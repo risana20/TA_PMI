@@ -87,9 +87,9 @@
             </button>
         </div>
 
-        {{-- Tab Panels Container --}}
-        <div class="max-w-6xl mx-auto bg-gray-50/50 border border-gray-100 rounded-3xl p-6 sm:p-10 shadow-sm min-h-[400px]">
-            
+        {{-- sesudah --}}
+<div class="max-w-6xl mx-auto rounded-3xl p-6 sm:p-10 min-h-[400px]"
+     style="background: linear-gradient(135deg, #fff 0%, #fef2f2 40%, #fff5f5 100%); border: 1px solid #fecaca; box-shadow: 0 4px 24px 0 rgba(228,0,15,0.07);">
             {{-- Panel 1: Griya PMI Surakarta --}}
             <div id="panel-griya-utama" class="tab-panel animate-fade-in-up">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -310,17 +310,16 @@
 {{-- Section Donatur --}}
 <section class="py-20 bg-gray-50/50 border-t border-b border-gray-100 overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
-        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Donatur Terverifikasi</h2>
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Donatur</h2>
         <p class="text-sm text-gray-500 mt-2 font-medium">Terima kasih kepada para donatur yang telah berkontribusi</p>
         <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mt-4"></div>
     </div>
 
     {{-- Marquee Container --}}
-    <div class="marquee-wrapper relative flex w-full overflow-hidden py-2 select-none">
-        {{-- Fade gradients on sides --}}
-        <div class="absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-gray-50/50 to-transparent z-10 pointer-events-none"></div>
-        <div class="absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-gray-50/50 to-transparent z-10 pointer-events-none"></div>
-
+<div class="marquee-wrapper relative flex w-full overflow-hidden py-2 select-none px-8 sm:px-16">
+    {{-- Fade gradients — lebih lebar agar kotak muncul/menghilang halus --}}
+    <div class="absolute inset-y-0 left-0 w-24 sm:w-48 bg-gradient-to-r from-gray-50/50 to-transparent z-10 pointer-events-none"></div>
+    <div class="absolute inset-y-0 right-0 w-24 sm:w-48 bg-gradient-to-l from-gray-50/50 to-transparent z-10 pointer-events-none"></div>
         {{-- Row 1 --}}
         <div class="flex gap-6 pr-6 shrink-0 animate-marquee">
             @foreach($donaturTerverifikasi as $donasi)
@@ -330,7 +329,7 @@
                 
                 <div>
                     <div class="flex items-center justify-between gap-2 mb-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Terverifikasi</span>
+                        
                         @if($donasi->jenis === 'Uang')
                         <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                             <i class="fa-solid fa-wallet text-[9px]"></i> Donasi Uang
@@ -366,7 +365,7 @@
                 
                 <div>
                     <div class="flex items-center justify-between gap-2 mb-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Terverifikasi</span>
+                     
                         @if($donasi->jenis === 'Uang')
                         <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                             <i class="fa-solid fa-wallet text-[9px]"></i> Donasi Uang
