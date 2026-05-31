@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Artikel;
 use App\Models\StokLogistik;
 use App\Models\WargaBinaan;
+use App\Models\Donasi;
 
 class BerandaController extends Controller
 {
@@ -15,6 +16,18 @@ class BerandaController extends Controller
         $kebutuhanMendesak = StokLogistik::with('itemLogistik')->mendesak()->limit(4)->get();
         $totalWarga        = WargaBinaan::where('status', 'Aktif')->count();
 
-        return view('pages.public.beranda', compact('artikelTerbaru', 'kebutuhanMendesak', 'totalWarga'));
+        // Fetch verified donors (status: Selesai)
+        $donaturTerverifikasi = Donasi::with('user')
+            ->where('status', 'Selesai')
+            ->latest()
+            ->get()
+            ->unique('nama_donatur');
+
+        // If list is small, repeat it to ensure seamless scrolling marquee
+        if ($donaturTerverifikasi->count() > 0 && $donaturTerverifikasi->count() < 6) {
+            $donaturTerverifikasi = $donaturTerverifikasi->concat($donaturTerverifikasi)->concat($donaturTerverifikasi);
+        }
+
+        return view('pages.public.beranda', compact('artikelTerbaru', 'kebutuhanMendesak', 'totalWarga', 'donaturTerverifikasi'));
     }
 }

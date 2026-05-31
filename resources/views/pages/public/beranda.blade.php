@@ -306,6 +306,96 @@
 </section>
 @endif
 
+@if($donaturTerverifikasi->count() > 0)
+{{-- Section Donatur --}}
+<section class="py-20 bg-gray-50/50 border-t border-b border-gray-100 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Donatur Terverifikasi</h2>
+        <p class="text-sm text-gray-500 mt-2 font-medium">Terima kasih kepada para donatur yang telah berkontribusi</p>
+        <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mt-4"></div>
+    </div>
+
+    {{-- Marquee Container --}}
+    <div class="marquee-wrapper relative flex w-full overflow-hidden py-2 select-none">
+        {{-- Fade gradients on sides --}}
+        <div class="absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-gray-50/50 to-transparent z-10 pointer-events-none"></div>
+        <div class="absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-gray-50/50 to-transparent z-10 pointer-events-none"></div>
+
+        {{-- Row 1 --}}
+        <div class="flex gap-6 pr-6 shrink-0 animate-marquee">
+            @foreach($donaturTerverifikasi as $donasi)
+            <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-red-500/30 hover:-translate-y-0.5 transition-all duration-300 w-72 md:w-80 shrink-0 flex flex-col justify-between relative overflow-hidden group">
+                {{-- Accent line on hover --}}
+                <div class="absolute top-0 left-0 w-full h-[3px] bg-red-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Terverifikasi</span>
+                        @if($donasi->jenis === 'Uang')
+                        <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                            <i class="fa-solid fa-wallet text-[9px]"></i> Donasi Uang
+                        </span>
+                        @elseif($donasi->jenis === 'Makanan')
+                        <span class="inline-flex items-center gap-1 bg-orange-50 text-orange-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                            <i class="fa-solid fa-utensils text-[9px]"></i> Bahan Makanan
+                        </span>
+                        @else
+                        <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                            <i class="fa-solid fa-box text-[9px]"></i> Donasi Barang
+                        </span>
+                        @endif
+                    </div>
+                    <h4 class="font-extrabold text-slate-800 text-sm md:text-base truncate mt-1">{{ $donasi->nama_donatur }}</h4>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+                    <p class="text-xs text-slate-400 flex items-center gap-1.5 font-medium truncate">
+                        <i class="fa-solid fa-location-dot text-slate-400/80 text-[11px]"></i>
+                        <span class="truncate">{{ $donasi->user?->address ?: 'Surakarta' }}</span>
+                    </p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Row 2 (Duplicate for loop) --}}
+        <div class="flex gap-6 pr-6 shrink-0 animate-marquee" aria-hidden="true">
+            @foreach($donaturTerverifikasi as $donasi)
+            <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-red-500/30 hover:-translate-y-0.5 transition-all duration-300 w-72 md:w-80 shrink-0 flex flex-col justify-between relative overflow-hidden group">
+                {{-- Accent line on hover --}}
+                <div class="absolute top-0 left-0 w-full h-[3px] bg-red-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Terverifikasi</span>
+                        @if($donasi->jenis === 'Uang')
+                        <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                            <i class="fa-solid fa-wallet text-[9px]"></i> Donasi Uang
+                        </span>
+                        @elseif($donasi->jenis === 'Makanan')
+                        <span class="inline-flex items-center gap-1 bg-orange-50 text-orange-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                            <i class="fa-solid fa-utensils text-[9px]"></i> Bahan Makanan
+                        </span>
+                        @else
+                        <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                            <i class="fa-solid fa-box text-[9px]"></i> Donasi Barang
+                        </span>
+                        @endif
+                    </div>
+                    <h4 class="font-extrabold text-slate-800 text-sm md:text-base truncate mt-1">{{ $donasi->nama_donatur }}</h4>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+                    <p class="text-xs text-slate-400 flex items-center gap-1.5 font-medium truncate">
+                        <i class="fa-solid fa-location-dot text-slate-400/80 text-[11px]"></i>
+                        <span class="truncate">{{ $donasi->user?->address ?: 'Surakarta' }}</span>
+                    </p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
 {{-- Artikel Terbaru --}}
 @if($artikelTerbaru->count() > 0)
 <section class="py-20 bg-white">
@@ -371,6 +461,22 @@
 .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* Marquee Auto-scrolling Styles */
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+.animate-marquee {
+    animation: marquee 35s linear infinite;
+}
+.marquee-wrapper:hover .animate-marquee {
+    animation-play-state: paused;
 }
 </style>
 @endpush
