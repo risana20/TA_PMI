@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
+        'role_id',
         'name',
         'email',
         'password',
@@ -52,5 +52,44 @@ class User extends Authenticatable
     public function reimbursements()
     {
         return $this->hasMany(Reimbursement::class);
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function hasRole($roleName)
+    {
+        return $this->role && $this->role->name === $roleName;
+    }
+
+    public function assignRole($roleName)
+    {
+        $role = Role::where('name', $roleName)->first();
+        if ($role) {
+            $this->role()->associate($role);
+            $this->save();
+        }
+        return $this;
+    }
+
+    public function syncRoles($roleNames)
+    {
+        $roleName = is_array($roleNames) ? reset($roleNames) : $roleNames;
+        return $this->assignRole($roleName);
+    }
+
+    public function getRoleNames()
+    {
+        return collect($this->role ? [$this->role->name] : []);
+    }
+
+    public function scopeRole($query, $roles)
+    {
+        $roles = is_array($roles) ? $roles : [$roles];
+        return $query->whereHas('role', function($q) use ($roles) {
+            $q->whereIn('name', $roles);
+        });
     }
 }
