@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             WargaBinaanSeeder::class,
-            // LogistikSeeder::class, // (Dinonaktifkan sementara karena tabel Logistik lama telah dihapus dan diganti)
+            LogistikSeeder::class,
         ]);
     }
 }
