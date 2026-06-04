@@ -51,10 +51,38 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 /*
 |--------------------------------------------------------------------------
+| Email Verification Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('/email/verify', function () {
+    return view('pages.auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    $user = $request->user();
+    if ($user->hasRole('superadmin')) {
+        return redirect()->route('superadmin.dashboard');
+    } elseif ($user->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    return redirect()->route('beranda')->with('success', 'Email Anda berhasil diverifikasi!');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (\Illuminate\Http\Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('status', 'verification-link-sent');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+/*
+|--------------------------------------------------------------------------
 | User / Donatur Routes (auth only)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/donasi', [DonasiUserController::class, 'index'])->name('donasi.index');
     Route::post('/donasi', [DonasiUserController::class, 'store'])->name('donasi.store');
 
@@ -72,7 +100,7 @@ Route::middleware(['auth'])->group(function () {
 | Admin Routes (role: admin)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -140,7 +168,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 | Superadmin Routes (role: superadmin only)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
 
     // Shared Routes (duplicated from admin)
     // Dashboard

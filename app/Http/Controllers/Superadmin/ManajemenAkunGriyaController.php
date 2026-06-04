@@ -12,7 +12,7 @@ class ManajemenAkunGriyaController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $query  = User::role(['admin', 'superadmin'])->latest();
+        $query  = User::query()->role(['admin', 'superadmin'])->latest();
 
         if ($search) {
             $query->where('name', 'like', "%{$search}%")

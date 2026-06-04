@@ -11,7 +11,7 @@ class ManajemenAkunPublikController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $query  = User::role('user')->latest();
+        $query  = User::query()->role('user')->latest();
 
         if ($search) {
             $query->where('name', 'like', "%{$search}%")

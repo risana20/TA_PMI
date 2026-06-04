@@ -210,7 +210,7 @@ class MonitoringController extends Controller
     public function storeObat(Request $request, WargaBinaan $wargaBinaan)
     {
         $data = $request->validate([
-            'logistik_id'  => 'nullable|exists:logistiks,id',
+            'logistik_id'  => 'nullable|exists:stok_logistiks,id',
             'nama_obat'    => 'required|string|max:255',
             'aturan_minum' => 'required|string',
             'bentuk_obat'  => 'required|string|max:50',

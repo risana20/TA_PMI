@@ -17,6 +17,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'phone'    => '081234567890',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
         $superadmin->assignRole('superadmin');
@@ -28,6 +29,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'phone'    => '081234567891',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
         $admin->assignRole('admin');
@@ -40,6 +42,7 @@ class UserSeeder extends Seeder
                 'phone'    => '081234567892',
                 'address'  => 'Jl. Contoh No. 1, Surakarta',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
         $user->assignRole('user');
