@@ -4,6 +4,14 @@
 
 @section('content')
 
+@if($errors->any())
+<div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-6 shadow-sm">
+    <ul class="list-disc list-inside space-y-1">
+        @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+    </ul>
+</div>
+@endif
+
 @include('sections.page-header', ['title' => 'Donasi & Donatur', 'subtitle' => 'Kelola dan verifikasi donasi'])
 
 {{-- Tab --}}
@@ -23,11 +31,9 @@
 </div>
 
 {{-- Toolbar --}}
-<div class="flex flex-wrap items-center gap-3 mb-4 w-full">
-    <form method="GET" action="{{ route(request()->segment(1) . '.' . 'donasi.index') }}" class="flex items-center gap-3 flex-1 w-full">
-    
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4 w-full">
+    <form method="GET" action="{{ route(request()->segment(1) . '.' . 'donasi.index') }}" class="flex items-center gap-3 flex-1 w-full sm:flex-initial">
         <input type="hidden" name="tab" value="{{ $tab }}">
-
         <div class="relative w-full sm:w-auto">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
             <input type="text"
@@ -37,6 +43,12 @@
                 class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-red-500">
         </div>
     </form>
+    <div>
+        <button type="button" onclick="openAddDonasiModal()"
+            class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 text-sm flex items-center gap-2 transition shadow-sm">
+            <i class="fa-solid fa-plus"></i> Tambah Donasi
+        </button>
+    </div>
 </div>
 
 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
@@ -195,6 +207,261 @@
     </div>
 </div>
 
+{{-- Modal Tambah Donasi --}}
+<div id="modal-add-donasi" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-5 sm:p-6 overflow-y-auto max-h-[90vh]">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+            <h3 class="font-bold text-lg text-gray-900">Tambah Donasi</h3>
+            <button type="button" onclick="closeAddDonasiModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form action="{{ route(request()->segment(1) . '.' . 'donasi.store') }}" method="POST" enctype="multipart/form-data" id="form-add-donasi" class="space-y-4">
+            @csrf
+            
+            {{-- Pilih Jenis --}}
+            <div>
+                <span class="block text-sm font-semibold text-gray-700 mb-2">Kategori Donasi</span>
+                <div class="grid grid-cols-3 gap-3 items-stretch">
+                    @foreach([
+                        'Uang'    => ['fa-credit-card', 'Uang'],
+                        'Barang'  => ['fa-box',         'Barang'],
+                        'Makanan' => ['fa-utensils',    'Makanan'],
+                    ] as $jenis => $info)
+                    <label class="cursor-pointer flex flex-col">
+                        <input type="radio" name="jenis" value="{{ $jenis }}"
+                               class="sr-only add-jenis-radio" {{ $jenis === $tab ? 'checked' : '' }}>
+                        <div class="add-jenis-card flex-1 flex flex-col items-center justify-center border-2 rounded-xl p-3 transition
+                                {{ $jenis === $tab ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white' }}"
+                             data-jenis="{{ $jenis }}">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center mb-1.5
+                                    {{ $jenis === $tab ? 'bg-red-600' : 'bg-gray-100' }}">
+                                <i class="fa-solid {{ $info[0] }} text-xs
+                                        {{ $jenis === $tab ? 'text-white' : 'text-gray-400' }}"></i>
+                            </div>
+                            <p class="font-semibold text-xs text-gray-900">
+                                {{ $info[1] }}
+                            </p>
+                        </div>
+                    </label>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Data Donatur --}}
+            <div class="bg-gray-50 p-4 rounded-xl space-y-3">
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-500">Data Donatur</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Donatur <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_donatur" required placeholder="Contoh: Budi Santoso"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">No. HP / WhatsApp</label>
+                        <input type="text" name="phone" placeholder="Contoh: 08123456789"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Alamat</label>
+                    <textarea name="address" rows="2" placeholder="Alamat lengkap donatur..."
+                        class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"></textarea>
+                </div>
+            </div>
+
+            {{-- Detail Uang --}}
+            <div id="add-detail-Uang" class="add-detail-donasi space-y-4">
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-500">Detail Donasi Uang</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jumlah Nominal (Rp) <span class="text-red-500">*</span></label>
+                        <input type="number" name="nominal" min="1" placeholder="100000"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Bank Tujuan <span class="text-red-500">*</span></label>
+                        <select name="bank_tujuan"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white">
+                            <option value="">Pilih bank...</option>
+                            <option value="Bank Syariah Indonesia 703 962 1597">Bank Syariah Indonesia 703 962 1597</option>
+                            <option value="Bank Jateng Syariah 5022 040 518">Bank Jateng Syariah 5022 040 518</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Bukti Transfer (Opsional)</label>
+                    <input type="file" name="bukti_transfer" accept="image/png,image/jpeg"
+                        class="w-full text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100">
+                </div>
+            </div>
+
+            {{-- Detail Barang --}}
+            <div id="add-detail-Barang" class="add-detail-donasi hidden space-y-4">
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-500">Detail Donasi Barang</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Pilih Nama Barang <span class="text-red-500">*</span></label>
+                        <select name="nama_barang" id="add_barang_select"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white">
+                            <option value="">Pilih Barang...</option>
+                            @foreach($barangStok as $stok)
+                                @if($stok->itemLogistik)
+                                <option value="{{ $stok->itemLogistik->nama_item }}" data-satuan="{{ $stok->itemLogistik->satuan }}">
+                                    {{ $stok->itemLogistik->nama_item }}
+                                </option>
+                                @endif
+                            @endforeach
+                            <option value="Lainnya">Lainnya (Barang baru)</option>
+                        </select>
+                    </div>
+                    <div id="add_custom_barang_wrapper" class="hidden">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Barang Lainnya <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_barang_custom" id="add_nama_barang_custom" placeholder="Contoh: Selimut, Pakaian, dll" disabled
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jumlah <span class="text-red-500">*</span></label>
+                        <input type="number" min="1" name="jumlah_barang" placeholder="Contoh: 2"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Satuan <span class="text-red-500">*</span></label>
+                        <input type="text" name="satuan" id="add_satuan_barang" placeholder="Satuan" readonly
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-gray-50 text-gray-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Kondisi <span class="text-red-500">*</span></label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                <input type="radio" name="kondisi" value="Baru" checked class="accent-red-600 w-3.5 h-3.5"> Baru
+                            </label>
+                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                <input type="radio" name="kondisi" value="Bekas Layak" class="accent-red-600 w-3.5 h-3.5"> Bekas Layak
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Metode Penyerahan <span class="text-red-500">*</span></label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                <input type="radio" name="metode_penyerahan" value="Antar Sendiri" checked class="accent-red-600 w-3.5 h-3.5"> Antar Sendiri
+                            </label>
+                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                <input type="radio" name="metode_penyerahan" value="Dijemput petugas" class="accent-red-600 w-3.5 h-3.5"> Dijemput petugas
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Penyerahan <span class="text-red-500">*</span></label>
+                        <input type="date" name="tgl_penyerahan"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jam Penyerahan <span class="text-red-500">*</span></label>
+                        <input type="time" name="jam_penyerahan"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+            </div>
+
+            {{-- Detail Makanan --}}
+            <div id="add-detail-Makanan" class="add-detail-donasi hidden space-y-4">
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-500">Detail Donasi Makanan</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Pilih Nama Makanan <span class="text-red-500">*</span></label>
+                        <select name="nama_makanan" id="add_makanan_select"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white">
+                            <option value="">Pilih Makanan...</option>
+                            @foreach($makananStok as $stok)
+                                @if($stok->itemLogistik)
+                                <option value="{{ $stok->itemLogistik->nama_item }}" data-satuan="{{ $stok->itemLogistik->satuan }}">
+                                    {{ $stok->itemLogistik->nama_item }}
+                                </option>
+                                @endif
+                            @endforeach
+                            <option value="Lainnya">Lainnya (Makanan baru)</option>
+                        </select>
+                    </div>
+                    <div id="add_custom_makanan_wrapper" class="hidden">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Makanan Lainnya <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_makanan_custom" id="add_nama_makanan_custom" placeholder="Contoh: Biskuit, Susu, dll" disabled
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jumlah <span class="text-red-500">*</span></label>
+                        <input type="number" min="1" name="jumlah_makanan_value" id="add_jumlah_makanan_value" placeholder="Contoh: 10"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Satuan <span class="text-red-500">*</span></label>
+                        <input type="text" name="jumlah_makanan_satuan" id="add_jumlah_makanan_satuan" placeholder="Satuan" readonly
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-gray-50 text-gray-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div id="add_jenis_makanan_wrapper" class="hidden">
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Jenis Makanan <span class="text-red-500">*</span></label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                <input type="radio" name="jenis_makanan" value="Bahan Mentah" checked disabled class="accent-red-600 w-3.5 h-3.5"> Bahan Mentah
+                            </label>
+                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                <input type="radio" name="jenis_makanan" value="Siap Saji" disabled class="accent-red-600 w-3.5 h-3.5"> Siap Saji
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Metode Penyerahan</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                <input type="radio" name="metode_penyerahan" value="Antar Sendiri" checked class="accent-red-600 w-3.5 h-3.5"> Antar Sendiri
+                            </label>
+                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                <input type="radio" name="metode_penyerahan" value="Dijemput petugas" class="accent-red-600 w-3.5 h-3.5"> Dijemput petugas
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Penyerahan</label>
+                        <input type="date" name="tgl_penyerahan"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jam Penyerahan</label>
+                        <input type="time" name="jam_penyerahan"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onclick="closeAddDonasiModal()"
+                    class="border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg px-4 py-2 text-sm font-semibold transition">Batal</button>
+                <button type="submit"
+                    class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition shadow-sm">Kirim Donasi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 <script>
     var prefix = '{{ request()->segment(1) }}';
@@ -222,6 +489,175 @@ if (searchInput) {
         }, 500);
     });
 }
+
+// Modal Tambah Donasi Functions
+const addRadios  = document.querySelectorAll('.add-jenis-radio');
+const addCards   = document.querySelectorAll('.add-jenis-card');
+const addDetails = document.querySelectorAll('.add-detail-donasi');
+
+addRadios.forEach(radio => {
+    radio.addEventListener('change', function () {
+        const jenis = this.value;
+        updateAddFormState(jenis);
+    });
+});
+
+function openAddDonasiModal() {
+    document.getElementById('modal-add-donasi').classList.remove('hidden');
+    // Set check state based on current active tab
+    const activeJenis = '{{ $tab }}';
+    const activeRadio = document.querySelector(`.add-jenis-radio[value="${activeJenis}"]`);
+    if (activeRadio) {
+        activeRadio.click();
+    }
+}
+
+function closeAddDonasiModal() {
+    document.getElementById('modal-add-donasi').classList.add('hidden');
+}
+
+function updateAddFormState(jenis) {
+    addCards.forEach(card => {
+        const active = card.dataset.jenis === jenis;
+        card.classList.toggle('border-red-500', active);
+        card.classList.toggle('bg-red-50',      active);
+        card.classList.toggle('border-gray-200', !active);
+        card.classList.toggle('bg-white',        !active);
+
+        const iconWrap = card.querySelector('div');
+        const icon     = card.querySelector('i');
+        iconWrap.classList.toggle('bg-red-600',  active);
+        iconWrap.classList.toggle('bg-gray-100', !active);
+        icon.classList.toggle('text-white',      active);
+        icon.classList.toggle('text-gray-400',   !active);
+    });
+
+    addDetails.forEach(d => {
+        const isActive = d.id === 'add-detail-' + jenis;
+        d.classList.toggle('hidden', !isActive);
+
+        // Disable all inputs in hidden sections, enable in active section
+        const inputs = d.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            // Keep customized custom field states
+            if (input.id === 'add_nama_barang_custom' && !isActive) {
+                input.disabled = true;
+            } else if (input.id === 'add_nama_makanan_custom' && !isActive) {
+                input.disabled = true;
+            } else {
+                input.disabled = !isActive;
+            }
+        });
+    });
+
+    // Call custom Makanan/Barang state updates
+    if (jenis === 'Makanan') {
+        updateAddMakananInputsState();
+    } else if (jenis === 'Barang') {
+        updateAddBarangInputsState();
+    }
+}
+
+const addMakananSelect = document.getElementById('add_makanan_select');
+const addCustomMakananWrapper = document.getElementById('add_custom_makanan_wrapper');
+const addNamaMakananCustom = document.getElementById('add_nama_makanan_custom');
+const addJumlahMakananSatuan = document.getElementById('add_jumlah_makanan_satuan');
+const addJenisMakananWrapper = document.getElementById('add_jenis_makanan_wrapper');
+
+function updateAddMakananInputsState() {
+    if (!addMakananSelect) return;
+    const isMakananActive = !document.getElementById('add-detail-Makanan').classList.contains('hidden');
+    if (!isMakananActive) return;
+
+    const isLainnya = addMakananSelect.value === 'Lainnya';
+    if (isLainnya) {
+        addCustomMakananWrapper.classList.remove('hidden');
+        addNamaMakananCustom.required = true;
+        addNamaMakananCustom.disabled = false;
+        
+        addJumlahMakananSatuan.removeAttribute('readonly');
+        addJumlahMakananSatuan.classList.remove('bg-gray-50', 'text-gray-500');
+        addJumlahMakananSatuan.classList.add('bg-white', 'text-gray-900');
+        addJumlahMakananSatuan.placeholder = 'Satuan (kg, box, dll)';
+
+        if (addJenisMakananWrapper) {
+            addJenisMakananWrapper.classList.remove('hidden');
+            const jenisRadios = addJenisMakananWrapper.querySelectorAll('input[type="radio"]');
+            jenisRadios.forEach(radio => radio.disabled = false);
+        }
+    } else {
+        addCustomMakananWrapper.classList.add('hidden');
+        addNamaMakananCustom.required = false;
+        addNamaMakananCustom.disabled = true;
+        addNamaMakananCustom.value = '';
+        
+        addJumlahMakananSatuan.setAttribute('readonly', 'true');
+        addJumlahMakananSatuan.classList.remove('bg-white', 'text-gray-900');
+        addJumlahMakananSatuan.classList.add('bg-gray-50', 'text-gray-500');
+        
+        const selectedOption = addMakananSelect.options[addMakananSelect.selectedIndex];
+        const satuan = selectedOption ? selectedOption.getAttribute('data-satuan') : '';
+        addJumlahMakananSatuan.value = satuan || '';
+        addJumlahMakananSatuan.placeholder = 'Satuan';
+
+        if (addJenisMakananWrapper) {
+            addJenisMakananWrapper.classList.add('hidden');
+            const jenisRadios = addJenisMakananWrapper.querySelectorAll('input[type="radio"]');
+            jenisRadios.forEach(radio => radio.disabled = true);
+        }
+    }
+}
+
+const addBarangSelect = document.getElementById('add_barang_select');
+const addCustomBarangWrapper = document.getElementById('add_custom_barang_wrapper');
+const addNamaBarangCustom = document.getElementById('add_nama_barang_custom');
+const addSatuanBarang = document.getElementById('add_satuan_barang');
+
+function updateAddBarangInputsState() {
+    if (!addBarangSelect) return;
+    const isBarangActive = !document.getElementById('add-detail-Barang').classList.contains('hidden');
+    if (!isBarangActive) return;
+
+    const isLainnya = addBarangSelect.value === 'Lainnya';
+    if (isLainnya) {
+        addCustomBarangWrapper.classList.remove('hidden');
+        addNamaBarangCustom.required = true;
+        addNamaBarangCustom.disabled = false;
+        
+        addSatuanBarang.removeAttribute('readonly');
+        addSatuanBarang.classList.remove('bg-gray-50', 'text-gray-500');
+        addSatuanBarang.classList.add('bg-white', 'text-gray-900');
+        addSatuanBarang.placeholder = 'Satuan (pcs, unit, dll)';
+    } else {
+        addCustomBarangWrapper.classList.add('hidden');
+        addNamaBarangCustom.required = false;
+        addNamaBarangCustom.disabled = true;
+        addNamaBarangCustom.value = '';
+        
+        addSatuanBarang.setAttribute('readonly', 'true');
+        addSatuanBarang.classList.remove('bg-white', 'text-gray-900');
+        addSatuanBarang.classList.add('bg-gray-50', 'text-gray-500');
+        
+        const selectedOption = addBarangSelect.options[addBarangSelect.selectedIndex];
+        const satuan = selectedOption ? selectedOption.getAttribute('data-satuan') : '';
+        addSatuanBarang.value = satuan || '';
+        addSatuanBarang.placeholder = 'Satuan';
+    }
+}
+
+if (addMakananSelect) {
+    addMakananSelect.addEventListener('change', updateAddMakananInputsState);
+}
+
+if (addBarangSelect) {
+    addBarangSelect.addEventListener('change', updateAddBarangInputsState);
+}
+
+addCards.forEach(card => {
+    card.addEventListener('click', function () {
+        document.querySelector(`.add-jenis-radio[value="${this.dataset.jenis}"]`).click();
+    });
+});
 </script>
 @endpush
 @endsection
