@@ -81,61 +81,61 @@
         </div>
 
         @if($items->count() > 0)
-
         {{-- Item Cards Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             @foreach($items as $item)
             @php
-                $persen     = $item->jumlah_minimum > 0
-                                ? min(100, round(($item->jumlah_saat_ini / $item->jumlah_minimum) * 100))
-                                : 100;
                 $isSangatMendesak = $item->status === 'Sangat Mendesak';
-                $barColor   = $isSangatMendesak ? 'bg-red-500' : 'bg-orange-400';
-                $badgeBg    = $isSangatMendesak ? 'bg-red-600' : 'bg-orange-500';
-                $kategori   = $item->itemLogistik->jenisLogistik->nama_jenis_logistik ?? '-';
+                $badgeClass = $isSangatMendesak 
+                    ? 'bg-red-50 text-red-600 border border-red-100' 
+                    : 'bg-orange-50 text-orange-600 border border-orange-100';
+                $kategori = $item->itemLogistik->jenisLogistik->nama_jenis_logistik ?? '-';
             @endphp
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition">
-
-                {{-- Icon + Badge --}}
-                <div class="flex items-start justify-between mb-3">
-                    @if($kategori === 'Makanan')
-                        <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                            <i class="fa-solid fa-utensils text-red-400"></i>
+            <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    {{-- Icon & Status Badge --}}
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-red-50/50 border border-red-100 flex items-center justify-center">
+                            @if($kategori === 'Makanan')
+                                <i class="fa-solid fa-utensils text-red-500 text-xl"></i>
+                            @elseif($kategori === 'Obat')
+                                <i class="fa-solid fa-pills text-red-500 text-xl"></i>
+                            @else
+                                <i class="fa-solid fa-box text-red-500 text-xl"></i>
+                            @endif
                         </div>
-                    @else
-                        <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                            <i class="fa-solid fa-cube text-red-400"></i>
-                        </div>
-                    @endif
-                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full text-white leading-5 {{ $badgeBg }}">
-                        {{ $item->status }}
-                    </span>
-                </div>
-
-                {{-- Name & Category --}}
-                <h3 class="font-bold text-gray-900 text-base mb-0.5">{{ $item->itemLogistik->nama_item }}</h3>
-                <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">{{ $kategori }}</p>
-
-                {{-- Stock Info --}}
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <p class="text-[9px] font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Stok Tersisa</p>
-                        <p class="font-bold text-gray-900 text-xl leading-none">{{ $item->jumlah_saat_ini }}</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $item->itemLogistik->satuan }}</p>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $badgeClass }}">
+                            {{ $item->status }}
+                        </span>
                     </div>
-                    <div class="text-right">
-                        <p class="text-[9px] font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Kebutuhan</p>
-                        <p class="font-bold text-gray-900 text-xl leading-none">{{ $item->jumlah_minimum }}</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $item->itemLogistik->satuan }}</p>
+
+                    {{-- Name & Category --}}
+                    <h3 class="font-extrabold text-gray-900 text-lg sm:text-xl tracking-tight mb-0.5">{{ $item->itemLogistik->nama_item }}</h3>
+                    <p class="text-sm font-medium text-gray-400 mb-5">{{ $kategori }}</p>
+
+                    {{-- Stock Info --}}
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mb-1">Stok Tersisa</p>
+                            <p class="text-2xl font-black {{ $isSangatMendesak ? 'text-red-600' : 'text-orange-500' }} leading-none">{{ $item->jumlah_saat_ini }}</p>
+                            <p class="text-[10px] text-gray-400 mt-1 font-bold">{{ $item->itemLogistik->satuan }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mb-1">Kebutuhan</p>
+                            <p class="text-2xl font-black text-gray-800 leading-none">{{ $item->jumlah_minimum }}</p>
+                            <p class="text-[10px] text-gray-400 mt-1 font-bold">{{ $item->itemLogistik->satuan }}</p>
+                        </div>
                     </div>
                 </div>
 
                 {{-- Progress Bar --}}
-                <div class="bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                    <div class="{{ $barColor }} h-1.5 rounded-full" style="width: {{ $persen }}%"></div>
+                @php
+                    $persen = $item->jumlah_minimum > 0 ? min(100, round(($item->jumlah_saat_ini / $item->jumlah_minimum) * 100)) : 100;
+                    $barBg = $isSangatMendesak ? 'bg-red-500' : 'bg-orange-500';
+                @endphp
+                <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div class="{{ $barBg }} h-2 rounded-full transition-all duration-500" style="width: {{ $persen }}%"></div>
                 </div>
-                <p class="text-[9px] uppercase tracking-wide text-gray-400 mt-1">{{ $persen }}% Terpenuhi</p>
-
             </div>
             @endforeach
         </div>

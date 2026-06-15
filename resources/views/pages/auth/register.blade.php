@@ -6,9 +6,9 @@
 <div class="w-full max-w-md">
     <div class="bg-white rounded-2xl shadow-xl p-8">
         <div class="flex flex-col items-center mb-6">
-            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mb-3">
-                <i class="fa-solid fa-heart text-white text-lg"></i>
-            </div>
+            <a href="{{ route('beranda') }}" class="mb-3">
+                <img src="{{ asset('assets/logo-pmi.png') }}" alt="PMI Surakarta" class="h-16 w-auto object-contain">
+            </a>
             <h1 class="text-xl font-bold text-gray-900">Daftar Akun</h1>
             <p class="text-sm text-gray-500 mt-1">Bergabung sebagai donatur</p>
         </div>
