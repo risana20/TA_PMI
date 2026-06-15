@@ -200,6 +200,13 @@ class DonasiController extends Controller
 
     public function complete(Request $request, Donasi $donasi)
     {
+        if ($request->has('masukkan_ke_stok')) {
+            $request->validate([
+                'stok_logistik_id' => 'required|exists:stok_logistiks,id',
+                'jumlah'           => 'required|integer|min:1',
+            ]);
+        }
+
         $data = ['status' => 'Selesai'];
 
         if ($donasi->jenis === 'Makanan') {
@@ -213,10 +220,7 @@ class DonasiController extends Controller
             if ($request->has('masukkan_ke_stok') && $request->stok_logistik_id) {
                 $existingPemasukan = \App\Models\PemasukanLogistik::where('donasi_id', $donasi->id)->first();
                 if (!$existingPemasukan) {
-                    // Parse integer from jumlah_makanan string
-                    $jumlahStr = $donasi->donasiMakanan->jumlah_makanan ?? '1';
-                    $jumlahInt = (int) filter_var($jumlahStr, FILTER_SANITIZE_NUMBER_INT);
-                    $jumlahInt = $jumlahInt > 0 ? $jumlahInt : 1;
+                    $jumlahInt = (int) $request->input('jumlah');
 
                     \App\Models\PemasukanLogistik::create([
                         'stok_logistik_id' => $request->stok_logistik_id,
@@ -248,9 +252,12 @@ class DonasiController extends Controller
 
                 if ($request->has('masukkan_ke_stok') && $request->stok_logistik_id && !$donasi->pemasukanLogistik->stok_logistik_id) {
                     $updateData['stok_logistik_id'] = $request->stok_logistik_id;
+                    $jumlahInt = (int) $request->input('jumlah');
+                    $updateData['jumlah'] = $jumlahInt;
+
                     $stok = \App\Models\StokLogistik::find($request->stok_logistik_id);
                     if ($stok) {
-                        $stok->increment('jumlah_saat_ini', $donasi->pemasukanLogistik->jumlah);
+                        $stok->increment('jumlah_saat_ini', $jumlahInt);
                     }
                 }
 

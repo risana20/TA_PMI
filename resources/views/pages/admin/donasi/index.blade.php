@@ -74,7 +74,7 @@
                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tanggal @if($tab !== 'Uang') & Jam @endif</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
                     @if($tab !== 'Uang')
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Bukti Diterima</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status Logistik</th>
                     @endif
                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Aksi</th>
                 </tr>
@@ -109,12 +109,18 @@
                     <td class="px-4 py-4">@include('components.badge-status', ['status' => $donasi->status])</td>
                     @if($tab !== 'Uang')
                     <td class="px-4 py-4">
-                        @if($donasi->bukti_diterima)
-                        <a href="{{ asset('storage/' . $donasi->bukti_diterima) }}" target="_blank" class="text-blue-500 hover:text-blue-700">
-                            <i class="fa-solid fa-image"></i> Lihat Foto
-                        </a>
+                        @php
+                            $hasStockMap = ($donasi->jenis === 'Barang' && $donasi->pemasukanLogistik?->stok_logistik_id !== null) || 
+                                           ($donasi->jenis === 'Makanan' && $donasi->pemasukanLogistik !== null);
+                        @endphp
+                        @if($hasStockMap)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                <i class="fa-solid fa-circle-check mr-1.5 text-emerald-500"></i> Sudah Ditambahkan
+                            </span>
                         @else
-                        <span class="text-gray-400 text-xs">-</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-100">
+                                <i class="fa-solid fa-clock mr-1.5 text-gray-400"></i> Belum Ditambahkan
+                            </span>
                         @endif
                     </td>
                     @endif

@@ -38,6 +38,9 @@ class ManajemenAkunGriyaController extends Controller
             'password' => Hash::make($data['password']),
             'is_active' => true,
         ]);
+        $user->email_verified_at = now();
+        $user->save();
+        
         $user->assignRole($data['role']);
 
         return back()->with('success', 'Akun berhasil dibuat.');
