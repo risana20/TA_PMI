@@ -12,11 +12,24 @@ use App\Models\StokObat;
 use App\Models\WargaBinaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\LogistikExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LogistikController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->filled('export')) {
+            $type = $request->get('export');
+            if ($type === 'pdf') {
+                return $this->exportPdf($request);
+            }
+            if ($type === 'excel') {
+                return $this->exportExcel($request);
+            }
+        }
+
         $search   = $request->get('search');
         $kategori = $request->get('kategori'); // This now refers to JenisLogistik ID or name
         $status   = $request->get('status');
@@ -49,6 +62,54 @@ class LogistikController extends Controller
         $jenisLogistiks = JenisLogistik::all();
 
         return view('pages.admin.logistik.index', compact('logistiks', 'search', 'kategori', 'status', 'jenisLogistiks'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $search   = $request->get('search');
+        $kategori = $request->get('kategori');
+        $status   = $request->get('status');
+
+        $query = StokLogistik::with(['itemLogistik.jenisLogistik']);
+
+        if ($search) {
+            $query->whereHas('itemLogistik', function($q) use ($search) {
+                $q->where('nama_item', 'like', "%$search%");
+            });
+        }
+
+        if ($kategori) {
+            $query->whereHas('itemLogistik.jenisLogistik', function($q) use ($kategori) {
+                $q->where('nama_jenis_logistik', $kategori);
+            });
+        }
+
+        if ($status) {
+            if ($status === 'Aman') {
+                $query->whereRaw('jumlah_saat_ini > jumlah_minimum');
+            } elseif ($status === 'Mendesak') {
+                $query->whereRaw('jumlah_saat_ini <= jumlah_minimum AND jumlah_saat_ini >= (jumlah_minimum * 0.8)');
+            } elseif ($status === 'Sangat Mendesak') {
+                $query->whereRaw('jumlah_saat_ini < (jumlah_minimum * 0.8)');
+            }
+        }
+
+        $logistiks = $query->latest()->get();
+
+        $pdf = Pdf::loadView('pages.admin.logistik.export_pdf', compact('logistiks', 'kategori', 'status'));
+        $fileName = 'logistik-inventaris-' . now()->format('Ymd_His') . '.pdf';
+
+        return $pdf->download($fileName);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $search   = $request->get('search');
+        $kategori = $request->get('kategori');
+        $status   = $request->get('status');
+
+        $fileName = 'logistik-inventaris-' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new LogistikExport($search, $kategori, $status), $fileName);
     }
 
     public function store(Request $request)

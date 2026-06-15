@@ -43,9 +43,17 @@
                 class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-red-500">
         </div>
     </form>
-    <div>
+    <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:ml-auto">
+        <a href="{{ route(request()->segment(1) . '.' . 'donasi.index', ['export' => 'pdf'] + request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition shadow-sm">
+            <i class="fa-solid fa-download"></i> Ekspor PDF
+        </a>
+        <a href="{{ route(request()->segment(1) . '.' . 'donasi.index', ['export' => 'excel'] + request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition shadow-sm">
+            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
+        </a>
         <button type="button" onclick="openAddDonasiModal()"
-            class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 text-sm flex items-center gap-2 transition shadow-sm">
+            class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 text-sm flex items-center justify-center gap-2 transition shadow-sm">
             <i class="fa-solid fa-plus"></i> Tambah Donasi
         </button>
     </div>
@@ -125,28 +133,42 @@
                     </td>
                     @endif
                     <td class="px-4 py-4">
-                        <a href="{{ route(request()->segment(1) . '.' . 'donasi.show', $donasi) }}" class="text-gray-400 hover:text-blue-500 mr-2">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                        @if($donasi->status === 'Tunggu Verifikasi')
-                            <form method="POST" action="{{ route(request()->segment(1) . '.' . 'donasi.verify', $donasi) }}" class="inline">
-                                @csrf
-                                <button type="submit" class="text-green-500 hover:text-green-700 text-xs font-medium mr-1">Verifikasi</button>
-                            </form>
-                        <button type="button" onclick="openRejectModal({{ $donasi->id }})" class="text-red-500 hover:text-red-700 text-xs font-medium">Tolak</button>
-                        @elseif(in_array($donasi->status, ['Menunggu Pengiriman', 'Menunggu Donasi Dijemput Petugas']))
-                            <button type="button" onclick="openCompleteModal({{ $donasi->id }})"
-                                class="text-blue-500 hover:text-blue-700 text-xs font-medium mr-1">Selesai</button>
-                        @elseif($donasi->status === 'Selesai' && $tab !== 'Uang')
-                            @php
-                                $hasBukti = ($donasi->jenis === 'Barang' && $donasi->pemasukanLogistik?->bukti_diterima) || 
-                                            ($donasi->jenis === 'Makanan' && $donasi->donasiMakanan?->bukti_diterima);
-                            @endphp
-                            @if(!$hasBukti)
-                            <button type="button" onclick="openCompleteModal({{ $donasi->id }})"
-                                class="text-blue-500 hover:text-blue-700 text-xs font-medium mr-1">Upload Bukti</button>
+                        <div class="flex items-center gap-2.5">
+                            <a href="{{ route(request()->segment(1) . '.' . 'donasi.show', $donasi) }}" 
+                               class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 text-gray-500 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 hover:border-blue-200 transition" 
+                               title="Lihat Detail">
+                                <i class="fa-solid fa-eye text-sm"></i>
+                            </a>
+                            @if($donasi->status === 'Tunggu Verifikasi')
+                                <form method="POST" action="{{ route(request()->segment(1) . '.' . 'donasi.verify', $donasi) }}" class="inline-flex">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 text-xs font-semibold border border-emerald-100 transition">
+                                        Verifikasi
+                                    </button>
+                                </form>
+                                <button type="button" onclick="openRejectModal({{ $donasi->id }})" 
+                                        class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 text-xs font-semibold border border-red-100 transition">
+                                    Tolak
+                                </button>
+                            @elseif(in_array($donasi->status, ['Menunggu Pengiriman', 'Menunggu Donasi Dijemput Petugas']))
+                                <button type="button" onclick="openCompleteModal({{ $donasi->id }})"
+                                        class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 text-xs font-semibold border border-blue-100 transition">
+                                    Selesai
+                                </button>
+                            @elseif($donasi->status === 'Selesai' && $tab !== 'Uang')
+                                @php
+                                    $hasBukti = ($donasi->jenis === 'Barang' && $donasi->pemasukanLogistik?->bukti_diterima) || 
+                                                ($donasi->jenis === 'Makanan' && $donasi->donasiMakanan?->bukti_diterima);
+                                @endphp
+                                @if(!$hasBukti)
+                                <button type="button" onclick="openCompleteModal({{ $donasi->id }})"
+                                        class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 text-xs font-semibold border border-amber-100 transition">
+                                    Upload Bukti
+                                </button>
+                                @endif
                             @endif
-                        @endif
+                        </div>
                     </td>
                 </tr>
                 @empty

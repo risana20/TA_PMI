@@ -6,11 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\Donasi;
 use App\Models\PemasukanLogistik;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\DonasiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DonasiController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->filled('export')) {
+            $type = $request->get('export');
+            if ($type === 'pdf') {
+                return $this->exportPdf($request);
+            }
+            if ($type === 'excel') {
+                return $this->exportExcel($request);
+            }
+        }
+
         $tab    = $request->get('tab', 'Uang');
         $search = $request->get('search');
 
@@ -41,6 +54,36 @@ class DonasiController extends Controller
             ->get();
 
         return view('pages.admin.donasi.index', compact('donasis', 'tab', 'search', 'makananStok', 'barangStok'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $tab    = $request->get('tab', 'Uang');
+        $search = $request->get('search');
+
+        $query = Donasi::with(['user', 'donasiUang', 'donasiMakanan', 'pemasukanLogistik.stokLogistik.itemLogistik'])
+                    ->where('jenis', $tab)
+                    ->latest();
+
+        if ($search) {
+            $query->where('nama_donatur', 'like', "%{$search}%");
+        }
+
+        $donasis = $query->get();
+
+        $pdf = Pdf::loadView('pages.admin.donasi.export_pdf', compact('donasis', 'tab'));
+        $fileName = 'donasi-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.pdf';
+
+        return $pdf->download($fileName);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $tab    = $request->get('tab', 'Uang');
+        $search = $request->get('search');
+
+        $fileName = 'donasi-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new DonasiExport($tab, $search), $fileName);
     }
 
     public function store(Request $request)
