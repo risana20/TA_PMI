@@ -18,10 +18,14 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 class WargaBinaanExport extends DefaultValueBinder implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithCustomValueBinder
 {
     protected $tab;
+    protected $status;
+    protected $search;
 
-    public function __construct($tab = 'ODGJ')
+    public function __construct($tab = 'ODGJ', $status = null, $search = null)
     {
         $this->tab = $tab;
+        $this->status = $status;
+        $this->search = $search;
     }
 
     public function bindValue(Cell $cell, $value)
@@ -40,9 +44,20 @@ class WargaBinaanExport extends DefaultValueBinder implements FromCollection, Wi
 
     public function collection()
     {
-        $data = WargaBinaan::where('kategori', $this->tab)
-            ->latest()
-            ->get();
+        $query = WargaBinaan::where('kategori', $this->tab);
+
+        if ($this->status) {
+            $query->where('status', $this->status);
+        }
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('nama', 'like', "%{$this->search}%")
+                  ->orWhere('nik', 'like', "%{$this->search}%");
+            });
+        }
+
+        $data = $query->latest()->get();
 
         return $data->map(function ($warga) {
             return [

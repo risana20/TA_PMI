@@ -79,9 +79,17 @@
 
     {{-- ================= TAB: PEMERIKSAAN KESEHATAN ================= --}}
     <div id="main-tab-pemeriksaan">
-        <div class="flex justify-end mb-4">
+        <div class="flex justify-end items-center gap-2 mb-4 flex-wrap">
+            <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'monitoring.exportPemeriksaanPdf', $wargaBinaan) }}"
+                class="border border-red-600 text-red-600 hover:bg-red-50 rounded-full px-4 py-2 text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap">
+                <i class="fa-solid fa-file-pdf"></i> Ekspor PDF
+            </a>
+            <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'monitoring.exportPemeriksaanExcel', $wargaBinaan) }}"
+                class="border border-red-600 text-red-600 hover:bg-red-50 rounded-full px-4 py-2 text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap">
+                <i class="fa-solid fa-file-excel"></i> Ekspor Excel
+            </a>
             <button onclick="document.getElementById('modal-periksa').classList.remove('hidden')"
-                class="bg-red-600 hover:bg-red-700 text-white rounded-full px-4 py-2 text-xs font-semibold flex items-center gap-1.5 transition">
+                class="bg-red-600 hover:bg-red-700 text-white rounded-full px-4 py-2 text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap">
                 <i class="fa-solid fa-plus"></i> Tambah Pemeriksaan
             </button>
         </div>

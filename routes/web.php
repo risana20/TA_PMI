@@ -140,6 +140,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Monitoring Kesehatan
     Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
     Route::get('/monitoring/{wargaBinaan}', [MonitoringController::class, 'show'])->name('monitoring.show');
+    Route::get('/monitoring/{wargaBinaan}/pemeriksaan/export/pdf', [MonitoringController::class, 'exportPemeriksaanPdf'])->name('monitoring.exportPemeriksaanPdf');
+    Route::get('/monitoring/{wargaBinaan}/pemeriksaan/export/excel', [MonitoringController::class, 'exportPemeriksaanExcel'])->name('monitoring.exportPemeriksaanExcel');
     Route::post('/monitoring/{wargaBinaan}/pemeriksaan', [MonitoringController::class, 'storePemeriksaan'])->name('monitoring.storePemeriksaan');
     Route::post('/monitoring/{wargaBinaan}/rsj', [MonitoringController::class, 'storeRSJ'])->name('monitoring.storeRSJ');
     Route::post('/monitoring/{wargaBinaan}/rujukan', [MonitoringController::class, 'storeRujukan'])->name('monitoring.storeRujukan');
@@ -209,6 +211,8 @@ Route::middleware(['auth', 'verified', 'role:superadmin'])->prefix('superadmin')
     // Monitoring Kesehatan
     Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
     Route::get('/monitoring/{wargaBinaan}', [MonitoringController::class, 'show'])->name('monitoring.show');
+    Route::get('/monitoring/{wargaBinaan}/pemeriksaan/export/pdf', [MonitoringController::class, 'exportPemeriksaanPdf'])->name('monitoring.exportPemeriksaanPdf');
+    Route::get('/monitoring/{wargaBinaan}/pemeriksaan/export/excel', [MonitoringController::class, 'exportPemeriksaanExcel'])->name('monitoring.exportPemeriksaanExcel');
     Route::post('/monitoring/{wargaBinaan}/pemeriksaan', [MonitoringController::class, 'storePemeriksaan'])->name('monitoring.storePemeriksaan');
     Route::post('/monitoring/{wargaBinaan}/rsj', [MonitoringController::class, 'storeRSJ'])->name('monitoring.storeRSJ');
     Route::post('/monitoring/{wargaBinaan}/rujukan', [MonitoringController::class, 'storeRujukan'])->name('monitoring.storeRujukan');
