@@ -587,30 +587,46 @@
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Tanda-Tanda Vital (TTV)</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Frek. Napas <span class="font-normal text-gray-400">(x/mnt)</span></label>
-                        <input type="text" name="frek_napas" placeholder="18"
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Frek. Napas <span class="text-red-500">*</span> <span class="font-normal text-gray-400">(x/mnt)</span></label>
+                        <input type="text" name="frek_napas" placeholder="18" required oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                             class="w-full border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Tekanan Darah <span class="font-normal text-gray-400">(mmHg)</span></label>
-                        <input type="text" name="tekanan_darah" placeholder="120/80"
-                            class="w-full border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Tekanan Darah <span class="text-red-500">*</span> <span class="font-normal text-gray-400">(mmHg)</span></label>
+                        @php
+                            $oldTd = old('tekanan_darah');
+                            $oldSys = '';
+                            $oldDias = '';
+                            if ($oldTd && str_contains($oldTd, '/')) {
+                                $parts = explode('/', $oldTd);
+                                $oldSys = $parts[0] ?? '';
+                                $oldDias = $parts[1] ?? '';
+                            }
+                        @endphp
+                        <div class="flex items-center gap-1.5">
+                            <input type="text" id="td_systolic" value="{{ $oldSys }}" placeholder="120" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateTekananDarah();"
+                                class="w-full border border-gray-200 bg-white rounded-lg px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <span class="text-gray-400 font-semibold">/</span>
+                            <input type="text" id="td_diastolic" value="{{ $oldDias }}" placeholder="80" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateTekananDarah();"
+                                class="w-full border border-gray-200 bg-white rounded-lg px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <input type="hidden" name="tekanan_darah" id="tekanan_darah_hidden" value="{{ $oldTd }}" required>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Suhu Tubuh <span class="font-normal text-gray-400">(°C)</span></label>
-                        <input type="text" name="suhu_tubuh" placeholder="36.5"
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Suhu Tubuh <span class="text-red-500">*</span> <span class="font-normal text-gray-400">(°C)</span></label>
+                        <input type="text" name="suhu_tubuh" placeholder="36.5" required oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                             class="w-full border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Nadi <span class="font-normal text-gray-400">(x/mnt)</span></label>
-                        <input type="text" name="nadi" placeholder="80"
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Nadi <span class="text-red-500">*</span> <span class="font-normal text-gray-400">(x/mnt)</span></label>
+                        <input type="text" name="nadi" placeholder="80" required oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                             class="w-full border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">SPO₂ <span class="font-normal text-gray-400">(%)</span></label>
-                        <input type="text" name="spo2" placeholder="98"
+                        <label class="block text-xs font-medium text-gray-600 mb-1">SPO₂ <span class="text-red-500">*</span> <span class="font-normal text-gray-400">(%)</span></label>
+                        <input type="text" name="spo2" placeholder="98" required oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                             class="w-full border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                 </div>
@@ -618,13 +634,13 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Berat Badan <span class="text-gray-400 font-normal">(kg)</span></label>
-                    <input type="number" name="berat_badan" step="0.1" placeholder="60.5"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Berat Badan <span class="text-red-500">*</span> <span class="text-gray-400 font-normal">(kg)</span></label>
+                    <input type="text" name="berat_badan" placeholder="60.5" required oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                         class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tinggi Badan <span class="text-gray-400 font-normal">(cm)</span></label>
-                    <input type="number" name="tinggi_badan" step="0.1" placeholder="165"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tinggi Badan <span class="text-red-500">*</span> <span class="text-gray-400 font-normal">(cm)</span></label>
+                    <input type="text" name="tinggi_badan" placeholder="165" required oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                         class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
             </div>
@@ -1121,6 +1137,17 @@
             }
         }
     });
+
+    function updateTekananDarah() {
+        const sys = document.getElementById('td_systolic').value;
+        const dias = document.getElementById('td_diastolic').value;
+        document.getElementById('tekanan_darah_hidden').value = (sys && dias) ? (sys + '/' + dias) : '';
+    }
+
+    // Initialize blood pressure field if old value exists
+    if (document.getElementById('td_systolic')) {
+        updateTekananDarah();
+    }
 
 </script>
 @endpush
