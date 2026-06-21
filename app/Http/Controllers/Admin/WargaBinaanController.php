@@ -14,7 +14,7 @@ class WargaBinaanController extends Controller
 {
     public function index(Request $request)
     {
-        // handle direct export via query parameter before listing
+        // tab pencarian dan export
         if ($request->filled('export')) {
             $type = $request->get('export');
             if ($type === 'pdf') {
@@ -66,7 +66,8 @@ class WargaBinaanController extends Controller
         $fileName = 'warga-binaan-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.xlsx';
         return Excel::download(new WargaBinaanExport($tab), $fileName);
     }
-
+    
+    //tambah warga
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -93,13 +94,13 @@ class WargaBinaanController extends Controller
         WargaBinaan::create($data);
         return back()->with('success', 'Data warga binaan berhasil ditambahkan.');
     }
-
+    //lihat data warga
     public function show(WargaBinaan $wargaBinaan)
     {
         $riwayatMonitoring = $wargaBinaan->monitoringKesehatans()->latest()->get();
         return view('pages.admin.warga-binaan.show', compact('wargaBinaan', 'riwayatMonitoring'));
     }
-
+    // update data
     public function update(Request $request, WargaBinaan $wargaBinaan)
     {
         $data = $request->validate([
@@ -129,7 +130,7 @@ class WargaBinaanController extends Controller
         $wargaBinaan->update($data);
         return back()->with('success', 'Data warga binaan berhasil diperbarui.');
     }
-
+    // hapus warga
     public function destroy(WargaBinaan $wargaBinaan)
     {
         if ($wargaBinaan->foto) {

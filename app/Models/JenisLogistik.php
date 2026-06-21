@@ -20,4 +20,9 @@ class JenisLogistik extends Model
     {
         return $this->hasMany(ItemLogistik::class);
     }
+
+    public function detailReimbursements()
+    {
+        return $this->hasMany(DetailReimbursement::class);
+    }
 }

@@ -5,7 +5,7 @@
 @section('content')
 
 @include('sections.page-header', ['title' => 'Keuangan', 'subtitle' => 'Kelola pemasukan dan pengeluaran'])
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {{-- Summary Cards --}}
 
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -33,21 +33,91 @@
     ])
 </div>
 
+{{-- chart --}}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+    <div class="bg-white p-5 rounded shadow">
+        <form method="GET">
+
+            <input type="hidden" 
+            name="bulan" 
+            value="{{ $bulan }}">
+
+
+            <select 
+            name="tahun" 
+            onchange="this.form.submit()"
+            class="border rounded p-2">
+
+
+            @for($i=2024;$i<=date('Y');$i++)
+
+            <option value="{{$i}}"
+            {{ (int)$tahun === $i ? 'selected' : '' }}>
+
+            {{$i}}
+
+            </option>
+
+            @endfor
+
+
+            </select>
+
+        </form>
+        <h3>
+            Pengeluaran Tahun {{ $tahun}}
+        </h3>
+        <canvas id="barPengeluaran" height="120" ></canvas>
+    </div>
+    <div class="bg-white p-5 rounded shadow">
+        <form method="GET">
+
+            <input type="hidden" 
+            name="tahun" 
+            value="{{ $tahun }}">
+
+
+            <select 
+            name="bulan" 
+            onchange="this.form.submit()"
+            class="border rounded p-2">
+
+
+            @for($i=1;$i<=12;$i++)
+
+            <option value="{{$i}}"
+            {{ (int)$bulan === $i ? 'selected' : '' }}>
+
+            {{ date('F', mktime(0,0,0,$i,1)) }}
+
+            </option>
+
+            @endfor
+
+
+            </select>
+
+        </form>
+        <h3>Barang Dibeli Bulan {{ date('F', mktime(0,0,0,$bulan,1)) }}</h3>
+        <canvas id="donutBarang" height="120"></canvas>
+    </div>
+</div>
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     {{-- Tabel Pemasukan --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <h3 class="font-semibold text-gray-900">Pemasukan</h3>
-            <button onclick="document.getElementById('modal-pemasukan').classList.remove('hidden')"
+            {{-- <button onclick="document.getElementById('modal-pemasukan').classList.remove('hidden')"
                 class="bg-red-600 text-white rounded-full px-4 py-1.5 text-xs font-semibold hover:bg-red-700">
                 <i class="fa-solid fa-plus mr-1"></i> Tambah
-            </button>
+            </button> --}}
         </div>
         <table class="w-full text-sm">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Tanggal</th>
-                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Kategori</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">donatur</th>
                     <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Nominal</th>
                 </tr>
             </thead>
@@ -55,7 +125,7 @@
                 @forelse($pemasukans as $p)
                 <tr class="hover:bg-gray-50">
                     <td class="px-4 py-3 text-gray-600">{{ $p->donasi->created_at->format('d M Y') }}</td>
-                    <td class="px-4 py-3 text-gray-600">Donasi Uang</td>
+                    <td>{{ $p->donasi->user->name }}</td>
                     <td class="px-4 py-3 font-semibold text-green-600">Rp {{ number_format($p->nominal, 0, ',', '.') }}</td>
                 </tr>
                 @empty
@@ -70,17 +140,17 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <h3 class="font-semibold text-gray-900">Pengeluaran</h3>
-            <button onclick="document.getElementById('modal-pengeluaran').classList.remove('hidden')"
+            {{-- <button onclick="document.getElementById('modal-pengeluaran').classList.remove('hidden')"
                 class="bg-red-600 text-white rounded-full px-4 py-1.5 text-xs font-semibold hover:bg-red-700">
                 <i class="fa-solid fa-plus mr-1"></i> Tambah
-            </button>
+            </button> --}}
         </div>
         <table class="w-full text-sm">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Tanggal</th>
-                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Kategori</th>
-                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Nominal</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Detail Reimbursements</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Total</th>
                     <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400">Nota</th>
                 </tr>
             </thead>
@@ -88,9 +158,25 @@
                 @forelse($pengeluarans as $p)
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-gray-600">{{ $p->tgl_validasi ? $p->tgl_validasi->format('d M Y') : $p->tgl_pengajuan->format('d M Y') }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $p->jenis_pengeluaran }}</td>
+                        <td class="px-4 py-3 text-gray-600">
+                            @forelse($p->detailReimbursements as $detail)
+
+                                <div>
+                                    {{ $detail->nama_kebutuhan }}
+                                    ({{ $detail->jenisLogistik->nama_jenis_logistik ?? '-' }})
+                                    - Rp {{ number_format($detail->nominal,0,',','.') }}
+                                </div>
+
+                            @empty
+
+                                <span class="text-gray-400">
+                                    Tidak ada detail
+                                </span>
+
+                            @endforelse
+                        </td>
                         <td class="px-4 py-3 font-semibold text-red-600">
-                            Rp {{ number_format($p->nominal, 0, ',', '.') }}
+                            Rp {{ number_format($p->total, 0, ',', '.') }}
                         </td>
 
                         <td class="px-4 py-3">
@@ -228,49 +314,189 @@
 
 </div>
 
+
 <script>
-const saldo = {{ $saldo }};
-const inputNominal = document.getElementById('nominalPengeluaran');
-const errorSaldo = document.getElementById('errorSaldo');
+    const saldo = {{ $saldo }};
+    const inputNominal = document.getElementById('nominalPengeluaran');
+    const errorSaldo = document.getElementById('errorSaldo');
 
-inputNominal.addEventListener('input', function(){
+    inputNominal.addEventListener('input', function(){
 
-    const nominal = parseInt(this.value);
+        const nominal = parseInt(this.value);
 
-    if(nominal > saldo){
-        errorSaldo.innerText = "Saldo tidak cukup. Saldo tersedia Rp " + saldo.toLocaleString('id-ID');
-        errorSaldo.classList.remove('hidden');
-    }else{
-        errorSaldo.classList.add('hidden');
+        if(nominal > saldo){
+            errorSaldo.innerText = "Saldo tidak cukup. Saldo tersedia Rp " + saldo.toLocaleString('id-ID');
+            errorSaldo.classList.remove('hidden');
+        }else{
+            errorSaldo.classList.add('hidden');
+        }
+
+    });
+
+    const btnSimpan = document.getElementById('btnSimpanPengeluaran');
+
+    inputNominal.addEventListener('input', function(){
+
+        const nominal = parseInt(this.value);
+
+        if(nominal > saldo){
+            errorSaldo.innerText = "Saldo tidak cukup. Saldo tersedia Rp " + saldo.toLocaleString('id-ID');
+            errorSaldo.classList.remove('hidden');
+            btnSimpan.disabled = true;
+            btnSimpan.classList.add('opacity-50');
+        }else{
+            errorSaldo.classList.add('hidden');
+            btnSimpan.disabled = false;
+            btnSimpan.classList.remove('opacity-50');
+        }
+
+    });
+    function lihatNota(src){
+        document.getElementById('gambar-nota').src = src;
+        document.getElementById('modal-nota').classList.remove('hidden');
     }
 
-});
+    function tutupNota(){
+        document.getElementById('modal-nota').classList.add('hidden');
+    }
+    let bulan = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember'
+    ];
 
-const btnSimpan = document.getElementById('btnSimpanPengeluaran');
 
-inputNominal.addEventListener('input', function(){
+    let dataPengeluaran = Array(12).fill(0);
+    let dataPemasukan = Array(12).fill(0);
 
-    const nominal = parseInt(this.value);
 
-    if(nominal > saldo){
-        errorSaldo.innerText = "Saldo tidak cukup. Saldo tersedia Rp " + saldo.toLocaleString('id-ID');
-        errorSaldo.classList.remove('hidden');
-        btnSimpan.disabled = true;
-        btnSimpan.classList.add('opacity-50');
-    }else{
-        errorSaldo.classList.add('hidden');
-        btnSimpan.disabled = false;
-        btnSimpan.classList.remove('opacity-50');
+    @foreach($pengeluaranPerBulan as $p)
+
+    dataPengeluaran[{{$p->bulan-1}}] =
+    {{$p->total}};
+
+    @endforeach
+
+    @foreach($pemasukanPerBulan as $p)
+    dataPemasukan[{{$p->bulan-1}}]
+    ={{$p->total}};
+    @endforeach
+
+    new Chart(
+    document.getElementById('barPengeluaran'),
+    {
+
+    type:'bar',
+
+    data:{
+
+    labels:bulan,
+
+    datasets:[{
+        label:'Pengeluaran',
+        data:dataPengeluaran
+    },
+    {
+        label:'Pemasukam',
+        data:dataPemasukan
+    }]
+
+    },
+
+    options:{
+
+    responsive:true,
+
+    scales:{
+
+    y:{
+    beginAtZero:true
     }
 
-});
-function lihatNota(src){
-    document.getElementById('gambar-nota').src = src;
-    document.getElementById('modal-nota').classList.remove('hidden');
-}
+    }
 
-function tutupNota(){
-    document.getElementById('modal-nota').classList.add('hidden');
-}
+    }
+
+    });
+
+
+
+    @if($barangPerBulan->count()==0)
+    new Chart(
+    document.getElementById('donutBarang'),
+    {
+
+    type:'doughnut',
+
+    data:{
+
+    labels:['Tidak ada pengeluaran'],
+
+    datasets:[{
+
+    data:[1],
+
+    backgroundColor:[
+    '#9CA3AF'
+    ]
+
+    }]
+
+    }
+
+    });
+
+
+    @else
+
+
+    new Chart(
+    document.getElementById('donutBarang'),
+    {
+
+    type:'doughnut',
+
+    data:{
+
+    labels:[
+
+    @foreach($barangPerBulan as $b)
+
+    "{{$b->nama_kebutuhan}}",
+
+    @endforeach
+
+    ],
+
+
+    datasets:[{
+
+    data:[
+
+    @foreach($barangPerBulan as $b)
+
+    {{$b->total}},
+
+    @endforeach
+
+    ]
+
+    }]
+
+    }
+
+    });
+
+
+    @endif
 </script>
 @endsection

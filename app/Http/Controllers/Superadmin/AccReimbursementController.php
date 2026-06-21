@@ -12,7 +12,7 @@ class AccReimbursementController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $query  = Reimbursement::with('user')->latest();
+        $query  = Reimbursement::with(['user', 'detailReimbursements.jenisLogistik'])->latest();
 
         if ($search) {
             $query->whereHas('user', fn($q) => $q->where('name', 'like', "%{$search}%"));
@@ -24,21 +24,33 @@ class AccReimbursementController extends Controller
 
     public function validasi(Reimbursement $reimbursement)
     {
+        if ($reimbursement->status !== 'Tunggu Verifikasi') {
+            return back()->with('error', 'Data sudah diproses.');
+        }
+
         $reimbursement->update([
-            'status'       => 'DIVALIDASI',
-            'tgl_validasi' => now()->toDateString(),
+            'status'       => 'Disetujui',
+            'tgl_validasi' => now(),
             'validated_by' => Auth::id(),
         ]);
-        return back()->with('success', 'Reimbursement berhasil divalidasi.');
+
+        return back()->with('success', 'Reimbursement berhasil disetujui.');
     }
+
+    
 
     public function batalkan(Reimbursement $reimbursement)
     {
+        if ($reimbursement->status !== 'Tunggu Verifikasi') {
+            return back()->with('error', 'Data sudah diproses.');
+        }
+
         $reimbursement->update([
-            'status'       => 'DIBATALKAN',
-            'tgl_validasi' => null,
-            'validated_by' => null,
+            'status'       => 'Ditolak',
+            'tgl_validasi' => now(),
+            'validated_by' => Auth::id(),
         ]);
-        return back()->with('success', 'Reimbursement berhasil dibatalkan.');
+
+        return back()->with('success', 'Reimbursement berhasil ditolak.');
     }
 }

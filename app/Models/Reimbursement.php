@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Reimbursement extends Model
 {
     use HasFactory;
-
+    protected $table = 'pengeluarans';
     protected $fillable = [
-        'user_id', 'nominal', 'jenis_pengeluaran', 'keterangan',
+        'user_id', 'total', 'jenis_pengeluaran', 'keterangan',
         'status', 'tgl_pengajuan', 'tgl_validasi', 'validated_by', 'bukti_nota',
     ];
 
@@ -27,5 +27,9 @@ class Reimbursement extends Model
     public function validator()
     {
         return $this->belongsTo(User::class, 'validated_by');
+    }
+    public function detailReimbursements()
+    {
+        return $this->hasMany(DetailReimbursement::class);
     }
 }
