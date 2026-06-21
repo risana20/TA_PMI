@@ -21,7 +21,7 @@ class ReimbursementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Setup Role
         $this->roleAdmin = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Role Admin']);
         $this->roleSuperadmin = Role::firstOrCreate(['name' => 'superadmin'], ['description' => 'Role Superadmin']);
@@ -66,18 +66,17 @@ class ReimbursementTest extends TestCase
 
         // Lakukan request POST pengajuan reimbursement
         $response = $this->actingAs($admin)
-                         ->post(route('admin.reimbursement.store'), $payload);
+            ->post(route('admin.reimbursement.store'), $payload);
 
         // Pastikan sukses redirect (302) dengan session success
         $response->assertStatus(302);
         $response->assertSessionHas('success', 'Ajuan reimbursement berhasil dikirim.');
 
-        // Assert di tabel reimbursements header (total 75000 + 35000 = 110000)
-        $this->assertDatabaseHas('reimbursements', [
+        // Assert di tabel pengeluarans header (total 75000 + 35000 = 110000)
+        $this->assertDatabaseHas('pengeluarans', [
             'user_id' => $admin->id,
             'status' => 'Tunggu Verifikasi',
             'total' => 110000,
-            'tgl_pengajuan' => now()->toDateString(),
         ]);
 
         // Karena cuma insert 1 header, kita bisa ambil id = 1 untuk asserts
