@@ -45,6 +45,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'loginPost'])->name('login.post');
     Route::get('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/register', [AuthController::class, 'registerPost'])->name('register.post');
+
+    Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPasswordPost'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPasswordPost'])->name('password.update');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
@@ -126,6 +131,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Donasi
     Route::get('/donasi', [DonasiController::class, 'index'])->name('donasi.index');
+    Route::post('/donasi', [DonasiController::class, 'store'])->name('donasi.store');
     Route::get('/donasi/{donasi}', [DonasiController::class, 'show'])->name('donasi.show');
     Route::post('/donasi/{donasi}/verify', [DonasiController::class, 'verify'])->name('donasi.verify');
     Route::post('/donasi/{donasi}/complete', [DonasiController::class, 'complete'])->name('donasi.complete');
@@ -134,6 +140,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Monitoring Kesehatan
     Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
     Route::get('/monitoring/{wargaBinaan}', [MonitoringController::class, 'show'])->name('monitoring.show');
+    Route::get('/monitoring/{wargaBinaan}/pemeriksaan/export/pdf', [MonitoringController::class, 'exportPemeriksaanPdf'])->name('monitoring.exportPemeriksaanPdf');
+    Route::get('/monitoring/{wargaBinaan}/pemeriksaan/export/excel', [MonitoringController::class, 'exportPemeriksaanExcel'])->name('monitoring.exportPemeriksaanExcel');
     Route::post('/monitoring/{wargaBinaan}/pemeriksaan', [MonitoringController::class, 'storePemeriksaan'])->name('monitoring.storePemeriksaan');
     Route::post('/monitoring/{wargaBinaan}/rsj', [MonitoringController::class, 'storeRSJ'])->name('monitoring.storeRSJ');
     Route::post('/monitoring/{wargaBinaan}/rujukan', [MonitoringController::class, 'storeRujukan'])->name('monitoring.storeRujukan');
@@ -194,6 +202,7 @@ Route::middleware(['auth', 'verified', 'role:superadmin'])->prefix('superadmin')
 
     // Donasi
     Route::get('/donasi', [DonasiController::class, 'index'])->name('donasi.index');
+    Route::post('/donasi', [DonasiController::class, 'store'])->name('donasi.store');
     Route::get('/donasi/{donasi}', [DonasiController::class, 'show'])->name('donasi.show');
     Route::post('/donasi/{donasi}/verify', [DonasiController::class, 'verify'])->name('donasi.verify');
     Route::post('/donasi/{donasi}/complete', [DonasiController::class, 'complete'])->name('donasi.complete');
@@ -202,6 +211,8 @@ Route::middleware(['auth', 'verified', 'role:superadmin'])->prefix('superadmin')
     // Monitoring Kesehatan
     Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
     Route::get('/monitoring/{wargaBinaan}', [MonitoringController::class, 'show'])->name('monitoring.show');
+    Route::get('/monitoring/{wargaBinaan}/pemeriksaan/export/pdf', [MonitoringController::class, 'exportPemeriksaanPdf'])->name('monitoring.exportPemeriksaanPdf');
+    Route::get('/monitoring/{wargaBinaan}/pemeriksaan/export/excel', [MonitoringController::class, 'exportPemeriksaanExcel'])->name('monitoring.exportPemeriksaanExcel');
     Route::post('/monitoring/{wargaBinaan}/pemeriksaan', [MonitoringController::class, 'storePemeriksaan'])->name('monitoring.storePemeriksaan');
     Route::post('/monitoring/{wargaBinaan}/rsj', [MonitoringController::class, 'storeRSJ'])->name('monitoring.storeRSJ');
     Route::post('/monitoring/{wargaBinaan}/rujukan', [MonitoringController::class, 'storeRujukan'])->name('monitoring.storeRujukan');

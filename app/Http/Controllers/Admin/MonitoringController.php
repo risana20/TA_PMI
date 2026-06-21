@@ -14,11 +14,25 @@ use App\Models\StokLogistik;
 use App\Models\PengeluaranLogistik;
 use App\Models\RiwayatStok;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\WargaBinaanExport;
+use App\Exports\PemeriksaanKesehatanExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MonitoringController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->filled('export')) {
+            $type = $request->get('export');
+            if ($type === 'pdf') {
+                return $this->exportWargaPdf($request);
+            }
+            if ($type === 'excel') {
+                return $this->exportWargaExcel($request);
+            }
+        }
+
         $tab = $request->get('tab', 'ODGJ');
         $search = $request->get('search');
 
@@ -125,13 +139,13 @@ class MonitoringController extends Controller
     {
         $data = $request->validate([
             'tanggal'       => 'required|date',
-            'frek_napas'    => 'nullable|string',
-            'tekanan_darah' => 'nullable|string',
-            'suhu_tubuh'    => 'nullable|string',
-            'nadi'          => 'nullable|string',
-            'spo2'          => 'nullable|string',
-            'berat_badan'   => 'nullable|numeric',
-            'tinggi_badan'  => 'nullable|numeric',
+            'frek_napas'    => 'required|string',
+            'tekanan_darah' => 'required|string',
+            'suhu_tubuh'    => 'required|string',
+            'nadi'          => 'required|string',
+            'spo2'          => 'required|string',
+            'berat_badan'   => 'required|numeric',
+            'tinggi_badan'  => 'required|numeric',
             'keluhan'       => 'nullable|string',
             'tindakan'      => 'nullable|string',
             'catatan'       => 'nullable|string',
@@ -317,5 +331,52 @@ class MonitoringController extends Controller
         $request->validate(['stok' => 'required|integer|min:0']);
         $stokObat->update(['stok' => $request->stok]);
         return back()->with('success', 'Stok obat berhasil diperbarui.');
+    }
+
+    public function exportWargaPdf(Request $request)
+    {
+        $tab = $request->get('tab', 'ODGJ');
+        $search = $request->get('search');
+        
+        $query = WargaBinaan::where('status', 'Aktif')->where('kategori', $tab);
+        
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                ->orWhere('nik', 'like', "%{$search}%");
+            });
+        }
+        
+        $wargaBinaans = $query->latest()->get();
+        
+        $pdf = Pdf::loadView('pages.admin.monitoring.export_warga_pdf', compact('wargaBinaans', 'tab'));
+        $fileName = 'monitoring-warga-binaan-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.pdf';
+        
+        return $pdf->download($fileName);
+    }
+    
+    public function exportWargaExcel(Request $request)
+    {
+        $tab = $request->get('tab', 'ODGJ');
+        $search = $request->get('search');
+        
+        $fileName = 'monitoring-warga-binaan-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new WargaBinaanExport($tab, 'Aktif', $search), $fileName);
+    }
+
+    public function exportPemeriksaanPdf(WargaBinaan $wargaBinaan)
+    {
+        $riwayat = $wargaBinaan->monitoringKesehatans()->with('riwayatPenyakits')->latest()->get();
+        
+        $pdf = Pdf::loadView('pages.admin.monitoring.export_pemeriksaan_pdf', compact('wargaBinaan', 'riwayat'));
+        $fileName = 'pemeriksaan-kesehatan-' . strtolower(str_replace(' ', '-', $wargaBinaan->nama)) . '-' . now()->format('Ymd_His') . '.pdf';
+        
+        return $pdf->download($fileName);
+    }
+
+    public function exportPemeriksaanExcel(WargaBinaan $wargaBinaan)
+    {
+        $fileName = 'pemeriksaan-kesehatan-' . strtolower(str_replace(' ', '-', $wargaBinaan->nama)) . '-' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new PemeriksaanKesehatanExport($wargaBinaan), $fileName);
     }
 }

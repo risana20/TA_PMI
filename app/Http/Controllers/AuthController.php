@@ -110,4 +110,59 @@ class AuthController extends Controller
 
             // lanjut simpan data
         }
+
+    public function forgotPassword()
+    {
+        return view('pages.auth.forgot-password');
+    }
+
+    public function forgotPasswordPost(Request $request)
+    {
+        $request->validate(
+            ['email' => 'required|email|exists:users,email'],
+            ['email.exists' => 'Email tidak terdaftar di sistem kami.']
+        );
+
+        $status = \Illuminate\Support\Facades\Password::sendResetLink(
+            $request->only('email')
+        );
+
+        if ($status === \Illuminate\Support\Facades\Password::RESET_LINK_SENT) {
+            return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
+        }
+
+        return back()->withErrors(['email' => 'Gagal mengirim link reset password.']);
+    }
+
+    public function resetPassword($token, Request $request)
+    {
+        return view('pages.auth.reset-password', [
+            'token' => $token,
+            'email' => $request->email
+        ]);
+    }
+
+    public function resetPasswordPost(Request $request)
+    {
+        $request->validate([
+            'token'    => 'required',
+            'email'    => 'required|email|exists:users,email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = \Illuminate\Support\Facades\Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->save();
+            }
+        );
+
+        if ($status === \Illuminate\Support\Facades\Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', 'Password Anda berhasil diperbarui. Silakan login.');
+        }
+
+        return back()->withErrors(['email' => 'Gagal mengatur ulang password Anda. Silakan coba lagi.']);
+    }
 }

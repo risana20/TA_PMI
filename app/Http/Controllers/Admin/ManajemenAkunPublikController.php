@@ -11,11 +11,15 @@ class ManajemenAkunPublikController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $query  = User::query()->role('user')->latest();
+        $query  = User::query()->role('user')
+                      ->where('email', 'not like', 'offline_%')
+                      ->latest();
 
         if ($search) {
-            $query->where('name', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
+            });
         }
 
         $users = $query->paginate(10)->withQueryString();

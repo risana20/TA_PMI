@@ -248,59 +248,84 @@
 
 {{-- Kebutuhan Mendesak --}}
 @if($kebutuhanMendesak->count() > 0)
-<section class="py-20 bg-gray-50">
+<section class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-            <div>
-                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Kebutuhan Mendesak</h2>
-                <p class="text-sm text-gray-500 mt-1.5">Bantu penuhi pasokan logistik harian warga binaan kami</p>
+        
+        {{-- Section Header --}}
+        <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full uppercase tracking-widest">
+                <i class="fa-solid fa-box text-[10px]"></i> Bantuan Dibutuhkan
             </div>
-            <a href="{{ route('kebutuhan-mendesak') }}" class="text-sm font-bold text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 transition">
-                Lihat Kebutuhan Lengkap <i class="fa-solid fa-circle-arrow-right"></i>
-            </a>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                Kebutuhan Mendesak
+            </h2>
+            <p class="text-gray-500 text-center max-w-2xl mx-auto text-sm leading-relaxed">
+                Berikut adalah daftar kebutuhan yang sedang mendesak di Griya PMI. Bantuan Anda sangat berarti bagi warga binaan kami.
+            </p>
         </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($kebutuhanMendesak as $item)
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all duration-300 flex flex-col justify-between">
+            @php
+                $isSangatMendesak = $item->status === 'Sangat Mendesak';
+                $badgeClass = $isSangatMendesak 
+                    ? 'bg-red-50 text-red-600 border border-red-100' 
+                    : 'bg-orange-50 text-orange-600 border border-orange-100';
+                $kategori = $item->itemLogistik->jenisLogistik->nama_jenis_logistik ?? '-';
+            @endphp
+            <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center gap-2 mb-3">
-                        @if($item->itemLogistik->jenisLogistik && $item->itemLogistik->jenisLogistik->nama_jenis_logistik === 'Makanan')
-                            <span class="inline-flex items-center gap-1 bg-orange-50 text-orange-600 text-xs font-bold px-2.5 py-1 rounded-full">
-                                <i class="fa-solid fa-utensils"></i> Makanan
-                            </span>
-                        @elseif($item->itemLogistik->jenisLogistik && $item->itemLogistik->jenisLogistik->nama_jenis_logistik === 'Obat')
-                            <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-full">
-                                <i class="fa-solid fa-pills"></i> Obat
-                            </span>
-                        @else
-                            <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-xs font-bold px-2.5 py-1 rounded-full">
-                                <i class="fa-solid fa-box"></i> Barang
-                            </span>
-                        @endif
+                    {{-- Icon & Status Badge --}}
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-red-50/50 border border-red-100 flex items-center justify-center">
+                            @if($kategori === 'Makanan')
+                                <i class="fa-solid fa-utensils text-red-500 text-xl"></i>
+                            @elseif($kategori === 'Obat')
+                                <i class="fa-solid fa-pills text-red-500 text-xl"></i>
+                            @else
+                                <i class="fa-solid fa-box text-red-500 text-xl"></i>
+                            @endif
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $badgeClass }}">
+                            {{ $item->status }}
+                        </span>
                     </div>
-                    <p class="font-bold text-gray-800 text-base leading-snug">{{ $item->itemLogistik->nama_item }}</p>
-                    <p class="text-sm text-gray-400 mt-1">Sisa Stok: <strong class="text-gray-600">{{ $item->jumlah_saat_ini }} {{ $item->itemLogistik->satuan }}</strong></p>
+
+                    {{-- Name & Category --}}
+                    <h3 class="font-extrabold text-gray-900 text-lg sm:text-xl tracking-tight mb-0.5">{{ $item->itemLogistik->nama_item }}</h3>
+                    <p class="text-sm font-medium text-gray-400 mb-5">{{ $kategori }}</p>
+
+                    {{-- Stock Info --}}
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mb-1">Stok Tersisa</p>
+                            <p class="text-2xl font-black {{ $isSangatMendesak ? 'text-red-600' : 'text-orange-500' }} leading-none">{{ $item->jumlah_saat_ini }}</p>
+                            <p class="text-[10px] text-gray-400 mt-1 font-bold">{{ $item->itemLogistik->satuan }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mb-1">Kebutuhan</p>
+                            <p class="text-2xl font-black text-gray-800 leading-none">{{ $item->jumlah_minimum }}</p>
+                            <p class="text-[10px] text-gray-400 mt-1 font-bold">{{ $item->itemLogistik->satuan }}</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
-                    <div>
-                        @include('components.badge-status', ['status' => $item->status])
-                    </div>
+
+                {{-- Progress Bar --}}
+                @php
+                    $persen = $item->jumlah_minimum > 0 ? min(100, round(($item->jumlah_saat_ini / $item->jumlah_minimum) * 100)) : 100;
+                    $barBg = $isSangatMendesak ? 'bg-red-500' : 'bg-orange-500';
+                @endphp
+                <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div class="{{ $barBg }} h-2 rounded-full transition-all duration-500" style="width: {{ $persen }}%"></div>
                 </div>
             </div>
             @endforeach
         </div>
         
         <div class="text-center mt-12">
-            @auth
-            <a href="{{ route('donasi.index') }}" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-full hover:shadow-lg active:scale-95 transition-all duration-300 inline-flex items-center gap-2">
-                <i class="fa-solid fa-heart"></i> Salurkan Bantuan Sekarang
+            <a href="{{ route('kebutuhan-mendesak') }}" class="inline-flex items-center gap-2 bg-white border border-red-200 hover:border-red-300 text-red-600 font-semibold px-8 py-3.5 rounded-full hover:shadow-sm active:scale-95 transition-all duration-300">
+                Lihat Semua Kebutuhan <i class="fa-solid fa-chevron-right text-xs"></i>
             </a>
-            @else
-            <a href="{{ route('register') }}" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-full hover:shadow-lg active:scale-95 transition-all duration-300 inline-flex items-center gap-2">
-                <i class="fa-solid fa-heart"></i> Daftar & Mulai Berdonasi
-            </a>
-            @endauth
         </div>
     </div>
 </section>
@@ -323,30 +348,30 @@
         {{-- Row 1 --}}
         <div class="flex gap-6 pr-6 shrink-0 animate-marquee">
             @foreach($donaturTerverifikasi as $donasi)
-            <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-red-500/30 hover:-translate-y-0.5 transition-all duration-300 w-72 md:w-80 shrink-0 flex flex-col justify-between relative overflow-hidden group">
+            <div class="rounded-2xl p-5 hover:shadow-md hover:border-red-500/30 hover:-translate-y-0.5 transition-all duration-300 w-72 md:w-80 shrink-0 flex flex-col justify-between relative overflow-hidden group"
+                 style="background: linear-gradient(135deg, #fff 0%, #fef2f2 40%, #fff5f5 100%); border: 1px solid #fecaca; box-shadow: 0 4px 24px 0 rgba(228,0,15,0.07);">
                 {{-- Accent line on hover --}}
                 <div class="absolute top-0 left-0 w-full h-[3px] bg-red-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 
                 <div>
                     <div class="flex items-center justify-between gap-2 mb-2">
-                        
                         @if($donasi->jenis === 'Uang')
                         <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                             <i class="fa-solid fa-wallet text-[9px]"></i> Donasi Uang
                         </span>
                         @elseif($donasi->jenis === 'Makanan')
-                        <span class="inline-flex items-center gap-1 bg-orange-50 text-orange-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                        <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                             <i class="fa-solid fa-utensils text-[9px]"></i> Bahan Makanan
                         </span>
                         @else
-                        <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                        <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                             <i class="fa-solid fa-box text-[9px]"></i> Donasi Barang
                         </span>
                         @endif
                     </div>
                     <h4 class="font-extrabold text-slate-800 text-sm md:text-base truncate mt-1">{{ $donasi->nama_donatur }}</h4>
                 </div>
-                <div class="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+                <div class="mt-4 pt-3 border-t border-red-100/50 flex items-center justify-between">
                     <p class="text-xs text-slate-400 flex items-center gap-1.5 font-medium truncate">
                         <i class="fa-solid fa-location-dot text-slate-400/80 text-[11px]"></i>
                         <span class="truncate">{{ $donasi->user?->address ?: 'Surakarta' }}</span>
@@ -359,30 +384,30 @@
         {{-- Row 2 (Duplicate for loop) --}}
         <div class="flex gap-6 pr-6 shrink-0 animate-marquee" aria-hidden="true">
             @foreach($donaturTerverifikasi as $donasi)
-            <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-red-500/30 hover:-translate-y-0.5 transition-all duration-300 w-72 md:w-80 shrink-0 flex flex-col justify-between relative overflow-hidden group">
+            <div class="rounded-2xl p-5 hover:shadow-md hover:border-red-500/30 hover:-translate-y-0.5 transition-all duration-300 w-72 md:w-80 shrink-0 flex flex-col justify-between relative overflow-hidden group"
+                 style="background: linear-gradient(135deg, #fff 0%, #fef2f2 40%, #fff5f5 100%); border: 1px solid #fecaca; box-shadow: 0 4px 24px 0 rgba(228,0,15,0.07);">
                 {{-- Accent line on hover --}}
                 <div class="absolute top-0 left-0 w-full h-[3px] bg-red-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 
                 <div>
                     <div class="flex items-center justify-between gap-2 mb-2">
-                     
                         @if($donasi->jenis === 'Uang')
                         <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                             <i class="fa-solid fa-wallet text-[9px]"></i> Donasi Uang
                         </span>
                         @elseif($donasi->jenis === 'Makanan')
-                        <span class="inline-flex items-center gap-1 bg-orange-50 text-orange-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                        <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                             <i class="fa-solid fa-utensils text-[9px]"></i> Bahan Makanan
                         </span>
                         @else
-                        <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                        <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                             <i class="fa-solid fa-box text-[9px]"></i> Donasi Barang
                         </span>
                         @endif
                     </div>
                     <h4 class="font-extrabold text-slate-800 text-sm md:text-base truncate mt-1">{{ $donasi->nama_donatur }}</h4>
                 </div>
-                <div class="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+                <div class="mt-4 pt-3 border-t border-red-100/50 flex items-center justify-between">
                     <p class="text-xs text-slate-400 flex items-center gap-1.5 font-medium truncate">
                         <i class="fa-solid fa-location-dot text-slate-400/80 text-[11px]"></i>
                         <span class="truncate">{{ $donasi->user?->address ?: 'Surakarta' }}</span>
