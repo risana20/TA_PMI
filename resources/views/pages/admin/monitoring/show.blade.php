@@ -61,12 +61,14 @@
             <span class="hidden sm:inline">Pemeriksaan Kesehatan</span>
             <span class="sm:hidden">Kesehatan</span>
         </button>
+        @if($wargaBinaan->kategori !== 'Lansia')
         <button onclick="switchMainTab('rsj')" id="main-btn-rsj"
             class="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer text-gray-500 hover:bg-gray-50 hover:text-gray-700">
             <i class="fa-solid fa-brain"></i>
             <span class="hidden sm:inline">Pemeriksaan RSJ</span>
             <span class="sm:hidden">RSJ</span>
         </button>
+        @endif
         <button onclick="switchMainTab('obat')" id="main-btn-obat"
             class="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer text-gray-500 hover:bg-gray-50 hover:text-gray-700">
             <i class="fa-solid fa-pills"></i>
@@ -162,6 +164,7 @@
         @endif
     </div>
 
+    @if($wargaBinaan->kategori !== 'Lansia')
     {{-- ================= TAB: PEMERIKSAAN RSJ ================= --}}
     <div id="main-tab-rsj" class="hidden">
 
@@ -303,6 +306,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- ================= TAB: PENCATATAN MINUM OBAT ================= --}}
     <div id="main-tab-obat" class="hidden">
@@ -959,15 +963,22 @@
 
     function switchMainTab(tab) {
         mainTabs.forEach(function(t) {
-            document.getElementById('main-tab-' + t).classList.add('hidden');
-            const btn = document.getElementById('main-btn-' + t);
-            btn.classList.remove('bg-white', 'shadow', 'text-gray-900');
-            btn.classList.add('text-gray-500');
+            const tabEl = document.getElementById('main-tab-' + t);
+            const btnEl = document.getElementById('main-btn-' + t);
+            if (tabEl) tabEl.classList.add('hidden');
+            if (btnEl) {
+                btnEl.classList.remove('bg-white', 'shadow', 'text-gray-900');
+                btnEl.classList.add('text-gray-500');
+            }
         });
-        document.getElementById('main-tab-' + tab).classList.remove('hidden');
+        const activeTabEl = document.getElementById('main-tab-' + tab);
+        if (activeTabEl) activeTabEl.classList.remove('hidden');
+        
         const activeBtn = document.getElementById('main-btn-' + tab);
-        activeBtn.classList.remove('text-gray-500');
-        activeBtn.classList.add('bg-white', 'shadow', 'text-gray-900');
+        if (activeBtn) {
+            activeBtn.classList.remove('text-gray-500');
+            activeBtn.classList.add('bg-white', 'shadow', 'text-gray-900');
+        }
     }
 
     // ── RSJ Sub-tab ───────────────────────────────────────────

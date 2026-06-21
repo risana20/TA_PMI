@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -70,10 +71,12 @@ class AuthController extends Controller
 
         $user->assignRole('user');
 
+        event(new Registered($user));
+
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('beranda')->with('success', 'Registrasi berhasil! Selamat datang.');
+        return redirect()->route('verification.notice')->with('success', 'Registrasi berhasil! Silakan verifikasi email Anda.');
     }
 
     public function logout(Request $request)

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('tindakan')->nullable();
             $table->text('catatan')->nullable();
             $table->string('petugas')->nullable();
+            $table->text('riwayat_penyakit')->nullable();
             $table->timestamps();
         });
     }
