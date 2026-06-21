@@ -228,7 +228,7 @@
                 <form method="POST" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.store') }}" enctype="multipart/form-data">
                     @csrf
 
-                    <input type="hidden" name="nama_pengunjung" value="{{ auth()->user()->name }}">
+                    <input type="hidden" name="nama_pengunjung" value="{{ $kunjungan->user->name ?? $kunjungan->nama_pengunjung }}">
                     <input type="hidden" name="no_hp" value="{{ auth()->user()->phone }}">
                     <input type="hidden" name="tgl_kunjungan" id="tgl-hidden" value="{{ old('tgl_kunjungan') }}">
 
