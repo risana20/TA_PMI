@@ -103,15 +103,11 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+<div class="grid grid-cols-1  gap-6 mb-6">
     {{-- Tabel Pemasukan --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <h3 class="font-semibold text-gray-900">Pemasukan</h3>
-            {{-- <button onclick="document.getElementById('modal-pemasukan').classList.remove('hidden')"
-                class="bg-red-600 text-white rounded-full px-4 py-1.5 text-xs font-semibold hover:bg-red-700">
-                <i class="fa-solid fa-plus mr-1"></i> Tambah
-            </button> --}}
         </div>
         <table class="w-full text-sm">
             <thead class="bg-gray-50">
@@ -140,10 +136,6 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <h3 class="font-semibold text-gray-900">Pengeluaran</h3>
-            {{-- <button onclick="document.getElementById('modal-pengeluaran').classList.remove('hidden')"
-                class="bg-red-600 text-white rounded-full px-4 py-1.5 text-xs font-semibold hover:bg-red-700">
-                <i class="fa-solid fa-plus mr-1"></i> Tambah
-            </button> --}}
         </div>
         <table class="w-full text-sm">
             <thead class="bg-gray-50">

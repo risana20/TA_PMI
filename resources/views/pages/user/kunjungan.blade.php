@@ -43,8 +43,6 @@
         </div>
         @endif
 
-        
-
         {{-- ① Jadwal Disetujui --}}
         <div class="bg-white rounded-2xl shadow-lg p-6">
             <div class="flex items-center gap-3 mb-5">
@@ -105,7 +103,6 @@
 
                     <input type="hidden" name="nama_pengunjung" value="{{ auth()->user()->name }}">
                     <input type="hidden" name="no_hp" value="{{ auth()->user()->phone }}">
-                    <input type="hidden" name="tgl_kunjungan" id="tgl-hidden" value="{{ old('tgl_kunjungan') }}">
 
                     <div class="space-y-5">
                         {{-- Nama Pengunjung --}}
@@ -169,6 +166,7 @@
 
                             <input type="text"
                                 name="instansi"
+                                required
                                 value="{{ old('instansi') }}"
                                 placeholder="Contoh: Universitas X / Masyarakat Umum"
                                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
@@ -205,9 +203,10 @@
 
                                 <input type="date"
                                     id="tgl-picker"
+                                    name="tgl_kunjungan"
                                     class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
                                     min="{{ date('Y-m-d') }}"
-                                    onchange="document.getElementById('tgl-hidden').value=this.value">
+                                    required>
                             </div>
 
                             {{-- Jam --}}
@@ -421,50 +420,6 @@
 
     renderCalendar();
 })();
-
-// document.addEventListener('DOMContentLoaded', function(){
-
-//     function initSurat() {
-//         const tujuan = document.getElementById('tujuan');
-//         const suratInput = document.getElementById('surat-input');
-//         const suratLabel = document.getElementById('surat-upload');
-
-//         // ❗ kalau belum ada, jangan lanjut
-//         if (!tujuan || !suratInput || !suratLabel) return;
-
-//         function updateSurat() {
-//             const value = tujuan.value;
-
-//             const aktif = (
-//                 value === "Penelitian" ||
-//                 value === "Kerjasama" ||
-//                 value === "Magang/PKL"
-//             );
-
-//             if (aktif) {
-//                 suratInput.disabled = false;
-//                 suratInput.required = true;
-
-//                 suratLabel.classList.remove('opacity-50');
-//                 suratLabel.classList.remove('pointer-events-none');
-//             } else {
-//                 suratInput.disabled = true;
-//                 suratInput.required = false;
-//                 suratInput.value = "";
-
-//                 suratLabel.classList.add('opacity-50');
-//                 suratLabel.classList.add('pointer-events-none');
-//             }
-//         }
-
-//         tujuan.addEventListener('change', updateSurat);
-
-//         updateSurat();
-//     }
-
-//     // 🔥 delay sedikit biar modal kebaca
-//     setTimeout(initSurat, 300);
-// });
 
 function initSurat() {
     const tujuan = document.getElementById('tujuan');

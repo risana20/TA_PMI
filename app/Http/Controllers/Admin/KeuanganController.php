@@ -101,56 +101,6 @@ class KeuanganController extends Controller
         
     }
 
-    // Pemasukan only comes from Donasi forms now, so manual storePemasukan is deprecated.
-    // KeuanganController only views finances or handles reimbursement approvals.
+
     
-    // Store pengeluaran manually (can be mapped to creating a pre-approved Reimbursement if needed)
-    // public function storePengeluaran(Request $request)
-    // {
-    //     $data = $request->validate([
-    //         'tanggal'    => 'required|date',
-    //         'nominal'    => 'required|integer|min:1',
-    //         'jenis_logistik_id' => 'required|exists:jenis_logistiks,id',
-    //         'keterangan' => 'nullable|string',
-    //         'bukti_nota' => 'nullable|image|max:2048',
-    //     ]);
-
-    //     $totalPemasukan = DonasiUang::whereHas('donasi', function($q) {
-    //         $q->where('status', 'Selesai');
-    //     })->sum('nominal');
-
-    //     $totalPengeluaran = Reimbursement::where('status', 'disetujui')->sum('total');
-
-    //     $saldo = $totalPemasukan - $totalPengeluaran;
-
-    //     if ($data['nominal'] > $saldo) {
-    //         return back()->withErrors(['nominal' => 'Saldo tidak cukup'])->withInput();
-    //     }
-
-    //     if ($request->hasFile('bukti_nota')) {
-    //         $data['bukti_nota'] = $request->file('bukti_nota')->store('keuangan', 'public');
-    //     }
-
-    //     // 1. buat reimbursement header
-    //     $reimbursement = Reimbursement::create([
-    //         'user_id' => Auth::id(),
-    //         'status' => 'disetujui',
-    //         'tgl_pengajuan' => $data['tanggal'],
-    //         'tgl_validasi' => now(),
-    //         'validated_by' => Auth::id(),
-    //         'bukti_nota' => $data['bukti_nota'] ?? null,
-    //         'total' => $data['nominal'],
-    //         'keterangan' => $data['keterangan'] ?? null,
-    //     ]);
-
-    //     // 2. buat detail
-    //     DetailReimbursement::create([
-    //         'reimbursement_id' => $reimbursement->id,
-    //         'nama_kebutuhan' => $data['keterangan'] ?? 'Pengeluaran manual',
-    //         'nominal' => $data['nominal'],
-    //         'jenis_logistik_id' => $data['jenis_logistik_id'],
-    //     ]);
-
-    //     return back()->with('success', 'Pengeluaran berhasil dicatat.');
-    // }
 }

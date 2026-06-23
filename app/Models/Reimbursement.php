@@ -11,7 +11,7 @@ class Reimbursement extends Model
     protected $table = 'pengeluarans';
     protected $fillable = [
         'user_id', 'total', 'jenis_pengeluaran', 'keterangan',
-        'status', 'tgl_pengajuan', 'tgl_validasi', 'validated_by', 'bukti_nota',
+        'status', 'tgl_pengajuan', 'tgl_validasi', 'validated_by', 'bukti_nota','alasan_tolak',
     ];
 
     protected $casts = [

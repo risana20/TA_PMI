@@ -16,6 +16,7 @@
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">total</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Nota</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Aksi</th>
             </tr>
         </thead>
@@ -54,31 +55,34 @@
                     @endif
                 </td>
                 <td class="px-4 py-4">@include('components.badge-status', ['status' => $r->status])</td>
+
+                <td class="px-5 py-4 text-gray-600">
+                    @if($r->status == 'Ditolak')
+                        {{ $r->alasan_tolak ?? '-' }}
+                    @else
+                        <span class="text-gray-400 text-xs">—</span>
+                    @endif
+                </td>
                 <td class="px-4 py-4">
                 @if($r->status === 'Tunggu Verifikasi')
 
-                    <form method="POST"
-                        action="{{ route('superadmin.acc-reimbursement.validasi', $r) }}"
-                        class="inline">
-                        @csrf
                         <button type="submit"
                             class="text-green-600 hover:text-green-800 text-xs font-medium mr-2">
                             Setujui
                         </button>
-                    </form>
+                    
 
-                    <form method="POST"
-                        action="{{ route('superadmin.acc-reimbursement.batalkan', $r) }}"
-                        class="inline">
-                        @csrf
-                        <button type="submit"
+                    
+                        <button type="button"
+                            onclick="openTolakModal({{ $r->id }})"
                             class="text-red-600 hover:text-red-800 text-xs font-medium">
                             Tolak
                         </button>
-                    </form>
+                    
 
                 @endif
             </td>
+            
             </tr>
             @empty
             <tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Belum ada ajuan reimbursement</td></tr>
@@ -87,5 +91,38 @@
     </table>
     <div class="px-4 py-3 border-t border-gray-100">{{ $reimbursements->links() }}</div>
 </div>
+<div id="modal-tolak" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">Tolak Kunjungan</h3>
+            <button onclick="document.getElementById('modal-tolak').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form id="form-tolak" method="POST" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Alasan Penolakan</label>
+                <textarea name="alasan_tolak" rows="3" required
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                    placeholder="Masukkan alasan penolakan..."></textarea>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('modal-tolak').classList.add('hidden')"
+                    class="border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg px-4 py-2 text-sm">Batal</button>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 text-sm">Tolak</button>
+            </div>
+        </form>
+    </div>
+</div>
 
+
+<script>
+    function openTolakModal(id) {
+        document.getElementById('form-tolak').action =
+            '/superadmin/acc-reimbursement/' + id + '/batalkan';
+
+        document.getElementById('modal-tolak').classList.remove('hidden');
+    }
+</script>
 @endsection

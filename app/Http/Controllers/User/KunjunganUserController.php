@@ -33,7 +33,7 @@ class KunjunganUserController extends Controller
             // 'jenis_kunjungan'   => 'required|string',
             // 'nama_kunjungan'    => 'required|string',
             'tujuan'            => 'required|string',
-            'instansi' => 'nullable|string|max:255',
+            'instansi'          => 'required|nullable|string|max:255',
             'tgl_kunjungan'     => 'required|date|after_or_equal:today',
             'jam'               => 'required',
             

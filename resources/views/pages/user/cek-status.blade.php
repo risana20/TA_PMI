@@ -311,11 +311,11 @@
                             <tr>
                                 <th class="px-5 py-3 text-left">No</th>
                                 <th class="px-5 py-3 text-left">Tujuan Kunjungan</th>
-                                {{-- <th class="px-5 py-3 text-left">Nama Kunjungan</th> --}}
                                 <th class="px-5 py-3 text-left">Surat Kunjungan</th>
                                 <th class="px-5 py-3 text-left">Tanggal</th>
                                 <th class="px-5 py-3 text-left">Jam</th>
                                 <th class="px-5 py-3 text-left">Status</th>
+                                <th class="px-5 py-3 text-left">Alasan Penolakan</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -340,6 +340,13 @@
                                 <td class="px-5 py-4 text-gray-600">{{ $k->jam }}</td>
                                 <td class="px-5 py-4">
                                     @include('components.badge-kunjungan', ['status' => $k->status])
+                                </td>
+                                <td class="px-5 py-4 text-gray-600">
+                                    @if($k->status == 'DITOLAK')
+                                        {{ $k->alasan_tolak ?? '-' }}
+                                    @else
+                                        <span class="text-gray-400 text-xs">—</span>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach
@@ -420,6 +427,7 @@
 
                             <input type="text"
                                 name="instansi"
+                                required
                                 value="{{ old('instansi') }}"
                                 placeholder="Contoh: Universitas X / Masyarakat Umum"
                                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
@@ -456,8 +464,9 @@
 
                                 <input type="date"
                                     id="tgl-picker"
+                                    required
                                     class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                                    onchange="document.getElementById('tgl-hidden').value=this.value">
+                                    >
                             </div>
 
                             {{-- Jam --}}

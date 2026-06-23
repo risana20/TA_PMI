@@ -39,8 +39,9 @@ class AccReimbursementController extends Controller
 
     
 
-    public function batalkan(Reimbursement $reimbursement)
-    {
+    public function batalkan(Request $request,Reimbursement $reimbursement)
+    {   
+        // dd($request->all());
         if ($reimbursement->status !== 'Tunggu Verifikasi') {
             return back()->with('error', 'Data sudah diproses.');
         }
@@ -49,6 +50,7 @@ class AccReimbursementController extends Controller
             'status'       => 'Ditolak',
             'tgl_validasi' => now(),
             'validated_by' => Auth::id(),
+            'alasan_tolak' => $request->alasan_tolak,
         ]);
 
         return back()->with('success', 'Reimbursement berhasil ditolak.');

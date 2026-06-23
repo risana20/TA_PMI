@@ -26,6 +26,7 @@
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Detail</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Nota</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
             </tr>
         </thead>
 
@@ -64,6 +65,13 @@
 
                 <td class="px-4 py-4">
                     @include('components.badge-status', ['status' => $r->status])
+                </td>
+                <td class="px-5 py-4 text-gray-600">
+                    @if($r->status == 'Ditolak')
+                        {{ $r->alasan_tolak ?? '-' }}
+                    @else
+                        <span class="text-gray-400 text-xs">—</span>
+                    @endif
                 </td>
 
             </tr>

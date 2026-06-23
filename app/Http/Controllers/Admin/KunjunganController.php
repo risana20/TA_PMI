@@ -30,7 +30,7 @@ class KunjunganController extends Controller
             $query->where('status', $status);
         }
 
-        $kunjungans = $query->latest()->paginate(10)->withQueryString();
+        $kunjungans = $query->orderBy('tgl_kunjungan', 'asc')->paginate(10)->withQueryString();
 
         return view('pages.admin.kunjungan.index', compact('kunjungans', 'search', 'status'));
     }
@@ -53,6 +53,7 @@ class KunjunganController extends Controller
     
     public function store(Request $request)
     {
+        // dd($request->all());
         // Upload surat (jika ada)
         $path = null;
         if ($request->hasFile('surat_pengajuan')) {

@@ -22,6 +22,8 @@
         'Menunggu Pengiriman'=>['bg-blue-100 text-blue-700',    'fa-truck',                 'Menunggu Pengiriman'],
         'Menunggu Donasi Dijemput Petugas' => ['bg-blue-100 text-blue-700', 'fa-truck-ramp-box', 'Menunggu Dijemput Petugas'],
         'Selesai'           => ['bg-green-100 text-green-700',  'fa-circle-check',          'Selesai'],
+        'Disetujui'         => ['bg-green-100 text-green-700',  'fa-circle-check',         'Disetujui'],
+        'Ditolak'           => ['bg-red-100 text-red-700',      'fa-circle-xmark',          'Ditolak'],
         default             => ['bg-gray-100 text-gray-600',    'fa-circle',                $status],
     };
 @endphp

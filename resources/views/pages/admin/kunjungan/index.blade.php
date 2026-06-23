@@ -47,6 +47,7 @@
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Jam</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Surat Pengajuan</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Aksi</th>
             </tr>
         </thead>
@@ -102,6 +103,15 @@
                     @include('components.badge-status', ['status' => $kunjungan->status])
                 </td>
 
+            {{-- keterangan --}}
+                <td class="px-5 py-4 text-gray-600">
+                    @if($kunjungan->status == 'DITOLAK')
+                        {{ $kunjungan->alasan_tolak ?? '-' }}
+                    @else
+                        <span class="text-gray-400 text-xs">—</span>
+                    @endif
+                </td>
+
                 {{-- AKSI --}}
                 <td class="px-4 py-4">
 
@@ -125,7 +135,7 @@
                     @endif
 
                 </td>
-
+                
             </tr>
             @empty
             <tr>
@@ -228,9 +238,6 @@
                 <form method="POST" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.store') }}" enctype="multipart/form-data">
                     @csrf
 
-                    <input type="hidden" name="nama_pengunjung" value="{{ $kunjungan->user->name ?? $kunjungan->nama_pengunjung }}">
-                    <input type="hidden" name="no_hp" value="{{ auth()->user()->phone }}">
-                    <input type="hidden" name="tgl_kunjungan" id="tgl-hidden" value="{{ old('tgl_kunjungan') }}">
 
                     <div class="space-y-5">
                         {{-- Nama Pengunjung --}}
@@ -336,9 +343,9 @@
                                 </label>
 
                                 <input type="date"
-                                    id="tgl-picker"
-                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                                    onchange="document.getElementById('tgl-hidden').value=this.value">
+                                    name="tgl_kunjungan"
+                                    required
+                                    class="w-full border rounded-lg px-3 py-2">
                             </div>
 
                             {{-- Jam --}}
@@ -394,7 +401,8 @@
 @push('scripts')
 <script>
 function openTolakModal(id) {
-    document.getElementById('form-tolak').action = '/admin/kunjungan/' + id + '/reject';
+    let prefix = "{{ auth()->user()->hasRole('superadmin') ? 'superadmin' : 'admin' }}";
+    document.getElementById('form-tolak').action =  '/' + prefix + '/kunjungan/' + id + '/reject';;
     document.getElementById('modal-tolak').classList.remove('hidden');
 }
 function openSuratModal(url){
