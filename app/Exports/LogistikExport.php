@@ -50,7 +50,7 @@ class LogistikExport implements FromCollection, WithHeadings, WithStyles, Should
             }
         }
 
-        $data = $query->latest()->get();
+        $data = $query->get();
 
         return $data->map(function ($item, $index) {
             return [

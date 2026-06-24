@@ -94,7 +94,7 @@ class LogistikController extends Controller
             }
         }
 
-        $logistiks = $query->latest()->get();
+        $logistiks = $query->get();
 
         $pdf = Pdf::loadView('pages.admin.logistik.export_pdf', compact('logistiks', 'kategori', 'status'));
         $fileName = 'Data_Logistik_Inventaris.pdf';
