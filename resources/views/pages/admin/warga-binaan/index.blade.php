@@ -146,7 +146,7 @@
                             data-pj="{{ $warga->penanggung_jawab ?: '-' }}"
                             data-kontak_pj="{{ $warga->kontak_pj ?: '-' }}"
                             data-foto="{{ $warga->foto ? Storage::url($warga->foto) : '' }}"
-                            data-url="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.show', $warga) }}">
+                            data-url="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'monitoring.show', $warga) }}">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                         <button type="button" title="Edit"
