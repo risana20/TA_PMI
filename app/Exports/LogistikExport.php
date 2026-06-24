@@ -66,13 +66,24 @@ class LogistikExport implements FromCollection, WithHeadings, WithStyles, Should
 
     public function headings(): array
     {
+        $user = auth()->user();
+        $role = $user->hasRole('superadmin') ? 'Superadmin' : 'Admin';
+        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
+
         return [
-            'No',
-            'Nama Barang',
-            'Kategori',
-            'Stok Minimum',
-            'Stok Saat Ini',
-            'Status'
+            ['Informasi Cetak'],
+            ['Tanggal Cetak', $tanggalCetak],
+            ['Dicetak Oleh', $user->name],
+            ['Role', $role],
+            [], // spacer row
+            [
+                'No',
+                'Nama Barang',
+                'Kategori',
+                'Stok Minimum',
+                'Stok Saat Ini',
+                'Status'
+            ]
         ];
     }
 
@@ -80,9 +91,14 @@ class LogistikExport implements FromCollection, WithHeadings, WithStyles, Should
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        $range = 'A1:' . $highestColumn . $highestRow;
+        
+        // Merging first row title (optional but nice)
+        $sheet->mergeCells('A1:B1');
+        
+        // Table styling starts at row 6
+        $range = 'A6:' . $highestColumn . $highestRow;
 
-        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
+        $sheet->getStyle('A6:' . $highestColumn . '6')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFFFF'],
@@ -109,6 +125,13 @@ class LogistikExport implements FromCollection, WithHeadings, WithStyles, Should
             'alignment' => [
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
+        ]);
+
+        // Style the print info
+        $sheet->getStyle('A1:A4')->applyFromArray([
+            'font' => [
+                'bold' => true,
+            ]
         ]);
 
         return [];

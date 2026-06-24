@@ -72,7 +72,7 @@ class DonasiController extends Controller
         $donasis = $query->get();
 
         $pdf = Pdf::loadView('pages.admin.donasi.export_pdf', compact('donasis', 'tab'));
-        $fileName = 'donasi-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.pdf';
+        $fileName = 'Data_Donasi_' . $tab . '.pdf';
 
         return $pdf->download($fileName);
     }
@@ -82,7 +82,7 @@ class DonasiController extends Controller
         $tab    = $request->get('tab', 'Uang');
         $search = $request->get('search');
 
-        $fileName = 'donasi-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.xlsx';
+        $fileName = 'Data_Donasi_' . $tab . '.xlsx';
         return Excel::download(new DonasiExport($tab, $search), $fileName);
     }
 

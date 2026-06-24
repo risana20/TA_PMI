@@ -44,6 +44,11 @@
     <div class="header">
         <h1>Laporan Data Logistik & Inventaris</h1>
         <p>Griya PMI Surakarta</p>
+        <div style="margin-top: 10px; font-size: 11px; color: #333; text-align: center;">
+            Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
+            Dicetak Oleh: {{ auth()->user()->name }}<br>
+            Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
+        </div>
         @if($kategori || $status)
         <p style="font-size: 10px;">
             @if($kategori) Kategori: {{ $kategori }} @endif
