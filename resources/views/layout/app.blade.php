@@ -43,6 +43,16 @@
                     @include('ui.alert', ['type' => 'error', 'message' => session('error')])
                 @endif
 
+                @if($errors->any())
+                    <div class="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 mb-4">
+                        <ul class="list-disc pl-5 text-sm">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 @yield('content')
             </main>
 

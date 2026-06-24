@@ -70,7 +70,7 @@
 
                     {{-- Edit --}}
                     <button 
-                        onclick="openEditArtikel({{ $artikel->id }}, '{{ addslashes($artikel->judul) }}', '{{ $artikel->kategori }}', '{{ $artikel->status }}', `{!! addslashes($artikel->konten) !!}`)"
+                        onclick="openEditArtikel({{ $artikel->id }}, '{{ addslashes($artikel->judul) }}', '{{ $artikel->kategori }}', '{{ $artikel->status }}', `{!! addslashes($artikel->konten) !!}`, '{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.update', $artikel) }}')"
                         class="text-gray-400 hover:text-yellow-500 mr-2">
                         <i class="fa-solid fa-pen"></i>
                     </button>
@@ -236,14 +236,14 @@
 const quilBuat = new Quill('#editor-buat', { theme: 'snow', placeholder: 'Tulis konten artikel...' });
 const quilEdit = new Quill('#editor-edit', { theme: 'snow' });
 
-function openEditArtikel(id, judul, kategori, status, konten) {
+function openEditArtikel(id, judul, kategori, status, konten, updateUrl) {
     document.getElementById('edit-judul').value = judul;
     document.getElementById('edit-kategori').value = kategori;
     document.getElementById('edit-status').value = status;
 
     quilEdit.root.innerHTML = konten;
 
-    document.getElementById('form-edit').action = '/admin/artikel/' + id;
+    document.getElementById('form-edit').action = updateUrl;
     document.getElementById('modal-edit').classList.remove('hidden');
 }
 function openPreview(judul, konten, gambar) {
