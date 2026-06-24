@@ -96,7 +96,7 @@
     <div class="overflow-x-auto border-b border-gray-200 mb-5">
         <div class="flex min-w-max">
             <button onclick="switchLogistikTab('pemasukan')" id="tab-pemasukan-btn"
-                class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 border-b-2 border-red-600 -mb-px transition">
+                class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-green-600 border-b-2 border-green-600 -mb-px transition">
                 <i class="fa-solid fa-arrow-trend-up text-green-500"></i> Riwayat Pemasukan
             </button>
             <button onclick="switchLogistikTab('pengeluaran')" id="tab-pengeluaran-btn"
@@ -111,23 +111,23 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <h3 class="font-bold text-gray-900">Riwayat Pemasukan</h3>
             <button onclick="document.getElementById('modal-pemasukan').classList.remove('hidden')"
-                class="bg-red-600 hover:bg-red-700 text-white rounded-full px-4 py-2 text-xs font-semibold flex items-center justify-center gap-1.5 transition w-full sm:w-auto">
+                class="bg-green-600 hover:bg-green-700 text-white rounded-full px-4 py-2 text-xs font-semibold flex items-center justify-center gap-1.5 transition w-full sm:w-auto">
                 <i class="fa-solid fa-plus"></i> Tambah Pemasukan
             </button>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[500px]">
-                <thead class="bg-gray-50">
+                <thead class="bg-green-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Tanggal</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Jumlah</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Keterangan</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-green-700">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-green-700">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-green-700">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($riwayatMasuk as $r)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-green-50">
                         <td class="px-4 py-3 text-gray-800 font-medium">{{ $r->tanggal->format('d/m/Y') }}</td>
                         <td class="px-4 py-3 font-semibold text-green-600">+{{ $r->jumlah }} <span class="font-normal text-gray-500">{{ $logistik->itemLogistik->satuan }}</span></td>
                         <td class="px-4 py-3 text-gray-600">{{ $r->keterangan ?? '-' }}</td>
@@ -157,21 +157,21 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[600px]">
-                <thead class="bg-gray-50">
+                <thead class="bg-red-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Tanggal</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Jumlah</th>
                         @if($logistik->itemLogistik->jenisLogistik->nama_jenis_logistik === 'Obat')
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Warga Griya</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Aturan Minum</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Warga Griya</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Aturan Minum</th>
                         @else
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Keterangan</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Keterangan</th>
                         @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($riwayatKeluar as $r)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-red-50">
                         <td class="px-4 py-3 text-gray-800 font-medium">{{ $r->tanggal->format('d/m/Y') }}</td>
                         <td class="px-4 py-3 font-semibold text-red-600">-{{ $r->jumlah }} <span class="font-normal text-gray-500">{{ $logistik->itemLogistik->satuan }}</span></td>
                         @if($logistik->itemLogistik->jenisLogistik->nama_jenis_logistik === 'Obat')
@@ -226,7 +226,7 @@
                 <button type="button" onclick="document.getElementById('modal-pemasukan').classList.add('hidden')"
                     class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-5 py-2 text-sm font-medium transition">Batal</button>
                 <button type="submit"
-                    class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-6 py-2 text-sm transition">Simpan</button>
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg px-6 py-2 text-sm transition">Simpan</button>
             </div>
         </form>
     </div>
@@ -301,16 +301,25 @@ function switchLogistikTab(tab) {
         p.classList.add('hidden');
     });
 
-    document.querySelectorAll('[id^="tab-"][id$="-btn"]').forEach(function(b) {
-        b.classList.remove('font-semibold', 'text-red-600', 'border-red-600');
-        b.classList.add('font-medium', 'text-gray-400', 'border-transparent');
-    });
+    const btnPem = document.getElementById('tab-pemasukan-btn');
+    const btnPen = document.getElementById('tab-pengeluaran-btn');
+
+    btnPem.classList.remove('font-semibold', 'text-green-600', 'border-green-600');
+    btnPem.classList.add('font-medium', 'text-gray-400', 'border-transparent');
+
+    btnPen.classList.remove('font-semibold', 'text-red-600', 'border-red-600');
+    btnPen.classList.add('font-medium', 'text-gray-400', 'border-transparent');
 
     document.getElementById('tab-' + tab).classList.remove('hidden');
 
-    const btn = document.getElementById('tab-' + tab + '-btn');
-    btn.classList.remove('font-medium', 'text-gray-400', 'border-transparent');
-    btn.classList.add('font-semibold', 'text-red-600', 'border-red-600');
+    const activeBtn = document.getElementById('tab-' + tab + '-btn');
+    activeBtn.classList.remove('font-medium', 'text-gray-400', 'border-transparent');
+    
+    if (tab === 'pemasukan') {
+        activeBtn.classList.add('font-semibold', 'text-green-600', 'border-green-600');
+    } else {
+        activeBtn.classList.add('font-semibold', 'text-red-600', 'border-red-600');
+    }
 }
 </script>
 @endpush
