@@ -1020,14 +1020,14 @@
     }
 
     // ── Open Update Sisa Obat Modal ───────────────────────────
-    function openUpdateSisaObat(obatId, currentSisa, currentDate) {
+    function openUpdateSisaObat(obatId, currentSisa, currentDate, updateUrl) {
         const modal = document.getElementById('modal-update-sisa');
         const form = document.getElementById('form-update-sisa');
 
         document.getElementById('input-sisa-terbaru').value = currentSisa;
         document.getElementById('input-tanggal-update').value = currentDate || new Date().toISOString().split('T')[0];
 
-        form.action = '/admin/monitoring/' + wargaBinaanId + '/obat/' + obatId + '/sisa';
+        form.action = updateUrl;
 
         modal.classList.remove('hidden');
     }

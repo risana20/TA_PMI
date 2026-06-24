@@ -115,7 +115,7 @@
                         </form>
 
                         <button
-                            onclick="openTolakModal({{ $kunjungan->id }})"
+                            onclick="openTolakModal({{ $kunjungan->id }}, '{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.reject', $kunjungan) }}')"
                             class="text-red-500 hover:text-red-700 text-xs font-medium">
 
                             Tolak
@@ -228,8 +228,6 @@
                 <form method="POST" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.store') }}" enctype="multipart/form-data">
                     @csrf
 
-                    <input type="hidden" name="nama_pengunjung" value="{{ $kunjungan->user->name ?? $kunjungan->nama_pengunjung }}">
-                    <input type="hidden" name="no_hp" value="{{ auth()->user()->phone }}">
                     <input type="hidden" name="tgl_kunjungan" id="tgl-hidden" value="{{ old('tgl_kunjungan') }}">
 
                     <div class="space-y-5">
@@ -393,8 +391,8 @@
 
 @push('scripts')
 <script>
-function openTolakModal(id) {
-    document.getElementById('form-tolak').action = '/admin/kunjungan/' + id + '/reject';
+function openTolakModal(id, url) {
+    document.getElementById('form-tolak').action = url;
     document.getElementById('modal-tolak').classList.remove('hidden');
 }
 function openSuratModal(url){

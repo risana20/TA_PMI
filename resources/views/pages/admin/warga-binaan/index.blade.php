@@ -165,7 +165,8 @@
                             data-penanggung_jawab="{{ $warga->penanggung_jawab }}"
                             data-kontak_pj="{{ $warga->kontak_pj ?: '-' }}"
                             data-catatan="{{ $warga->catatan }}"
-                            data-kategori="{{ $warga->kategori }}">
+                            data-kategori="{{ $warga->kategori }}"
+                            data-update_url="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.update', $warga) }}">
                             <i class="fa-solid fa-pen"></i>
                         </button>
                         {{-- Hapus: hanya Superadmin --}}
@@ -645,7 +646,7 @@ function openDetailWarga(btn) {
 
 function openEditWarga(btn) {
     const d = btn.dataset;
-    document.getElementById('form-edit').action = '/admin/warga-binaan/' + d.id;
+    document.getElementById('form-edit').action = d.update_url;
     document.getElementById('edit-nik').value              = d.nik;
     document.getElementById('edit-nama').value             = d.nama;
     document.getElementById('edit-tempat_lahir').value     = d.tempat_lahir;
