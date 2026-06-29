@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Monitoring Kesehatan Warga Binaan - {{ $tab }}</title>
+    <title>Laporan Monitoring Kesehatan Warga Binaan - {{ $tab }}</title>
     <style>
         body {
             font-family: 'sans-serif';
@@ -14,23 +14,26 @@
         .header h1 {
             margin: 0;
             font-size: 16px;
+            color: #E4000F;
         }
         .header p {
             margin: 5px 0 0 0;
             font-size: 11px;
-            color: #555;
+            color: #555555;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
         }
         th, td {
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
         thead {
-            background-color: #f2f2f2;
+            background-color: #E4000F;
+            color: #ffffff;
         }
         tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -39,8 +42,13 @@
 </head>
 <body>
     <div class="header">
-        <h1>Monitoring Kesehatan Warga Binaan</h1>
-        <p>Kategori: {{ $tab === 'ODGJ' ? 'Griya PMI Peduli (ODGJ)' : 'Griya PMI Bahagia (Lansia)' }}</p>
+        <h1>Laporan Monitoring Kesehatan Warga Binaan</h1>
+        <p>Kategori: {{ $tab === 'ODGJ' ? 'Griya PMI Peduli (ODGJ)' : ($tab === 'Lansia' ? 'Griya PMI Bahagia (Lansia)' : $tab) }}</p>
+        <div style="margin-top: 10px; font-size: 11px; color: #333; text-align: center;">
+            Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
+            Dicetak Oleh: {{ auth()->user()->name }}<br>
+            Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
+        </div>
     </div>
     <table>
         <thead>

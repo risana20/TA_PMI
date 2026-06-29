@@ -107,6 +107,11 @@ class WargaBinaan extends Model
         return $query->where('kategori', 'Lansia');
     }
 
+    public function scopeLansiaOdgj($query)
+    {
+        return $query->where('kategori', 'Lansia ODGJ');
+    }
+
     public function pengeluaranLogistiks()
     {
         return $this->hasMany(PengeluaranLogistik::class);

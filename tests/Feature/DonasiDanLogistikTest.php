@@ -189,4 +189,97 @@ class DonasiDanLogistikTest extends TestCase
             'sisa' => 9,
         ]);
     }
+
+    public function test_admin_bisa_memfilter_donasi_berdasarkan_status_donasi_dan_status_logistik()
+    {
+        $admin = User::factory()->create([
+            'role_id' => $this->roleAdmin->id,
+            'is_active' => true,
+        ]);
+        $admin->markEmailAsVerified();
+
+        $donatur = User::factory()->create([
+            'role_id' => $this->roleDonatur->id,
+        ]);
+
+        // Donasi 1: Barang, Tunggu Verifikasi, Belum Ditambahkan ke stok
+        $donasi1 = \App\Models\Donasi::create([
+            'user_id' => $donatur->id,
+            'jenis' => 'Barang',
+            'nama_donatur' => 'Donatur A',
+            'status' => 'Tunggu Verifikasi',
+        ]);
+        $pemasukan1 = \App\Models\PemasukanLogistik::create([
+            'user_id' => $donatur->id,
+            'donasi_id' => $donasi1->id,
+            'nama_barang' => 'Kursi Roda A',
+            'jumlah' => 1,
+            'tanggal' => now()->format('Y-m-d'),
+            'kondisi' => 'Baru',
+            'metode_penyerahan' => 'Antar Sendiri',
+            'status' => 'Tunggu Verifikasi',
+        ]);
+
+        // Donasi 2: Barang, Selesai, Sudah Ditambahkan ke stok (stok_logistik_id set)
+        $donasi2 = \App\Models\Donasi::create([
+            'user_id' => $donatur->id,
+            'jenis' => 'Barang',
+            'nama_donatur' => 'Donatur B',
+            'status' => 'Selesai',
+        ]);
+
+        $jenisLogistik = JenisLogistik::create([
+            'nama_jenis_logistik' => 'Barang',
+            'deskripsi' => 'Alat'
+        ]);
+        $itemLogistik = \App\Models\ItemLogistik::create([
+            'jenis_logistik_id' => $jenisLogistik->id,
+            'nama_item' => 'Kursi Roda B',
+            'satuan' => 'Pcs',
+        ]);
+        $stokLogistik = \App\Models\StokLogistik::create([
+            'item_logistik_id' => $itemLogistik->id,
+            'jumlah_saat_ini' => 10,
+            'jumlah_minimum' => 2,
+        ]);
+
+        $pemasukan2 = \App\Models\PemasukanLogistik::create([
+            'stok_logistik_id' => $stokLogistik->id,
+            'user_id' => $donatur->id,
+            'donasi_id' => $donasi2->id,
+            'nama_barang' => 'Kursi Roda B',
+            'jumlah' => 1,
+            'tanggal' => now()->format('Y-m-d'),
+            'kondisi' => 'Baru',
+            'metode_penyerahan' => 'Antar Sendiri',
+            'status' => 'Selesai',
+        ]);
+
+        // Test Filter 1: status_donasi = Selesai
+        $response = $this->actingAs($admin)->get(route('admin.donasi.index', [
+            'tab' => 'Barang',
+            'status_donasi' => 'Selesai',
+        ]));
+        $response->assertStatus(200);
+        $response->assertSee('Donatur B');
+        $response->assertDontSee('Donatur A');
+
+        // Test Filter 2: status_logistik = Sudah
+        $response = $this->actingAs($admin)->get(route('admin.donasi.index', [
+            'tab' => 'Barang',
+            'status_logistik' => 'Sudah',
+        ]));
+        $response->assertStatus(200);
+        $response->assertSee('Donatur B');
+        $response->assertDontSee('Donatur A');
+
+        // Test Filter 3: status_logistik = Belum
+        $response = $this->actingAs($admin)->get(route('admin.donasi.index', [
+            'tab' => 'Barang',
+            'status_logistik' => 'Belum',
+        ]));
+        $response->assertStatus(200);
+        $response->assertSee('Donatur A');
+        $response->assertDontSee('Donatur B');
+    }
 }

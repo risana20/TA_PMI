@@ -26,6 +26,8 @@ class DonasiController extends Controller
 
         $tab    = $request->get('tab', 'Uang');
         $search = $request->get('search');
+        $statusDonasi = $request->get('status_donasi');
+        $statusLogistik = $request->get('status_logistik');
 
         $query = Donasi::with(['user', 'donasiUang', 'donasiMakanan', 'pemasukanLogistik.stokLogistik.itemLogistik'])
                     ->where('jenis', $tab)
@@ -34,9 +36,33 @@ class DonasiController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama_donatur', 'like', "%{$search}%");
-                // For a more comprehensive search, we would join the tables, 
-                // but keeping it simple for the main donatur name.
             });
+        }
+
+        if ($statusDonasi) {
+            $query->where('status', $statusDonasi);
+        }
+
+        if ($statusLogistik && $tab !== 'Uang') {
+            if ($tab === 'Barang') {
+                if ($statusLogistik === 'Sudah') {
+                    $query->whereHas('pemasukanLogistik', function ($q) {
+                        $q->whereNotNull('stok_logistik_id');
+                    });
+                } elseif ($statusLogistik === 'Belum') {
+                    $query->where(function ($q) {
+                        $q->whereHas('pemasukanLogistik', function ($sub) {
+                            $sub->whereNull('stok_logistik_id');
+                        })->orWhereDoesntHave('pemasukanLogistik');
+                    });
+                }
+            } elseif ($tab === 'Makanan') {
+                if ($statusLogistik === 'Sudah') {
+                    $query->whereHas('pemasukanLogistik');
+                } elseif ($statusLogistik === 'Belum') {
+                    $query->whereDoesntHave('pemasukanLogistik');
+                }
+            }
         }
 
         $donasis = $query->paginate(10)->withQueryString();
@@ -60,6 +86,8 @@ class DonasiController extends Controller
     {
         $tab    = $request->get('tab', 'Uang');
         $search = $request->get('search');
+        $statusDonasi = $request->get('status_donasi');
+        $statusLogistik = $request->get('status_logistik');
 
         $query = Donasi::with(['user', 'donasiUang', 'donasiMakanan', 'pemasukanLogistik.stokLogistik.itemLogistik'])
                     ->where('jenis', $tab)
@@ -69,10 +97,36 @@ class DonasiController extends Controller
             $query->where('nama_donatur', 'like', "%{$search}%");
         }
 
+        if ($statusDonasi) {
+            $query->where('status', $statusDonasi);
+        }
+
+        if ($statusLogistik && $tab !== 'Uang') {
+            if ($tab === 'Barang') {
+                if ($statusLogistik === 'Sudah') {
+                    $query->whereHas('pemasukanLogistik', function ($q) {
+                        $q->whereNotNull('stok_logistik_id');
+                    });
+                } elseif ($statusLogistik === 'Belum') {
+                    $query->where(function ($q) {
+                        $q->whereHas('pemasukanLogistik', function ($sub) {
+                            $sub->whereNull('stok_logistik_id');
+                        })->orWhereDoesntHave('pemasukanLogistik');
+                    });
+                }
+            } elseif ($tab === 'Makanan') {
+                if ($statusLogistik === 'Sudah') {
+                    $query->whereHas('pemasukanLogistik');
+                } elseif ($statusLogistik === 'Belum') {
+                    $query->whereDoesntHave('pemasukanLogistik');
+                }
+            }
+        }
+
         $donasis = $query->get();
 
         $pdf = Pdf::loadView('pages.admin.donasi.export_pdf', compact('donasis', 'tab'));
-        $fileName = 'Data_Donasi_' . $tab . '.pdf';
+        $fileName = 'Laporan Data Donasi - ' . $tab . '.pdf';
 
         return $pdf->download($fileName);
     }
@@ -81,9 +135,11 @@ class DonasiController extends Controller
     {
         $tab    = $request->get('tab', 'Uang');
         $search = $request->get('search');
+        $statusDonasi = $request->get('status_donasi');
+        $statusLogistik = $request->get('status_logistik');
 
-        $fileName = 'Data_Donasi_' . $tab . '.xlsx';
-        return Excel::download(new DonasiExport($tab, $search), $fileName);
+        $fileName = 'Laporan Data Donasi - ' . $tab . '.xlsx';
+        return Excel::download(new DonasiExport($tab, $search, $statusDonasi, $statusLogistik), $fileName);
     }
 
     public function store(Request $request)

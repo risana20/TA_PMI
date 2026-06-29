@@ -350,7 +350,7 @@ class MonitoringController extends Controller
         $wargaBinaans = $query->latest()->get();
         
         $pdf = Pdf::loadView('pages.admin.monitoring.export_warga_pdf', compact('wargaBinaans', 'tab'));
-        $fileName = 'monitoring-warga-binaan-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.pdf';
+        $fileName = 'Laporan Monitoring Kesehatan Warga Binaan - ' . $tab . '.pdf';
         
         return $pdf->download($fileName);
     }
@@ -360,7 +360,7 @@ class MonitoringController extends Controller
         $tab = $request->get('tab', 'ODGJ');
         $search = $request->get('search');
         
-        $fileName = 'monitoring-warga-binaan-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.xlsx';
+        $fileName = 'Laporan Monitoring Kesehatan Warga Binaan - ' . $tab . '.xlsx';
         return Excel::download(new WargaBinaanExport($tab, 'Aktif', $search), $fileName);
     }
 
@@ -369,14 +369,14 @@ class MonitoringController extends Controller
         $riwayat = $wargaBinaan->monitoringKesehatans()->with('riwayatPenyakits')->latest()->get();
         
         $pdf = Pdf::loadView('pages.admin.monitoring.export_pemeriksaan_pdf', compact('wargaBinaan', 'riwayat'));
-        $fileName = 'pemeriksaan-kesehatan-' . strtolower(str_replace(' ', '-', $wargaBinaan->nama)) . '-' . now()->format('Ymd_His') . '.pdf';
+        $fileName = 'Laporan Pemeriksaan Kesehatan - ' . $wargaBinaan->nama . '.pdf';
         
         return $pdf->download($fileName);
     }
 
     public function exportPemeriksaanExcel(WargaBinaan $wargaBinaan)
     {
-        $fileName = 'pemeriksaan-kesehatan-' . strtolower(str_replace(' ', '-', $wargaBinaan->nama)) . '-' . now()->format('Ymd_His') . '.xlsx';
+        $fileName = 'Laporan Pemeriksaan Kesehatan - ' . $wargaBinaan->nama . '.xlsx';
         return Excel::download(new PemeriksaanKesehatanExport($wargaBinaan), $fileName);
     }
 }

@@ -64,19 +64,30 @@ class PemeriksaanKesehatanExport implements FromCollection, WithHeadings, WithSt
 
     public function headings(): array
     {
+        $user = auth()->user();
+        $role = $user->hasRole('superadmin') ? 'Superadmin' : 'Admin';
+        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
+
         return [
-            'No',
-            'Tanggal',
-            'Frek. Napas',
-            'Tekanan Darah',
-            'Suhu',
-            'Nadi',
-            'SPO₂',
-            'BB / TB',
-            'Riwayat Penyakit',
-            'Keluhan',
-            'Tindakan',
-            'Catatan',
+            ['Informasi Cetak'],
+            ['Tanggal Cetak', $tanggalCetak],
+            ['Dicetak Oleh', $user->name],
+            ['Role', $role],
+            [], // spacer row
+            [
+                'No',
+                'Tanggal',
+                'Frek. Napas',
+                'Tekanan Darah',
+                'Suhu',
+                'Nadi',
+                'SPO₂',
+                'BB / TB',
+                'Riwayat Penyakit',
+                'Keluhan',
+                'Tindakan',
+                'Catatan',
+            ]
         ];
     }
 
@@ -84,9 +95,12 @@ class PemeriksaanKesehatanExport implements FromCollection, WithHeadings, WithSt
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        $range = 'A1:' . $highestColumn . $highestRow;
+        
+        $sheet->mergeCells('A1:B1');
+        
+        $range = 'A6:' . $highestColumn . $highestRow;
 
-        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
+        $sheet->getStyle('A6:' . $highestColumn . '6')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFFFF'],
@@ -113,6 +127,13 @@ class PemeriksaanKesehatanExport implements FromCollection, WithHeadings, WithSt
             'alignment' => [
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
+        ]);
+
+        // Style the print info
+        $sheet->getStyle('A1:A4')->applyFromArray([
+            'font' => [
+                'bold' => true,
+            ]
         ]);
 
         return [];

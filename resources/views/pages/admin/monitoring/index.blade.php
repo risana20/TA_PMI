@@ -23,7 +23,7 @@
 </div>
 
 {{-- Tab Pill --}}
-<div class="bg-gray-100 p-1 rounded-xl flex flex-col sm:inline-flex sm:flex-row gap-1 mb-4 w-full sm:w-auto">
+<div class="bg-gray-100 p-1 rounded-xl flex flex-col sm:inline-flex sm:flex-row gap-1 mb-4 w-full sm:w-auto flex-wrap">
     <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'monitoring.index', array_merge(request()->except('tab', 'page'), ['tab' => 'ODGJ'])) }}"
         class="px-5 py-2 rounded-lg text-sm font-medium transition text-center
                {{ $tab === 'ODGJ' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
@@ -33,6 +33,11 @@
         class="px-5 py-2 rounded-lg text-sm font-medium transition text-center
                {{ $tab === 'Lansia' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
         Griya PMI Bahagia (Lansia)
+    </a>
+    <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'monitoring.index', array_merge(request()->except('tab', 'page'), ['tab' => 'Lansia ODGJ'])) }}"
+        class="px-5 py-2 rounded-lg text-sm font-medium transition text-center
+               {{ $tab === 'Lansia ODGJ' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
+        Lansia ODGJ
     </a>
 </div>
 

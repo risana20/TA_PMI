@@ -77,17 +77,28 @@ class WargaBinaanExport extends DefaultValueBinder implements FromCollection, Wi
 
     public function headings(): array
     {
+        $user = auth()->user();
+        $role = $user->hasRole('superadmin') ? 'Superadmin' : 'Admin';
+        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
+
         return [
-            'NIK',
-            'Nama',
-            'Tempat Lahir',
-            'Tanggal Lahir',
-            'Jenis Kelamin',
-            'Kategori',
-            'Status',
-            'Tanggal Masuk',
-            'No. BPJS',
-            'Penanggung Jawab'
+            ['Informasi Cetak'],
+            ['Tanggal Cetak', $tanggalCetak],
+            ['Dicetak Oleh', $user->name],
+            ['Role', $role],
+            [], // spacer row
+            [
+                'NIK',
+                'Nama',
+                'Tempat Lahir',
+                'Tanggal Lahir',
+                'Jenis Kelamin',
+                'Kategori',
+                'Status',
+                'Tanggal Masuk',
+                'No. BPJS',
+                'Penanggung Jawab'
+            ]
         ];
     }
 
@@ -95,9 +106,12 @@ class WargaBinaanExport extends DefaultValueBinder implements FromCollection, Wi
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        $range = 'A1:' . $highestColumn . $highestRow;
+        
+        $sheet->mergeCells('A1:B1');
+        
+        $range = 'A6:' . $highestColumn . $highestRow;
 
-        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
+        $sheet->getStyle('A6:' . $highestColumn . '6')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFFFF'],
@@ -105,7 +119,7 @@ class WargaBinaanExport extends DefaultValueBinder implements FromCollection, Wi
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                 'startColor' => [
-                    'argb' => 'FF4CAF50',
+                    'argb' => 'FFE4000F', // Brand Red PMI
                 ],
             ],
             'alignment' => [
@@ -124,6 +138,13 @@ class WargaBinaanExport extends DefaultValueBinder implements FromCollection, Wi
             'alignment' => [
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
+        ]);
+
+        // Style the print info
+        $sheet->getStyle('A1:A4')->applyFromArray([
+            'font' => [
+                'bold' => true,
+            ]
         ]);
 
         return [];

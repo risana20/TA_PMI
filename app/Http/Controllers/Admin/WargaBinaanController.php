@@ -54,7 +54,7 @@ class WargaBinaanController extends Controller
         $wargaBinaans = WargaBinaan::where('kategori', $tab)->latest()->get();
 
         $pdf = Pdf::loadView('pages.admin.warga-binaan.export_pdf', compact('wargaBinaans', 'tab'));
-        $fileName = 'warga-binaan-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.pdf';
+        $fileName = 'Laporan Data Warga Binaan - ' . $tab . '.pdf';
 
         return $pdf->download($fileName);
     }
@@ -63,21 +63,41 @@ class WargaBinaanController extends Controller
     public function exportExcel(Request $request)
     {
         $tab = $request->get('tab', 'ODGJ');
-        $fileName = 'warga-binaan-' . strtolower($tab) . '-' . now()->format('Ymd_His') . '.xlsx';
+        $fileName = 'Laporan Data Warga Binaan - ' . $tab . '.xlsx';
         return Excel::download(new WargaBinaanExport($tab), $fileName);
     }
     
     //tambah warga
     public function store(Request $request)
     {
+        // Auto-categorize ODGJ >= 60 to Lansia ODGJ
+        $tglLahir = $request->input('tgl_lahir');
+        if ($tglLahir) {
+            $age = \Carbon\Carbon::parse($tglLahir)->age;
+            if ($request->input('kategori') === 'ODGJ' && $age >= 60) {
+                $request->merge(['kategori' => 'Lansia ODGJ']);
+            }
+        }
+
         $data = $request->validate([
             'nik'             => 'required|string|max:16|unique:warga_binaans',
             'nama'            => 'required|string|max:255',
             'tempat_lahir'    => 'required|string',
-            'tgl_lahir'       => 'required|date',
+            'tgl_lahir'       => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('kategori') === 'Lansia ODGJ') {
+                        $age = \Carbon\Carbon::parse($value)->age;
+                        if ($age < 60) {
+                            $fail('Umur warga binaan pada kategori Lansia ODGJ harus 60 tahun ke atas.');
+                        }
+                    }
+                }
+            ],
             'alamat'          => 'required|string',
             'jenis_kelamin'   => 'required|in:L,P',
-            'kategori'        => 'required|in:ODGJ,Lansia',
+            'kategori'        => 'required|in:ODGJ,Lansia,Lansia ODGJ',
             'status'          => 'required|in:Aktif,Selesai Pembinaan,Meninggal,Kabur',
             'tgl_masuk'       => 'required|date',
             'no_bpjs'         => 'nullable|string|max:13',
@@ -103,14 +123,34 @@ class WargaBinaanController extends Controller
     // update data
     public function update(Request $request, WargaBinaan $wargaBinaan)
     {
+        // Auto-categorize ODGJ >= 60 to Lansia ODGJ
+        $tglLahir = $request->input('tgl_lahir');
+        if ($tglLahir) {
+            $age = \Carbon\Carbon::parse($tglLahir)->age;
+            if ($request->input('kategori') === 'ODGJ' && $age >= 60) {
+                $request->merge(['kategori' => 'Lansia ODGJ']);
+            }
+        }
+
         $data = $request->validate([
             'nik'             => 'required|string|max:16|regex:/^[0-9]+$/|unique:warga_binaans,nik,' . $wargaBinaan->id,
             'nama'            => 'required|string|max:255',
             'tempat_lahir'    => 'required|string',
-            'tgl_lahir'       => 'required|date',
+            'tgl_lahir'       => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('kategori') === 'Lansia ODGJ') {
+                        $age = \Carbon\Carbon::parse($value)->age;
+                        if ($age < 60) {
+                            $fail('Umur warga binaan pada kategori Lansia ODGJ harus 60 tahun ke atas.');
+                        }
+                    }
+                }
+            ],
             'alamat'          => 'required|string',
             'jenis_kelamin'   => 'required|in:L,P',
-            'kategori'        => 'required|in:ODGJ,Lansia',
+            'kategori'        => 'required|in:ODGJ,Lansia,Lansia ODGJ',
             'status'          => 'required|in:Aktif,Selesai Pembinaan,Meninggal,Kabur',
             'tgl_masuk'       => 'required|date',
             'no_bpjs'         => 'nullable|string|max:13|regex:/^[0-9]+$/',

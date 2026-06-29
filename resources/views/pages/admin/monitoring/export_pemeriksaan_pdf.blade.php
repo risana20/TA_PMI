@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Riwayat Pemeriksaan Kesehatan - {{ $wargaBinaan->nama }}</title>
+    <title>Laporan Pemeriksaan Kesehatan - {{ $wargaBinaan->nama }}</title>
     <style>
         body {
             font-family: 'sans-serif';
@@ -18,23 +18,26 @@
         .header h1 {
             margin: 0;
             font-size: 16px;
+            color: #E4000F;
         }
         .header p {
             margin: 5px 0 0 0;
             font-size: 11px;
-            color: #555;
+            color: #555555;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
         }
         th, td {
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             padding: 5px;
             text-align: left;
         }
         thead {
-            background-color: #f2f2f2;
+            background-color: #E4000F;
+            color: #ffffff;
         }
         tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -43,8 +46,13 @@
 </head>
 <body>
     <div class="header">
-        <h1>Riwayat Pemeriksaan Kesehatan Warga Binaan</h1>
+        <h1>Laporan Pemeriksaan Kesehatan Warga Binaan</h1>
         <p>Nama: {{ $wargaBinaan->nama }} ({{ $wargaBinaan->nik }}) | Kategori: {{ $wargaBinaan->kategori }}</p>
+        <div style="margin-top: 10px; font-size: 11px; color: #333; text-align: center;">
+            Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
+            Dicetak Oleh: {{ auth()->user()->name }}<br>
+            Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
+        </div>
     </div>
     <table>
         <thead>

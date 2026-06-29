@@ -32,18 +32,57 @@
 
 {{-- Toolbar --}}
 <div class="flex flex-wrap items-center justify-between gap-3 mb-4 w-full">
-    <form method="GET" action="{{ route(request()->segment(1) . '.' . 'donasi.index') }}" class="flex items-center gap-3 flex-1 w-full sm:flex-initial">
+    <form method="GET" action="{{ route(request()->segment(1) . '.' . 'donasi.index') }}" id="filterForm" class="flex flex-wrap items-center gap-3 flex-1 w-full sm:w-auto">
         <input type="hidden" name="tab" value="{{ $tab }}">
-        <div class="relative w-full sm:w-auto">
+        
+        {{-- Search --}}
+        <div class="relative w-full sm:w-64">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
             <input type="text"
                 name="search"
                 value="{{ request('search') }}"
                 placeholder="Cari nama donatur..."
-                class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-red-500">
+                class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-full focus:outline-none focus:ring-2 focus:ring-red-500">
         </div>
+
+        {{-- Filter Status Donasi --}}
+        <div class="relative w-full sm:w-auto">
+            <select 
+                name="status_donasi"
+                id="statusDonasiFilter"
+                class="border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-red-500 bg-white text-gray-600 w-full sm:w-auto">
+                <option value="">Semua Status Donasi</option>
+                <option value="Tunggu Verifikasi" {{ request('status_donasi') == 'Tunggu Verifikasi' ? 'selected' : '' }}>Tunggu Verifikasi</option>
+                @if($tab !== 'Uang')
+                <option value="Menunggu Pengiriman" {{ request('status_donasi') == 'Menunggu Pengiriman' ? 'selected' : '' }}>Menunggu Pengiriman</option>
+                <option value="Menunggu Donasi Dijemput Petugas" {{ request('status_donasi') == 'Menunggu Donasi Dijemput Petugas' ? 'selected' : '' }}>Menunggu Jemputan</option>
+                @endif
+                <option value="Selesai" {{ request('status_donasi') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                <option value="Donasi Ditolak" {{ request('status_donasi') == 'Donasi Ditolak' ? 'selected' : '' }}>Ditolak</option>
+            </select>
+            <span class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-gray-400">
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+            </span>
+        </div>
+
+        {{-- Filter Status Logistik --}}
+        @if($tab !== 'Uang')
+        <div class="relative w-full sm:w-auto">
+            <select 
+                name="status_logistik"
+                id="statusLogistikFilter"
+                class="border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-red-500 bg-white text-gray-600 w-full sm:w-auto">
+                <option value="">Semua Status Logistik</option>
+                <option value="Sudah" {{ request('status_logistik') == 'Sudah' ? 'selected' : '' }}>Sudah Ditambahkan</option>
+                <option value="Belum" {{ request('status_logistik') == 'Belum' ? 'selected' : '' }}>Belum Ditambahkan</option>
+            </select>
+            <span class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-gray-400">
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+            </span>
+        </div>
+        @endif
     </form>
-    <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:ml-auto">
+    <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:ml-auto w-full sm:w-auto">
         <a href="{{ route(request()->segment(1) . '.' . 'donasi.index', ['export' => 'pdf'] + request()->query()) }}"
             class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition shadow-sm">
             <i class="fa-solid fa-download"></i> Ekspor PDF
@@ -515,6 +554,21 @@ if (searchInput) {
         timer = setTimeout(() => {
             this.form.submit();
         }, 500);
+    });
+}
+
+const statusDonasiFilter = document.getElementById('statusDonasiFilter');
+const statusLogistikFilter = document.getElementById('statusLogistikFilter');
+
+if (statusDonasiFilter) {
+    statusDonasiFilter.addEventListener('change', function () {
+        this.form.submit();
+    });
+}
+
+if (statusLogistikFilter) {
+    statusLogistikFilter.addEventListener('change', function () {
+        this.form.submit();
     });
 }
 

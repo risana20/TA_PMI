@@ -15,11 +15,15 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
 {
     protected $tab;
     protected $search;
+    protected $statusDonasi;
+    protected $statusLogistik;
 
-    public function __construct($tab = 'Uang', $search = null)
+    public function __construct($tab = 'Uang', $search = null, $statusDonasi = null, $statusLogistik = null)
     {
-        $this->tab    = $tab;
-        $this->search = $search;
+        $this->tab            = $tab;
+        $this->search         = $search;
+        $this->statusDonasi   = $statusDonasi;
+        $this->statusLogistik = $statusLogistik;
     }
 
     public function collection()
@@ -30,6 +34,32 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
 
         if ($this->search) {
             $query->where('nama_donatur', 'like', "%{$this->search}%");
+        }
+
+        if ($this->statusDonasi) {
+            $query->where('status', $this->statusDonasi);
+        }
+
+        if ($this->statusLogistik && $this->tab !== 'Uang') {
+            if ($this->tab === 'Barang') {
+                if ($this->statusLogistik === 'Sudah') {
+                    $query->whereHas('pemasukanLogistik', function ($q) {
+                        $q->whereNotNull('stok_logistik_id');
+                    });
+                } elseif ($this->statusLogistik === 'Belum') {
+                    $query->where(function ($q) {
+                        $q->whereHas('pemasukanLogistik', function ($sub) {
+                            $sub->whereNull('stok_logistik_id');
+                        })->orWhereDoesntHave('pemasukanLogistik');
+                    });
+                }
+            } elseif ($this->tab === 'Makanan') {
+                if ($this->statusLogistik === 'Sudah') {
+                    $query->whereHas('pemasukanLogistik');
+                } elseif ($this->statusLogistik === 'Belum') {
+                    $query->whereDoesntHave('pemasukanLogistik');
+                }
+            }
         }
 
         $data = $query->get();
