@@ -30,24 +30,30 @@ class KunjunganUserController extends Controller
         $data = $request->validate([
             'nama_pengunjung'   => 'required|string|max:255',
             'no_hp'             => 'required|string|digits_between:10,12',
-            // 'jenis_kunjungan'   => 'required|string',
-            // 'nama_kunjungan'    => 'required|string',
             'tujuan'            => 'required|string',
             'instansi'          => 'required|nullable|string|max:255',
             'tgl_kunjungan'     => 'required|date|after_or_equal:today',
             'jam'               => 'required',
-            
-            // 'jumlah_pengunjung' => 'required|integer|min:1',
             'surat_pengajuan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        if ($request->tanggal == now()->toDateString() && $request->jam <= now()->format('H:i')) {
-            return back()->withErrors([
-                'jam' => 'Jam sudah lewat'
-            ]);
+        // Pastikan jam kunjungan pada hari ini belum terlewati
+        if ($request->tgl_kunjungan == now()->toDateString()) {
+            if ($this->getSessionStartTime($request->jam) <= now()->format('H:i')) {
+                return back()->withErrors([
+                    'jam' => 'Waktu sesi kunjungan sudah terlewat untuk hari ini.'
+                ])->withInput();
+            }
         }
 
-        if(in_array($request->tujuan, ['Penelitian','Kerjasama','Magang/PKL'])){
+        // Pastikan sesi kunjungan belum dipesan/disetujui oleh orang lain
+        if ($this->isSessionBooked($request->tgl_kunjungan, $request->jam)) {
+            return back()->withErrors([
+                'jam' => 'Sesi kunjungan pada tanggal tersebut sudah terisi.'
+            ])->withInput();
+        }
+
+        if (in_array($request->tujuan, ['Penelitian', 'Kerjasama', 'Magang/PKL'])) {
             $request->validate([
                 'instansi' => 'required',
                 'surat_pengajuan' => 'required'
@@ -60,9 +66,77 @@ class KunjunganUserController extends Controller
 
         $data['user_id'] = Auth::id();
         $data['status'] = 'Proses';
+        $data['jam'] = $this->getSessionStartTime($request->jam);
         Kunjungan::create($data);
 
         return redirect()->route('cek-status.index')
-        ->with('success', 'Pengajuan kunjungan berhasil dikirim.');
+            ->with('success', 'Pengajuan kunjungan berhasil dikirim.');
+    }
+
+    private function isSessionBooked($date, $selectedJam)
+    {
+        $visits = Kunjungan::whereDate('tgl_kunjungan', $date)
+            ->where('status', 'DISETUJUI')
+            ->get();
+
+        $selectedSession = $this->mapStringToSession($selectedJam);
+        if (!$selectedSession) {
+            return false;
+        }
+
+        foreach ($visits as $v) {
+            if ($this->mapStringToSession($v->jam) === $selectedSession) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function mapStringToSession($jamStr)
+    {
+        if (!$jamStr) return null;
+        $jamStr = trim($jamStr);
+
+        if (stripos($jamStr, 'Sesi 1') !== false) return 'Sesi 1';
+        if (stripos($jamStr, 'Sesi 2') !== false) return 'Sesi 2';
+        if (stripos($jamStr, 'Sesi 3') !== false) return 'Sesi 3';
+        if (stripos($jamStr, 'Sesi 4') !== false) return 'Sesi 4';
+        if (stripos($jamStr, 'Sesi 5') !== false) return 'Sesi 5';
+
+        // Fallback mapping untuk format jam lama (misal: "10:00:00")
+        $normalized = str_replace('.', ':', $jamStr);
+        if (preg_match('/(\d{2}):(\d{2})/', $normalized, $matches)) {
+            $hour = (int)$matches[1];
+            $min = (int)$matches[2];
+            $totalMinutes = $hour * 60 + $min;
+
+            if ($totalMinutes >= 480 && $totalMinutes < 570) return 'Sesi 1';
+            if ($totalMinutes >= 570 && $totalMinutes < 660) return 'Sesi 2';
+            if ($totalMinutes >= 660 && $totalMinutes < 780) return 'Sesi 3';
+            if ($totalMinutes >= 780 && $totalMinutes < 870) return 'Sesi 4';
+            if ($totalMinutes >= 870 && $totalMinutes <= 990) return 'Sesi 5';
+        }
+
+        return null;
+    }
+
+    private function getSessionStartTime($jamStr)
+    {
+        if (!$jamStr) return '00:00';
+        $jamStr = trim($jamStr);
+
+        if (stripos($jamStr, 'Sesi 1') !== false) return '08:00';
+        if (stripos($jamStr, 'Sesi 2') !== false) return '09:30';
+        if (stripos($jamStr, 'Sesi 3') !== false) return '11:00';
+        if (stripos($jamStr, 'Sesi 4') !== false) return '13:00';
+        if (stripos($jamStr, 'Sesi 5') !== false) return '14:30';
+
+        $normalized = str_replace('.', ':', $jamStr);
+        if (preg_match('/(\d{2}):(\d{2})/', $normalized, $matches)) {
+            return $matches[1] . ':' . $matches[2];
+        }
+
+        return '00:00';
     }
 }

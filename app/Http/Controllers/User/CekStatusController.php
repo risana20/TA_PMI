@@ -18,8 +18,14 @@ class CekStatusController extends Controller
         $donasiMakanan = Donasi::where('user_id', $userId)->where('jenis', 'Makanan')->latest()->get();
         $kunjungan     = Kunjungan::where('user_id', $userId)->latest()->get();
 
+        // Fetch all approved visits from today onwards
+        $jadwalDisetujui = Kunjungan::where('status', 'DISETUJUI')
+                            ->whereDate('tgl_kunjungan', '>=', today())
+                            ->orderBy('tgl_kunjungan')
+                            ->get();
+
         return view('pages.user.cek-status', compact(
-            'donasiUang', 'donasiBarang', 'donasiMakanan', 'kunjungan'
+            'donasiUang', 'donasiBarang', 'donasiMakanan', 'kunjungan', 'jadwalDisetujui'
         ));
     }
 }

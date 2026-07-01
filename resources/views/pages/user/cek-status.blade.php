@@ -134,7 +134,7 @@
                         <h2 class="font-bold text-gray-900">Riwayat Donasi Barang</h2>
                         <p class="text-xs text-gray-400 mt-0.5">Status pengajuan donasi barang Anda</p>
                     </div>
-                    <button onclick="document.getElementById('modal-tambah').classList.remove('hidden')"
+                    <button onclick="openModal()"
                         class="inline-flex items-center bg-white text-red-600 rounded-full px-5 py-2 font-semibold text-sm hover:bg-red-400 hover:text-white gap-2 transition ">
                         <i class="fa-solid fa-arrow-right"></i> Ajukan Kunjungan
                     </button>
@@ -298,7 +298,7 @@
                             <p class="text-xs text-gray-400 mt-0.5">Status pengajuan kunjungan Anda</p>
                         </div>
                     </div>
-                    <button onclick="document.getElementById('modal-tambah').classList.remove('hidden')"
+                    <button onclick="openModal()"
                         class="inline-flex items-center bg-white text-red-600 rounded-full px-5 py-2 font-semibold text-sm hover:bg-red-400 hover:text-white gap-2 transition ">
                         <i class="fa-solid fa-arrow-right"></i> Ajukan Kunjungan
                     </button>
@@ -337,7 +337,7 @@
                                 <td class="px-5 py-4 text-gray-600">
                                     {{ \Carbon\Carbon::parse($k->tgl_kunjungan)->format('d M Y') }}
                                 </td>
-                                <td class="px-5 py-4 text-gray-600">{{ $k->jam }}</td>
+                                <td class="px-5 py-4 text-gray-600">{{ $k->formatted_jam }}</td>
                                 <td class="px-5 py-4">
                                     @include('components.badge-kunjungan', ['status' => $k->status])
                                 </td>
@@ -382,7 +382,6 @@
 
                 <input type="hidden" name="nama_pengunjung" value="{{ auth()->user()->name }}">
                 <input type="hidden" name="no_hp" value="{{ auth()->user()->phone }}">
-                <input type="hidden" name="tgl_kunjungan" id="tgl-hidden" value="{{ old('tgl_kunjungan') }}">
 
                 <div class="space-y-5">
                 {{-- Nama Pengunjung --}}
@@ -464,29 +463,26 @@
 
                                 <input type="date"
                                     id="tgl-picker"
-                                    required
-                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                                    >
+                                    name="tgl_kunjungan"
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
+                                    min="{{ date('Y-m-d') }}"
+                                    required>
                             </div>
 
                             {{-- Jam --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Jam Kunjungan
+                                    Sesi Kunjungan
                                 </label>
 
-                                <select name="jam" required
-                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
-
-                                    <option value="">Pilih jam...</option>
-                                    <option value="09:00">09.00 WIB</option>
-                                    <option value="10:00">10.00 WIB</option>
-                                    <option value="11:00">11.00 WIB</option>
-                                    <option value="13:00">13.00 WIB</option>
-                                    <option value="14:00">14.00 WIB</option>
-                                    <option value="15:00">15.00 WIB</option>
-                                    <option value="16:00">16.00 WIB</option>
-
+                                <select name="jam" id="jam-select" required
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+                                    <option value="">Pilih Sesi...</option>
+                                    <option value="Sesi 1: 08.00-09.30">Sesi 1: 08.00-09.30</option>
+                                    <option value="Sesi 2: 09.30-11.00">Sesi 2: 09.30-11.00</option>
+                                    <option value="Sesi 3: 11.00-12.30">Sesi 3: 11.00-12.30</option>
+                                    <option value="Sesi 4: 13.00-14.30">Sesi 4: 13.00-14.30</option>
+                                    <option value="Sesi 5: 14.30-16.00">Sesi 5: 14.30-16.00</option>
                                 </select>
                             </div>
 
@@ -498,8 +494,7 @@
 
                             <p class="text-sm text-red-700">
                                 <span class="font-semibold">Informasi:</span>
-                                Jam operasional kunjungan adalah
-                                <span class="font-semibold">09:00 – 16:00 WIB</span>.
+                                Jam operasional kunjungan dibagi menjadi 5 sesi per hari mulai dari <span class="font-semibold">08:00 – 16:00 WIB</span> dengan 1 sesi istirahat.
                             </p>
                         </div>
 
@@ -522,6 +517,8 @@
 
 @push('scripts')
 <script>
+const dbJadwalDisetujui = @json($jadwalDisetujui);
+
 function switchMain(tab) {
     const panels = ['donasi', 'kunjungan'];
     panels.forEach(p => {
@@ -533,7 +530,7 @@ function switchMain(tab) {
         // Sync icon color
         const icon = btn.querySelector('i');
         if (p === tab) {
-            icon.classList.replace('text-gray-400', p === 'donasi' ? 'text-red-500' : 'text-red-500');
+            icon.classList.replace('text-gray-400', 'text-red-500');
         } else {
             icon.classList.remove('text-red-500');
             icon.classList.add('text-gray-400');
@@ -549,6 +546,155 @@ function switchSub(sub) {
         btn.classList.toggle('active',   s === sub);
         btn.classList.toggle('inactive', s !== sub);
     });
+}
+
+function formatYYYYMMDD(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function getVisitDateString(visit) {
+    if (!visit.tgl_kunjungan) return "";
+    return visit.tgl_kunjungan.split('T')[0].split(' ')[0];
+}
+
+function mapJamToSession(jamStr) {
+    if (!jamStr) return null;
+    jamStr = jamStr.trim();
+    if (jamStr.toLowerCase().startsWith('sesi 1')) return 'Sesi 1';
+    if (jamStr.toLowerCase().startsWith('sesi 2')) return 'Sesi 2';
+    if (jamStr.toLowerCase().startsWith('sesi 3')) return 'Sesi 3';
+    if (jamStr.toLowerCase().startsWith('sesi 4')) return 'Sesi 4';
+    if (jamStr.toLowerCase().startsWith('sesi 5')) return 'Sesi 5';
+
+    let timePart = jamStr.replace('.', ':');
+    let match = timePart.match(/(\d{2}):(\d{2})/);
+    if (!match) return null;
+    let hour = parseInt(match[1]);
+    let min = parseInt(match[2]);
+    let totalMinutes = hour * 60 + min;
+
+    if (totalMinutes >= 480 && totalMinutes < 570) return 'Sesi 1';
+    if (totalMinutes >= 570 && totalMinutes < 660) return 'Sesi 2';
+    if (totalMinutes >= 660 && totalMinutes < 780) return 'Sesi 3';
+    if (totalMinutes >= 780 && totalMinutes < 870) return 'Sesi 4';
+    if (totalMinutes >= 870 && totalMinutes <= 990) return 'Sesi 5';
+
+    return null;
+}
+
+function updateAvailableSessions(dateStr) {
+    const jamSelect = document.getElementById('jam-select');
+    if (!jamSelect) return;
+
+    Array.from(jamSelect.options).forEach(opt => {
+        if (!opt.value) return;
+        opt.disabled = false;
+        opt.textContent = opt.value;
+    });
+
+    if (!dateStr) return;
+
+    const bookedSessions = [];
+    dbJadwalDisetujui.forEach(v => {
+        const vDate = getVisitDateString(v);
+        if (vDate === dateStr) {
+            const sess = mapJamToSession(v.jam);
+            if (sess) bookedSessions.push(sess);
+        }
+    });
+
+    const todayStr = formatYYYYMMDD(new Date());
+    const isToday = (dateStr === todayStr);
+
+    const nowTime = new Date();
+    const currentHour = nowTime.getHours();
+    const currentMin = nowTime.getMinutes();
+    const currentTotalMinutes = currentHour * 60 + currentMin;
+
+    const sessionStartTimes = {
+        'Sesi 1: 08.00-09.30': 480,
+        'Sesi 2: 09.30-11.00': 570,
+        'Sesi 3: 11.00-12.30': 660,
+        'Sesi 4: 13.00-14.30': 780,
+        'Sesi 5: 14.30-16.00': 870,
+    };
+
+    Array.from(jamSelect.options).forEach(opt => {
+        if (!opt.value) return;
+        const optSess = mapJamToSession(opt.value);
+        const startTime = sessionStartTimes[opt.value];
+        const isPassed = isToday && (currentTotalMinutes >= startTime);
+
+        if (bookedSessions.includes(optSess)) {
+            opt.disabled = true;
+            opt.textContent = opt.value + ' (Terisi)';
+        } else if (isPassed) {
+            opt.disabled = true;
+            opt.textContent = opt.value + ' (Sudah Terlewat)';
+        }
+    });
+}
+
+document.getElementById('tgl-picker').addEventListener('change', function() {
+    updateAvailableSessions(this.value);
+});
+
+function initSurat() {
+    const tujuan = document.getElementById('tujuan');
+    const suratInput = document.getElementById('surat-input');
+    const suratLabel = document.getElementById('surat-upload');
+
+    if (!tujuan || !suratInput || !suratLabel) return;
+
+    function updateSurat() {
+        const value = tujuan.value;
+        const aktif = (
+            value === "Penelitian" ||
+            value === "Kerjasama" ||
+            value === "Magang/PKL"
+        );
+
+        if (aktif) {
+            suratInput.disabled = false;
+            suratInput.required = true;
+            suratLabel.classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+            suratInput.disabled = true;
+            suratInput.required = false;
+            suratInput.value = "";
+            suratLabel.classList.add('opacity-50', 'pointer-events-none');
+        }
+    }
+
+    tujuan.addEventListener('change', updateSurat);
+    updateSurat();
+}
+
+function openModal() {
+    const modal = document.getElementById('modal-tambah');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+
+    const tglPicker = document.getElementById('tgl-picker');
+    if (tglPicker) {
+        if (!tglPicker.value) {
+            tglPicker.value = formatYYYYMMDD(new Date());
+        }
+        updateAvailableSessions(tglPicker.value);
+    }
+    initSurat();
+}
+
+function previewSurat(input) {
+    const lbl = document.getElementById('surat-label-text');
+    if (input.files && input.files[0]) {
+        lbl.textContent = input.files[0].name;
+        lbl.classList.remove('text-gray-400');
+        lbl.classList.add('text-gray-700');
+    }
 }
 </script>
 @endpush

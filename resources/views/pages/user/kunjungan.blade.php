@@ -43,44 +43,150 @@
         </div>
         @endif
 
-        {{-- ① Jadwal Disetujui --}}
+        {{-- ① Jadwal Disetujui (Tampilan Kalender & Detail Sesi) --}}
         <div class="bg-white rounded-2xl shadow-lg p-6">
-            <div class="flex items-center gap-3 mb-5">
-                <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-calendar-check text-red-600"></i>
+            <!-- VIEW 1: KALENDER -->
+            <div id="calendar-view" class="block">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-calendar-days text-red-600"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-gray-900">Jadwal Kunjungan Griya PMI</h2>
+                            <p class="text-xs text-gray-400 mt-0.5">Pilih tanggal pada kalender untuk melihat jadwal atau mengajukan kunjungan.</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="font-bold text-gray-900">Jadwal Kunjungan Griya PMI Beberapa Waktu Kedepan</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Berikut jadwal kunjungan yang sudah diverifikasi. Silakan pilih waktu yang tidak bentrok.</p>
+
+                <!-- Kontrol Kalender (Navigasi Bulan) -->
+                <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+                    <button type="button" id="prev-month-btn" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition">
+                        <i class="fa-solid fa-chevron-left text-sm"></i>
+                    </button>
+                    <h3 id="current-month-year" class="font-bold text-gray-800 text-sm"></h3>
+                    <button type="button" id="next-month-btn" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition">
+                        <i class="fa-solid fa-chevron-right text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Grid Nama Hari -->
+                <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-400 uppercase mb-2">
+                    <div>Min</div>
+                    <div>Sen</div>
+                    <div>Sel</div>
+                    <div>Rab</div>
+                    <div>Kam</div>
+                    <div>Jum</div>
+                    <div>Sab</div>
+                </div>
+
+                <!-- Grid Hari/Tanggal -->
+                <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                    <!-- Javascript will render the days here -->
                 </div>
             </div>
-            @php $disetujui = $jadwalDisetujui; @endphp
-            @if($disetujui->count() > 0)
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b border-gray-100">
-                        <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3">Tanggal</th>
-                        <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3">Instansi</th>
-                        <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3">Jam Kunjungan</th>
-                        <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3">Tujuan</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @foreach($disetujui as $k)
-                    <tr>
-                        <td class="py-4 text-gray-700">
-                            {{ \Carbon\Carbon::parse($k->tgl_kunjungan)->locale('id')->translatedFormat('l, d F Y') }}
-                        </td>
-                        <td class="py-4 font-semibold text-gray-900">{{ $k->instansi }}</td>
-                        <td class="py-4 font-semibold text-gray-900">{{ $k->jam }}</td>
-                        <td class="py-4 text-gray-600">{{ $k->tujuan }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            @else
-            <p class="text-sm text-gray-400 text-center py-4">Belum ada jadwal kunjungan yang disetujui.</p>
-            @endif
+
+            <!-- VIEW 2: DETAIL HARI (LIST SESI) -->
+            <div id="detail-view" class="hidden">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="showCalendarView()" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition mr-1">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h2 id="detail-date-title" class="font-bold text-gray-900 text-base">Detail Kunjungan</h2>
+                            <p class="text-xs text-gray-400 mt-0.5">Daftar sesi kunjungan yang tersedia atau sudah terisi pada tanggal ini.</p>
+                        </div>
+                    </div>
+                    <div>
+                        @auth
+                        <button type="button" id="btn-ajukan-kunjungan-detail" onclick="openModalWithSelectedDate()"
+                            class="inline-flex items-center bg-red-600 text-white rounded-xl px-4 py-2 font-semibold text-xs hover:bg-red-700 gap-1.5 transition">
+                            <i class="fa-solid fa-plus"></i> Ajukan Kunjungan
+                        </button>
+                        @endauth
+                        @guest
+                        <a href="{{ route('login') }}"
+                            class="inline-flex items-center bg-red-600 text-white rounded-xl px-4 py-2 font-semibold text-xs hover:bg-red-700 gap-1.5 transition">
+                            <i class="fa-solid fa-plus"></i> Ajukan Kunjungan
+                        </a>
+                        @endguest
+                    </div>
+                </div>
+
+                <!-- List Sesi Kunjungan -->
+                <div class="space-y-3">
+                    <!-- Sesi 1 -->
+                    <div id="sesi-1-item" class="flex items-center justify-between p-4 rounded-xl border border-gray-100 transition bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center font-bold text-xs text-gray-500">1</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">Sesi 1 (08.00 - 09.30 WIB)</h4>
+                                <p id="sesi-1-status" class="text-xs text-green-600 mt-0.5 font-medium"><i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Tersedia</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sesi 2 -->
+                    <div id="sesi-2-item" class="flex items-center justify-between p-4 rounded-xl border border-gray-100 transition bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center font-bold text-xs text-gray-500">2</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">Sesi 2 (09.30 - 11.00 WIB)</h4>
+                                <p id="sesi-2-status" class="text-xs text-green-600 mt-0.5 font-medium"><i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Tersedia</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sesi 3 -->
+                    <div id="sesi-3-item" class="flex items-center justify-between p-4 rounded-xl border border-gray-100 transition bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center font-bold text-xs text-gray-500">3</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">Sesi 3 (11.00 - 12.30 WIB)</h4>
+                                <p id="sesi-3-status" class="text-xs text-green-600 mt-0.5 font-medium"><i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Tersedia</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Istirahat (Break) -->
+                    <div class="flex items-center justify-between p-3 rounded-xl border border-dashed border-gray-200 bg-gray-50/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                                <i class="fa-solid fa-mug-hot text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-xs text-gray-500">Istirahat (12.30 - 13.00 WIB)</h4>
+                                <p class="text-[10px] text-gray-400 mt-0.5 font-normal">Sesi istirahat - Tidak tersedia untuk kunjungan</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full uppercase tracking-wider text-[10px]">Istirahat</span>
+                    </div>
+
+                    <!-- Sesi 4 -->
+                    <div id="sesi-4-item" class="flex items-center justify-between p-4 rounded-xl border border-gray-100 transition bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center font-bold text-xs text-gray-500">4</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">Sesi 4 (13.00 - 14.30 WIB)</h4>
+                                <p id="sesi-4-status" class="text-xs text-green-600 mt-0.5 font-medium"><i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Tersedia</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sesi 5 -->
+                    <div id="sesi-5-item" class="flex items-center justify-between p-4 rounded-xl border border-gray-100 transition bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center font-bold text-xs text-gray-500">5</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">Sesi 5 (14.30 - 16.00 WIB)</h4>
+                                <p id="sesi-5-status" class="text-xs text-green-600 mt-0.5 font-medium"><i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Tersedia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         @auth
@@ -204,7 +310,7 @@
                                 <input type="date"
                                     id="tgl-picker"
                                     name="tgl_kunjungan"
-                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
                                     min="{{ date('Y-m-d') }}"
                                     required>
                             </div>
@@ -212,21 +318,17 @@
                             {{-- Jam --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Jam Kunjungan
+                                    Sesi Kunjungan
                                 </label>
 
-                                <select name="jam" required
-                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
-
-                                    <option value="">Pilih jam...</option>
-                                    <option value="09:00">09.00 WIB</option>
-                                    <option value="10:00">10.00 WIB</option>
-                                    <option value="11:00">11.00 WIB</option>
-                                    <option value="13:00">13.00 WIB</option>
-                                    <option value="14:00">14.00 WIB</option>
-                                    <option value="15:00">15.00 WIB</option>
-                                    <option value="16:00">16.00 WIB</option>
-
+                                <select name="jam" id="jam-select" required
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+                                    <option value="">Pilih Sesi...</option>
+                                    <option value="Sesi 1: 08.00-09.30">Sesi 1: 08.00-09.30</option>
+                                    <option value="Sesi 2: 09.30-11.00">Sesi 2: 09.30-11.00</option>
+                                    <option value="Sesi 3: 11.00-12.30">Sesi 3: 11.00-12.30</option>
+                                    <option value="Sesi 4: 13.00-14.30">Sesi 4: 13.00-14.30</option>
+                                    <option value="Sesi 5: 14.30-16.00">Sesi 5: 14.30-16.00</option>
                                 </select>
                             </div>
 
@@ -238,8 +340,7 @@
 
                             <p class="text-sm text-red-700">
                                 <span class="font-semibold">Informasi:</span>
-                                Jam operasional kunjungan adalah
-                                <span class="font-semibold">09:00 – 16:00 WIB</span>.
+                                Jam operasional kunjungan dibagi menjadi 5 sesi per hari mulai dari <span class="font-semibold">08:00 – 16:00 WIB</span> dengan 1 sesi istirahat.
                             </p>
                         </div>
 
@@ -287,139 +388,324 @@
 
 @push('scripts')
 <script>
-(function () {
-    const btnKal    = document.getElementById('btn-kalender');
-    const cal       = document.getElementById('custom-calendar');
-    const tglHidden = document.getElementById('tgl-hidden');
-    const tglDisplay= document.getElementById('tgl-display');
-    const monthLabel= document.getElementById('month-label');
-    const daysGrid  = document.getElementById('days-grid');
-    const prevBtn   = document.getElementById('prev-month');
-    const nextBtn   = document.getElementById('next-month');
+const dbJadwalDisetujui = @json($jadwalDisetujui);
 
-    const MONTHS_EN = ['January','February','March','April','May','June',
-                       'July','August','September','October','November','December'];
-    const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni',
-                       'Juli','Agustus','September','Oktober','November','Desember'];
-    const DAYS_ID   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni',
+                   'Juli','Agustus','September','Oktober','November','Mei']; // Mei/Desember
+// Let's make sure December is correct
+MONTHS_ID[11] = 'Desember';
 
-    const now = new Date();
-    let viewYear  = now.getFullYear();
-    let viewMonth = now.getMonth();
-    let selected  = null;
+const DAYS_ID   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 
-    // Pre-fill if old value exists
-    const oldVal = tglHidden.value;
-    if (oldVal) {
-        const parts = oldVal.split('-');
-        selected = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-        viewYear  = selected.getFullYear();
-        viewMonth = selected.getMonth();
+let viewDate = new Date();
+let selectedDateStr = "";
+
+// Helper to format Date to YYYY-MM-DD local timezone
+function formatYYYYMMDD(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function getVisitDateString(visit) {
+    if (!visit.tgl_kunjungan) return "";
+    return visit.tgl_kunjungan.split('T')[0].split(' ')[0];
+}
+
+function mapJamToSession(jamStr) {
+    if (!jamStr) return null;
+    jamStr = jamStr.trim();
+    if (jamStr.toLowerCase().startsWith('sesi 1')) return 'Sesi 1';
+    if (jamStr.toLowerCase().startsWith('sesi 2')) return 'Sesi 2';
+    if (jamStr.toLowerCase().startsWith('sesi 3')) return 'Sesi 3';
+    if (jamStr.toLowerCase().startsWith('sesi 4')) return 'Sesi 4';
+    if (jamStr.toLowerCase().startsWith('sesi 5')) return 'Sesi 5';
+
+    // Parse HH:MM from HH:MM:SS or HH.MM
+    let timePart = jamStr.replace('.', ':');
+    let match = timePart.match(/(\d{2}):(\d{2})/);
+    if (!match) return null;
+    let hour = parseInt(match[1]);
+    let min = parseInt(match[2]);
+    let totalMinutes = hour * 60 + min;
+
+    // Sesi 1: 08.00-09.30 -> 480 to 570 mins
+    if (totalMinutes >= 480 && totalMinutes < 570) return 'Sesi 1';
+    // Sesi 2: 09.30-11.00 -> 570 to 660 mins
+    if (totalMinutes >= 570 && totalMinutes < 660) return 'Sesi 2';
+    // Sesi 3: 11.00-12.30 -> 660 to 750 mins
+    if (totalMinutes >= 660 && totalMinutes < 780) return 'Sesi 3';
+    // Sesi 4: 13.00-14.30 -> 780 to 870 mins
+    if (totalMinutes >= 780 && totalMinutes < 870) return 'Sesi 4';
+    // Sesi 5: 14.30-16.00 -> 870 to 990 mins
+    if (totalMinutes >= 870 && totalMinutes <= 990) return 'Sesi 5';
+
+    return null;
+}
+
+function renderCalendar() {
+    const grid = document.getElementById('calendar-grid');
+    const label = document.getElementById('current-month-year');
+    if (!grid || !label) return;
+
+    grid.innerHTML = "";
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+
+    label.textContent = `${MONTHS_ID[month]} ${year}`;
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const prevLastDay = new Date(year, month, 0).getDate();
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    // Padding cells from previous month
+    for (let i = firstDayIndex; i > 0; i--) {
+        const dayNum = prevLastDay - i + 1;
+        const cell = document.createElement('div');
+        cell.className = 'bg-gray-50/50 border border-gray-100/50 rounded-2xl min-h-[65px] p-2 text-center text-xs text-gray-300 flex items-center justify-center cursor-not-allowed';
+        cell.textContent = dayNum;
+        grid.appendChild(cell);
     }
 
-    function pad(n) { return String(n).padStart(2, '0'); }
+    // Days in current month
+    for (let day = 1; day <= lastDay; day++) {
+        const currentCellDate = new Date(year, month, day);
+        const dateStr = formatYYYYMMDD(currentCellDate);
+        const isPast = currentCellDate < today;
 
-    function renderCalendar() {
-        monthLabel.textContent = MONTHS_EN[viewMonth] + ' ' + viewYear;
+        const cell = document.createElement('button');
+        cell.type = "button";
+        cell.className = 'relative flex flex-col items-center justify-between p-2 rounded-2xl border transition text-center min-h-[65px]';
 
-        const firstDay    = new Date(viewYear, viewMonth, 1).getDay();
-        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-        const daysInPrev  = new Date(viewYear, viewMonth, 0).getDate();
+        const numSpan = document.createElement('span');
+        numSpan.className = 'text-xs font-bold';
+        numSpan.textContent = day;
+        cell.appendChild(numSpan);
 
-        daysGrid.innerHTML = '';
+        if (isPast) {
+            cell.className += ' bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed';
+            cell.disabled = true;
+        } else {
+            // Find booked sessions for this date
+            const booked = [];
+            dbJadwalDisetujui.forEach(v => {
+                const vDate = getVisitDateString(v);
+                if (vDate === dateStr) {
+                    const sess = mapJamToSession(v.jam);
+                    if (sess) booked.push(sess);
+                }
+            });
 
-        // Hari dari bulan sebelumnya (abu-abu)
-        for (let i = firstDay - 1; i >= 0; i--) {
-            const el = document.createElement('div');
-            el.textContent = daysInPrev - i;
-            el.className = 'text-center text-xs text-gray-300 w-9 h-9 flex items-center justify-center mx-auto';
-            daysGrid.appendChild(el);
-        }
+            const isFull = booked.length >= 5;
 
-        // Hari bulan ini
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        for (let day = 1; day <= daysInMonth; day++) {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = day;
-
-            const currentDate = new Date(viewYear, viewMonth, day);
-            const isPast = currentDate < today;
-
-            if (isPast) {
-                btn.disabled = true;
-                btn.className = 'text-center text-xs text-gray-300 w-9 h-9 flex items-center justify-center mx-auto cursor-not-allowed';
+            if (isFull) {
+                cell.className += ' bg-red-50 border-red-200 text-red-700 hover:bg-red-100';
+            } else if (booked.length > 0) {
+                cell.className += ' bg-orange-50 border-orange-200 text-orange-800 hover:bg-orange-100';
             } else {
-                const isSel = selected &&
-                    selected.getDate()     === day &&
-                    selected.getMonth()    === viewMonth &&
-                    selected.getFullYear() === viewYear;
-
-                btn.className = isSel
-                    ? 'text-center text-xs font-bold text-white bg-red-600 rounded-full w-9 h-9 flex items-center justify-center mx-auto hover:bg-red-700 transition'
-                    : 'text-center text-xs text-gray-700 w-9 h-9 flex items-center justify-center mx-auto hover:bg-red-50 hover:text-red-600 rounded-full transition cursor-pointer';
-
-                btn.addEventListener('click', function () {
-                    selected = new Date(viewYear, viewMonth, day);
-
-                    tglHidden.value = viewYear + '-' + pad(viewMonth + 1) + '-' + pad(day);
-
-                    tglDisplay.textContent = DAYS_ID[selected.getDay()] + ', ' + day + ' ' + MONTHS_ID[viewMonth] + ' ' + viewYear;
-                    tglDisplay.classList.replace('text-gray-400', 'text-gray-800');
-
-                    cal.classList.add('hidden');
-                    renderCalendar();
-                });
+                cell.className += ' bg-white border-gray-100 text-gray-700 hover:border-red-300 hover:bg-red-50/30';
             }
 
-            daysGrid.appendChild(btn);
+            // Draw dots indicator for the 5 sessions
+            const dotsContainer = document.createElement('div');
+            dotsContainer.className = 'flex justify-center gap-0.5 mt-1';
+            for (let s = 1; s <= 5; s++) {
+                const isBooked = booked.includes('Sesi ' + s);
+                const dot = document.createElement('span');
+                dot.className = `w-1.5 h-1.5 rounded-full ${isBooked ? 'bg-red-500' : 'bg-green-400'}`;
+                dotsContainer.appendChild(dot);
+            }
+            cell.appendChild(dotsContainer);
+
+            // Click handler
+            cell.addEventListener('click', () => {
+                showDayDetail(dateStr);
+            });
         }
 
-        // Hari dari bulan berikutnya (abu-abu)
-        const total     = firstDay + daysInMonth;
-        const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
-        for (let i = 1; i <= remaining; i++) {
-            const el = document.createElement('div');
-            el.textContent = i;
-            el.className = 'text-center text-xs text-gray-300 w-9 h-9 flex items-center justify-center mx-auto';
-            daysGrid.appendChild(el);
+        grid.appendChild(cell);
+    }
+
+    // Padding cells from next month
+    const totalCells = firstDayIndex + lastDay;
+    const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let i = 1; i <= remaining; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bg-gray-50/50 border border-gray-100/50 rounded-2xl min-h-[65px] p-2 text-center text-xs text-gray-300 flex items-center justify-center cursor-not-allowed';
+        cell.textContent = i;
+        grid.appendChild(cell);
+    }
+}
+
+function showDayDetail(dateStr) {
+    selectedDateStr = dateStr;
+    const parts = dateStr.split('-');
+    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateTitleStr = dateObj.toLocaleDateString('id-ID', options);
+    document.getElementById('detail-date-title').textContent = dateTitleStr;
+
+    const booked = [];
+    dbJadwalDisetujui.forEach(v => {
+        const vDate = getVisitDateString(v);
+        if (vDate === dateStr) {
+            const sess = mapJamToSession(v.jam);
+            if (sess) booked.push(sess);
+        }
+    });
+
+    const todayStr = formatYYYYMMDD(new Date());
+    const isToday = (dateStr === todayStr);
+
+    const nowTime = new Date();
+    const currentHour = nowTime.getHours();
+    const currentMin = nowTime.getMinutes();
+    const currentTotalMinutes = currentHour * 60 + currentMin;
+
+    const sessionStartTimes = {
+        'Sesi 1': 480, // 08:00
+        'Sesi 2': 570, // 09:30
+        'Sesi 3': 660, // 11:00
+        'Sesi 4': 780, // 13:00
+        'Sesi 5': 870, // 14:30
+    };
+
+    let availableCount = 0;
+
+    for (let s = 1; s <= 5; s++) {
+        const sessionName = 'Sesi ' + s;
+        const statusEl = document.getElementById(`sesi-${s}-status`);
+        const itemEl = document.getElementById(`sesi-${s}-item`);
+
+        const isBooked = booked.includes(sessionName);
+        const startTime = sessionStartTimes[sessionName];
+        const isPassed = isToday && (currentTotalMinutes >= startTime);
+
+        if (isBooked) {
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1 text-[10px]"></i> Terisi (Tidak Tersedia)`;
+            statusEl.className = "text-xs text-red-600 mt-0.5 font-medium";
+            itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-red-100 bg-red-50/20 opacity-85 transition";
+        } else if (isPassed) {
+            statusEl.innerHTML = `<i class="fa-solid fa-clock-rotate-left mr-1 text-[10px]"></i> Sudah Terlewat`;
+            statusEl.className = "text-xs text-gray-400 mt-0.5 font-medium";
+            itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50 opacity-60 transition";
+        } else {
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Tersedia`;
+            statusEl.className = "text-xs text-green-600 mt-0.5 font-medium";
+            itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-gray-100 transition bg-white";
+            availableCount++;
         }
     }
 
-    btnKal.addEventListener('click', function (e) {
-        e.stopPropagation();
-        cal.classList.toggle('hidden');
-        renderCalendar();
-    });
-
-    prevBtn.addEventListener('click', function () {
-        viewMonth--;
-        if (viewMonth < 0) { viewMonth = 11; viewYear--; }
-        renderCalendar();
-    });
-
-    nextBtn.addEventListener('click', function () {
-        viewMonth++;
-        if (viewMonth > 11) { viewMonth = 0; viewYear++; }
-        renderCalendar();
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!cal.contains(e.target) && e.target !== btnKal) {
-            cal.classList.add('hidden');
+    const btnAjukan = document.getElementById('btn-ajukan-kunjungan-detail');
+    if (btnAjukan) {
+        if (availableCount === 0) {
+            btnAjukan.disabled = true;
+            btnAjukan.className = "inline-flex items-center bg-gray-300 text-gray-500 rounded-xl px-4 py-2 font-semibold text-xs cursor-not-allowed gap-1.5 transition";
+            btnAjukan.innerHTML = `<i class="fa-solid fa-ban"></i> Jadwal Penuh`;
+        } else {
+            btnAjukan.disabled = false;
+            btnAjukan.className = "inline-flex items-center bg-red-600 text-white rounded-xl px-4 py-2 font-semibold text-xs hover:bg-red-700 gap-1.5 transition";
+            btnAjukan.innerHTML = `<i class="fa-solid fa-plus"></i> Ajukan Kunjungan`;
         }
-    });
-
-    // Tampilkan nilai lama jika ada
-    if (selected) {
-        tglDisplay.textContent = DAYS_ID[selected.getDay()] + ', ' +
-            selected.getDate() + ' ' + MONTHS_ID[selected.getMonth()] + ' ' + selected.getFullYear();
-        tglDisplay.classList.replace('text-gray-400', 'text-gray-800');
     }
 
+    document.getElementById('calendar-view').classList.replace('block', 'hidden');
+    document.getElementById('detail-view').classList.replace('hidden', 'block');
+}
+
+function showCalendarView() {
+    document.getElementById('detail-view').classList.replace('block', 'hidden');
+    document.getElementById('calendar-view').classList.replace('hidden', 'block');
     renderCalendar();
-})();
+}
+
+function openModalWithSelectedDate() {
+    const tglPicker = document.getElementById('tgl-picker');
+    if (tglPicker && selectedDateStr) {
+        tglPicker.value = selectedDateStr;
+        updateAvailableSessions(selectedDateStr);
+    }
+    openModal();
+}
+
+function updateAvailableSessions(dateStr) {
+    const jamSelect = document.getElementById('jam-select');
+    if (!jamSelect) return;
+
+    // Reset all options
+    Array.from(jamSelect.options).forEach(opt => {
+        if (!opt.value) return;
+        opt.disabled = false;
+        opt.textContent = opt.value;
+    });
+
+    if (!dateStr) return;
+
+    // Find booked sessions
+    const bookedSessions = [];
+    dbJadwalDisetujui.forEach(v => {
+        const vDate = getVisitDateString(v);
+        if (vDate === dateStr) {
+            const sess = mapJamToSession(v.jam);
+            if (sess) bookedSessions.push(sess);
+        }
+    });
+
+    // Check today's time logic
+    const todayStr = formatYYYYMMDD(new Date());
+    const isToday = (dateStr === todayStr);
+
+    const nowTime = new Date();
+    const currentHour = nowTime.getHours();
+    const currentMin = nowTime.getMinutes();
+    const currentTotalMinutes = currentHour * 60 + currentMin;
+
+    const sessionStartTimes = {
+        'Sesi 1: 08.00-09.30': 480,
+        'Sesi 2: 09.30-11.00': 570,
+        'Sesi 3: 11.00-12.30': 660,
+        'Sesi 4: 13.00-14.30': 780,
+        'Sesi 5: 14.30-16.00': 870,
+    };
+
+    // Disable booked or passed options
+    Array.from(jamSelect.options).forEach(opt => {
+        if (!opt.value) return;
+        const optSess = mapJamToSession(opt.value);
+        const startTime = sessionStartTimes[opt.value];
+        const isPassed = isToday && (currentTotalMinutes >= startTime);
+
+        if (bookedSessions.includes(optSess)) {
+            opt.disabled = true;
+            opt.textContent = opt.value + ' (Terisi)';
+        } else if (isPassed) {
+            opt.disabled = true;
+            opt.textContent = opt.value + ' (Sudah Terlewat)';
+        }
+    });
+}
+
+// Bind navigation buttons
+document.getElementById('prev-month-btn').addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() - 1);
+    renderCalendar();
+});
+
+document.getElementById('next-month-btn').addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() + 1);
+    renderCalendar();
+});
+
+// Bind date picker change listener
+document.getElementById('tgl-picker').addEventListener('change', function() {
+    updateAvailableSessions(this.value);
+});
 
 function initSurat() {
     const tujuan = document.getElementById('tujuan');
@@ -430,7 +716,6 @@ function initSurat() {
 
     function updateSurat() {
         const value = tujuan.value;
-
         const aktif = (
             value === "Penelitian" ||
             value === "Kerjasama" ||
@@ -440,16 +725,12 @@ function initSurat() {
         if (aktif) {
             suratInput.disabled = false;
             suratInput.required = true;
-
-            suratLabel.classList.remove('opacity-50');
-            suratLabel.classList.remove('pointer-events-none');
+            suratLabel.classList.remove('opacity-50', 'pointer-events-none');
         } else {
             suratInput.disabled = true;
             suratInput.required = false;
             suratInput.value = "";
-
-            suratLabel.classList.add('opacity-50');
-            suratLabel.classList.add('pointer-events-none');
+            suratLabel.classList.add('opacity-50', 'pointer-events-none');
         }
     }
 
@@ -458,11 +739,19 @@ function initSurat() {
 }
 
 function openModal() {
-    document.getElementById('modal-tambah').classList.remove('hidden');
+    const modal = document.getElementById('modal-tambah');
+    if (!modal) return;
+    modal.classList.remove('hidden');
 
+    const tglPicker = document.getElementById('tgl-picker');
+    if (tglPicker) {
+        if (!tglPicker.value) {
+            tglPicker.value = formatYYYYMMDD(new Date());
+        }
+        updateAvailableSessions(tglPicker.value);
+    }
     initSurat();
 }
-
 
 function previewSurat(input) {
     const lbl = document.getElementById('surat-label-text');
@@ -473,5 +762,7 @@ function previewSurat(input) {
     }
 }
 
+// Initial Render
+renderCalendar();
 </script>
 @endpush
