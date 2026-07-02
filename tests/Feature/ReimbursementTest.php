@@ -45,20 +45,33 @@ class ReimbursementTest extends TestCase
             'deskripsi' => 'Kebutuhan pangan',
         ]);
 
+        // Setup Item Logistik
+        $itemBeras = \App\Models\ItemLogistik::create([
+            'jenis_logistik_id' => $jenisLogistik->id,
+            'nama_item' => 'Beras 5kg',
+            'satuan' => 'Pcs',
+        ]);
+
+        $itemMinyak = \App\Models\ItemLogistik::create([
+            'jenis_logistik_id' => $jenisLogistik->id,
+            'nama_item' => 'Minyak Goreng 2L',
+            'satuan' => 'Pcs',
+        ]);
+
         // Mock gambar sebagai bukti nota
         $fileNota = UploadedFile::fake()->image('nota_pembelian.jpg');
 
         $payload = [
             'details' => [
                 [
-                    'nama_kebutuhan' => 'Beras 5kg',
+                    'item_logistik_id' => $itemBeras->id,
+                    'jumlah' => 1,
                     'nominal' => 75000,
-                    'jenis_logistik_id' => $jenisLogistik->id,
                 ],
                 [
-                    'nama_kebutuhan' => 'Minyak Goreng 2L',
+                    'item_logistik_id' => $itemMinyak->id,
+                    'jumlah' => 1,
                     'nominal' => 35000,
-                    'jenis_logistik_id' => $jenisLogistik->id,
                 ]
             ],
             'bukti_nota' => $fileNota,
@@ -82,13 +95,15 @@ class ReimbursementTest extends TestCase
         // Karena cuma insert 1 header, kita bisa ambil id = 1 untuk asserts
         $this->assertDatabaseHas('detail_reimbursements', [
             'reimbursement_id' => 1,
-            'nama_kebutuhan' => 'Beras 5kg',
+            'item_logistik_id' => $itemBeras->id,
+            'jumlah' => 1,
             'nominal' => 75000,
         ]);
 
         $this->assertDatabaseHas('detail_reimbursements', [
             'reimbursement_id' => 1,
-            'nama_kebutuhan' => 'Minyak Goreng 2L',
+            'item_logistik_id' => $itemMinyak->id,
+            'jumlah' => 1,
             'nominal' => 35000,
         ]);
 

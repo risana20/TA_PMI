@@ -464,7 +464,7 @@
 
     @foreach($barangPerBulan as $b)
 
-    "{{$b->nama_kebutuhan}}",
+    "{{ $b->itemLogistik->nama_item ?? 'Tidak Diketahui' }}",
 
     @endforeach
 

@@ -79,8 +79,9 @@ class KeuanganController extends Controller
         // DONUT CHART
 
 
-        $barangPerBulan = DetailReimbursement::selectRaw(
-            'item_logistik_id, SUM(nominal) as total'
+        $barangPerBulan = DetailReimbursement::with('itemLogistik')
+        ->selectRaw(
+            'item_logistik_id, SUM(jumlah) as total'
         )
         ->whereHas('reimbursement', function($q) use ($bulan,$tahun){
 
