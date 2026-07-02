@@ -65,7 +65,13 @@
                 </td>
 
                 <td class="px-4 py-4 text-gray-600">
-                    {{ $kunjungan->tujuan }}
+                    <div>{{ $kunjungan->tujuan }}</div>
+                    @if($kunjungan->wargaBinaan)
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1 rounded text-xs font-semibold bg-red-50 text-red-700">
+                            <i class="fa-solid fa-user text-[10px]"></i>
+                            WBP: {{ $kunjungan->wargaBinaan->nama }}
+                        </span>
+                    @endif
                 </td>
 
                 <td class="px-4 py-4 text-gray-600">
@@ -313,6 +319,39 @@
                                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                         </div>
 
+                        {{-- Mengunjungi WBP Checkbox --}}
+                        <div class="mt-4">
+                            <label class="inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="admin-mengunjungi-wbp-checkbox" name="mengunjungi_wbp" value="1" class="rounded border-gray-300 text-red-600 focus:ring-red-500 w-4 h-4" onchange="adminToggleWbpSearch(this.checked)" {{ old('mengunjungi_wbp') ? 'checked' : '' }}>
+                                <span class="ml-2 text-sm font-semibold text-gray-700">Mengunjungi 1 orang warga binaan</span>
+                            </label>
+                        </div>
+
+                        {{-- Warga Binaan Search Container --}}
+                        <div id="admin-wbp-search-container" class="{{ old('mengunjungi_wbp') ? '' : 'hidden' }} mt-3 space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Nama Warga Binaan (Aktif)</label>
+                            <div class="relative">
+                                @php
+                                    $oldAdminWbpName = '';
+                                    if (old('warga_binaan_id')) {
+                                        $oldAdminWbp = \App\Models\WargaBinaan::find(old('warga_binaan_id'));
+                                        if ($oldAdminWbp) {
+                                            $oldAdminWbpName = $oldAdminWbp->nama;
+                                        }
+                                    }
+                                @endphp
+                                <input type="text" id="admin-wbp-search-input" placeholder="Ketik nama warga binaan..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" autocomplete="off" value="{{ $oldAdminWbpName }}" {{ old('warga_binaan_id') ? 'readonly' : '' }} {{ old('mengunjungi_wbp') ? 'required' : '' }}>
+                                <input type="hidden" id="admin-wbp-id-input" name="warga_binaan_id" value="{{ old('warga_binaan_id') }}">
+                                <button type="button" id="admin-clear-wbp-btn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 {{ old('warga_binaan_id') ? '' : 'hidden' }}">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                                {{-- Dropdown Suggestions --}}
+                                <div id="admin-wbp-suggestions" class="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden">
+                                    {{-- Rendered via Javascript --}}
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Upload Surat --}}
                         <div id="surat-field">
                             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -489,6 +528,94 @@ function previewSurat(input) {
         label.classList.remove('text-gray-400');
         label.classList.add('text-gray-700');
     }
+}
+
+// Admin WBP Autocomplete Search
+let adminWbpTimeout = null;
+const adminWbpSearchInput = document.getElementById('admin-wbp-search-input');
+const adminWbpIdInput = document.getElementById('admin-wbp-id-input');
+const adminWbpSuggestions = document.getElementById('admin-wbp-suggestions');
+const adminClearWbpBtn = document.getElementById('admin-clear-wbp-btn');
+
+function adminToggleWbpSearch(checked) {
+    const container = document.getElementById('admin-wbp-search-container');
+    if (checked) {
+        container.classList.remove('hidden');
+        adminWbpSearchInput.required = true;
+    } else {
+        container.classList.add('hidden');
+        adminWbpSearchInput.required = false;
+        adminClearWbpSelection();
+    }
+}
+
+function adminClearWbpSelection() {
+    adminWbpSearchInput.value = '';
+    adminWbpIdInput.value = '';
+    adminWbpSearchInput.readOnly = false;
+    adminClearWbpBtn.classList.add('hidden');
+    adminWbpSuggestions.innerHTML = '';
+    adminWbpSuggestions.classList.add('hidden');
+}
+
+if (adminWbpSearchInput) {
+    adminWbpSearchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        clearTimeout(adminWbpTimeout);
+        
+        if (query.length < 2) {
+            adminWbpSuggestions.innerHTML = '';
+            adminWbpSuggestions.classList.add('hidden');
+            return;
+        }
+        
+        adminWbpTimeout = setTimeout(() => {
+            fetch(`/kunjungan/search-wbp?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    adminWbpSuggestions.innerHTML = '';
+                    if (data.length === 0) {
+                        adminWbpSuggestions.innerHTML = '<div class="px-4 py-3 text-sm text-gray-500">Tidak ada warga binaan aktif ditemukan</div>';
+                        adminWbpSuggestions.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    data.forEach(wbp => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'w-full text-left px-4 py-2.5 hover:bg-red-50 text-sm text-gray-700 border-b last:border-0 border-gray-100 flex items-center justify-between transition';
+                        btn.innerHTML = `
+                            <span class="font-medium">${wbp.nama}</span>
+                            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">NIK: ${wbp.nik}</span>
+                        `;
+                        btn.addEventListener('click', () => {
+                            adminSelectWbp(wbp.id, wbp.nama);
+                        });
+                        adminWbpSuggestions.appendChild(btn);
+                    });
+                    adminWbpSuggestions.classList.remove('hidden');
+                });
+        }, 300);
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!adminWbpSearchInput.contains(e.target) && !adminWbpSuggestions.contains(e.target)) {
+            adminWbpSuggestions.classList.add('hidden');
+        }
+    });
+}
+
+function adminSelectWbp(id, name) {
+    adminWbpSearchInput.value = name;
+    adminWbpIdInput.value = id;
+    adminWbpSearchInput.readOnly = true;
+    adminWbpSuggestions.classList.add('hidden');
+    adminClearWbpBtn.classList.remove('hidden');
+}
+
+if (adminClearWbpBtn) {
+    adminClearWbpBtn.addEventListener('click', adminClearWbpSelection);
 }
 </script>
 @endpush

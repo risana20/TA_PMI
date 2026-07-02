@@ -90,10 +90,9 @@
     </div>
 </div>
 
-{{-- Modal Ajukan --}}
-<div id="modal-ajukan" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+<div id="modal-ajukan" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
 
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 max-h-[85vh] overflow-y-auto relative">
 
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-lg">Ajukan Reimbursement</h3>

@@ -278,6 +278,39 @@
                                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                         </div>
 
+                        {{-- Mengunjungi WBP Checkbox --}}
+                        <div class="mt-4">
+                            <label class="inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="mengunjungi-wbp-checkbox" name="mengunjungi_wbp" value="1" class="rounded border-gray-300 text-red-600 focus:ring-red-500 w-4 h-4" onchange="toggleWbpSearch(this.checked)" {{ old('mengunjungi_wbp') ? 'checked' : '' }}>
+                                <span class="ml-2 text-sm font-semibold text-gray-700">Mengunjungi 1 orang warga binaan</span>
+                            </label>
+                        </div>
+
+                        {{-- Warga Binaan Search Container --}}
+                        <div id="wbp-search-container" class="{{ old('mengunjungi_wbp') ? '' : 'hidden' }} mt-3 space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Nama Warga Binaan (Aktif)</label>
+                            <div class="relative">
+                                @php
+                                    $oldWbpName = '';
+                                    if (old('warga_binaan_id')) {
+                                        $oldWbp = \App\Models\WargaBinaan::find(old('warga_binaan_id'));
+                                        if ($oldWbp) {
+                                            $oldWbpName = $oldWbp->nama;
+                                        }
+                                    }
+                                @endphp
+                                <input type="text" id="wbp-search-input" placeholder="Ketik nama warga binaan..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" autocomplete="off" value="{{ $oldWbpName }}" {{ old('warga_binaan_id') ? 'readonly' : '' }} {{ old('mengunjungi_wbp') ? 'required' : '' }}>
+                                <input type="hidden" id="wbp-id-input" name="warga_binaan_id" value="{{ old('warga_binaan_id') }}">
+                                <button type="button" id="clear-wbp-btn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 {{ old('warga_binaan_id') ? '' : 'hidden' }}">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                                {{-- Dropdown Suggestions --}}
+                                <div id="wbp-suggestions" class="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden">
+                                    {{-- Rendered via Javascript --}}
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Upload Surat --}}
                         <div id="surat-field">
                             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -762,7 +795,96 @@ function previewSurat(input) {
     }
 }
 
+// Autocomplete WBP Search
+let wbpTimeout = null;
+const wbpSearchInput = document.getElementById('wbp-search-input');
+const wbpIdInput = document.getElementById('wbp-id-input');
+const wbpSuggestions = document.getElementById('wbp-suggestions');
+const clearWbpBtn = document.getElementById('clear-wbp-btn');
+
+function toggleWbpSearch(checked) {
+    const container = document.getElementById('wbp-search-container');
+    if (checked) {
+        container.classList.remove('hidden');
+        wbpSearchInput.required = true;
+    } else {
+        container.classList.add('hidden');
+        wbpSearchInput.required = false;
+        clearWbpSelection();
+    }
+}
+
+function clearWbpSelection() {
+    wbpSearchInput.value = '';
+    wbpIdInput.value = '';
+    wbpSearchInput.readOnly = false;
+    clearWbpBtn.classList.add('hidden');
+    wbpSuggestions.innerHTML = '';
+    wbpSuggestions.classList.add('hidden');
+}
+
+if (wbpSearchInput) {
+    wbpSearchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        clearTimeout(wbpTimeout);
+        
+        if (query.length < 2) {
+            wbpSuggestions.innerHTML = '';
+            wbpSuggestions.classList.add('hidden');
+            return;
+        }
+        
+        wbpTimeout = setTimeout(() => {
+            fetch(`/kunjungan/search-wbp?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    wbpSuggestions.innerHTML = '';
+                    if (data.length === 0) {
+                        wbpSuggestions.innerHTML = '<div class="px-4 py-3 text-sm text-gray-500">Tidak ada warga binaan aktif ditemukan</div>';
+                        wbpSuggestions.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    data.forEach(wbp => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'w-full text-left px-4 py-2.5 hover:bg-red-50 text-sm text-gray-700 border-b last:border-0 border-gray-100 flex items-center justify-between transition';
+                        btn.innerHTML = `
+                            <span class="font-medium">${wbp.nama}</span>
+                            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">NIK: ${wbp.nik}</span>
+                        `;
+                        btn.addEventListener('click', () => {
+                            selectWbp(wbp.id, wbp.nama);
+                        });
+                        wbpSuggestions.appendChild(btn);
+                    });
+                    wbpSuggestions.classList.remove('hidden');
+                });
+        }, 300);
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!wbpSearchInput.contains(e.target) && !wbpSuggestions.contains(e.target)) {
+            wbpSuggestions.classList.add('hidden');
+        }
+    });
+}
+
+function selectWbp(id, name) {
+    wbpSearchInput.value = name;
+    wbpIdInput.value = id;
+    wbpSearchInput.readOnly = true;
+    wbpSuggestions.classList.add('hidden');
+    clearWbpBtn.classList.remove('hidden');
+}
+
+if (clearWbpBtn) {
+    clearWbpBtn.addEventListener('click', clearWbpSelection);
+}
+
 // Initial Render
 renderCalendar();
 </script>
 @endpush
+

@@ -12,7 +12,7 @@ class Kunjungan extends Model
     protected $fillable = [
         'user_id', 'nama_pengunjung', 'no_hp',
          'tujuan','instansi', 'tgl_kunjungan', 'jam',
-         'surat_pengajuan', 'status', 'alasan_tolak', 
+         'surat_pengajuan', 'status', 'alasan_tolak', 'warga_binaan_id',
     ];
 
     protected $casts = [
@@ -22,6 +22,11 @@ class Kunjungan extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function wargaBinaan()
+    {
+        return $this->belongsTo(WargaBinaan::class);
     }
 
     public function getFormattedJamAttribute()

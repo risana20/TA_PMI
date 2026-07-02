@@ -4,11 +4,28 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kunjungan;
+use App\Models\WargaBinaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class KunjunganUserController extends Controller
 {
+    public function searchWbp(Request $request)
+    {
+        $search = $request->query('q');
+        if (!$search) {
+            return response()->json([]);
+        }
+
+        $wbp = WargaBinaan::where('status', 'Aktif')
+            ->where('nama', 'like', "%{$search}%")
+            ->select('id', 'nama', 'nik')
+            ->limit(10)
+            ->get();
+
+        return response()->json($wbp);
+    }
+
     public function index()
     {
         // Riwayat milik user yang login
@@ -35,6 +52,7 @@ class KunjunganUserController extends Controller
             'tgl_kunjungan'     => 'required|date|after_or_equal:today',
             'jam'               => 'required',
             'surat_pengajuan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'warga_binaan_id'   => 'required_if:mengunjungi_wbp,1|nullable|exists:warga_binaans,id',
         ]);
 
         // Pastikan jam kunjungan pada hari ini belum terlewati
@@ -67,6 +85,11 @@ class KunjunganUserController extends Controller
         $data['user_id'] = Auth::id();
         $data['status'] = 'Proses';
         $data['jam'] = $this->getSessionStartTime($request->jam);
+        
+        if (!$request->input('mengunjungi_wbp')) {
+            $data['warga_binaan_id'] = null;
+        }
+
         Kunjungan::create($data);
 
         return redirect()->route('cek-status.index')

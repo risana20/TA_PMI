@@ -94,6 +94,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
    
 
+    Route::get('/kunjungan/search-wbp', [KunjunganUserController::class, 'searchWbp'])->name('kunjungan.search-wbp');
     Route::get('/cek-status', [CekStatusController::class, 'index'])->name('cek-status.index');
 
     Route::get('/profil', [ProfilController::class, 'edit'])->name('profil.edit');
