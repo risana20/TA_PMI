@@ -6,6 +6,13 @@
 
 @include('sections.page-header', ['title' => 'ACC Reimbursement', 'subtitle' => 'Validasi ajuan reimbursement dari admin'])
 
+<div class="mb-4 flex justify-between items-center">
+    <div class="bg-gray-100 border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2">
+        <i class="fa-solid fa-wallet text-gray-500"></i>
+        <span>Saldo Keuangan Saat Ini: <strong class="text-gray-900">Rp {{ number_format($saldo, 0, ',', '.') }}</strong></span>
+    </div>
+</div>
+
 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
     <table class="w-full text-sm">
         <thead class="bg-gray-50">
@@ -77,7 +84,8 @@
 
                         <form action="{{ route('superadmin.acc-reimbursement.validasi', $r->id) }}"
                             method="POST"
-                            class="inline">
+                            class="inline"
+                            onsubmit="return confirmApprove(event, {{ $r->total }}, {{ $saldo }})">
 
                             @csrf
 
@@ -140,6 +148,15 @@
             '/superadmin/acc-reimbursement/' + id + '/batalkan';
 
         document.getElementById('modal-tolak').classList.remove('hidden');
+    }
+
+    function confirmApprove(event, total, saldo) {
+        if (total > saldo) {
+            alert("Persetujuan Gagal!\n\nSaldo keuangan tidak mencukupi untuk menyetujui reimbursement ini.\n\nSaldo saat ini: Rp " + saldo.toLocaleString('id-ID') + "\nNominal reimbursement: Rp " + total.toLocaleString('id-ID'));
+            event.preventDefault();
+            return false;
+        }
+        return confirm("Apakah Anda yakin ingin menyetujui ajuan reimbursement sebesar Rp " + total.toLocaleString('id-ID') + "?");
     }
 </script>
 @endsection

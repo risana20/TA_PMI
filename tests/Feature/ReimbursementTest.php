@@ -111,4 +111,81 @@ class ReimbursementTest extends TestCase
         $reimbursement = \App\Models\Reimbursement::first();
         Storage::disk('public')->assertExists($reimbursement->bukti_nota);
     }
+
+    public function test_superadmin_cannot_approve_reimbursement_if_insufficient_saldo()
+    {
+        $superadmin = User::factory()->create([
+            'role_id' => $this->roleSuperadmin->id,
+            'is_active' => true,
+        ]);
+        $superadmin->markEmailAsVerified();
+
+        $reimbursement = \App\Models\Reimbursement::create([
+            'user_id' => $superadmin->id,
+            'tgl_pengajuan' => now()->toDateString(),
+            'status' => 'Tunggu Verifikasi',
+            'bukti_nota' => 'bukti.png',
+            'total' => 50000,
+        ]);
+
+        // Kirim request approve (validasi) oleh superadmin
+        $response = $this->actingAs($superadmin)
+            ->post(route('superadmin.acc-reimbursement.validasi', $reimbursement->id));
+
+        // Harus gagal dan diredirect dengan pesan error di session
+        $response->assertStatus(302);
+        $response->assertSessionHas('error', 'Persetujuan gagal! Saldo keuangan tidak mencukupi untuk memproses reimbursement ini.');
+
+        // Status di database harus tetap 'Tunggu Verifikasi'
+        $this->assertDatabaseHas('pengeluarans', [
+            'id' => $reimbursement->id,
+            'status' => 'Tunggu Verifikasi',
+        ]);
+    }
+
+    public function test_superadmin_can_approve_reimbursement_if_sufficient_saldo()
+    {
+        $superadmin = User::factory()->create([
+            'role_id' => $this->roleSuperadmin->id,
+            'is_active' => true,
+        ]);
+        $superadmin->markEmailAsVerified();
+
+        // Buat donasi uang dengan status 'Selesai' untuk mengisi saldo
+        $donasi = \App\Models\Donasi::create([
+            'user_id' => $superadmin->id,
+            'jenis' => 'Uang',
+            'nama_donatur' => 'John Doe',
+            'status' => 'Selesai',
+        ]);
+
+        \App\Models\DonasiUang::create([
+            'donasi_id' => $donasi->id,
+            'nominal' => 200000,
+            'bank_tujuan' => 'Mandiri',
+            'bukti_transfer' => 'transfer.png',
+        ]);
+
+        $reimbursement = \App\Models\Reimbursement::create([
+            'user_id' => $superadmin->id,
+            'tgl_pengajuan' => now()->toDateString(),
+            'status' => 'Tunggu Verifikasi',
+            'bukti_nota' => 'bukti.png',
+            'total' => 150000,
+        ]);
+
+        // Kirim request approve (validasi) oleh superadmin
+        $response = $this->actingAs($superadmin)
+            ->post(route('superadmin.acc-reimbursement.validasi', $reimbursement->id));
+
+        // Harus berhasil redirect (302) dengan session success
+        $response->assertStatus(302);
+        $response->assertSessionHas('success', 'Reimbursement berhasil disetujui.');
+
+        // Status di database harus berubah menjadi 'Disetujui'
+        $this->assertDatabaseHas('pengeluarans', [
+            'id' => $reimbursement->id,
+            'status' => 'Disetujui',
+        ]);
+    }
 }

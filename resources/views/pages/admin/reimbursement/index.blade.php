@@ -152,7 +152,7 @@
 
                         <button
                             type="button"
-                            onclick="openModalTambahItem()"
+                            onclick="openModalTambahItem(this)"
                             class="mt-2 text-sm text-blue-600 hover:underline">
 
                             + Tambahkan Item
@@ -345,11 +345,12 @@
             console.log(itemData[value]);
 
             const item = itemData[value];
+            const inputSatuan = select.closest(".item").querySelector(".satuan");
 
-            if(!item) return;
-
-            const inputSatuan =
-                select.closest(".item").querySelector(".satuan");
+            if(!item) {
+                inputSatuan.value = "";
+                return;
+            }
 
             inputSatuan.value = item.satuan;
 
@@ -372,7 +373,7 @@
     });
     
 
-    const optionItems = `
+    let optionItems = `
         @foreach($itemLogistiks as $item)
 
         <option
@@ -413,7 +414,7 @@
 
         <button
         type="button"
-        onclick="openModalTambahItem()"
+        onclick="openModalTambahItem(this)"
         class="mt-2 text-sm text-blue-600">
 
         + Tambahkan Item
@@ -468,7 +469,7 @@
         <button
         type="button"
         class="text-red-600"
-        onclick="this.parentElement.remove()">
+        onclick="removeItem(this)">
 
         Hapus Item
 
@@ -490,12 +491,36 @@
 
         }
 
-    function openModalTambahItem() {
+    let activeTomSelect = null;
+
+    function openModalTambahItem(button) {
+        if (button) {
+            const itemDiv = button.closest('.item');
+            const selectEl = itemDiv.querySelector('.item-select');
+            let ts = selectEl.tomselect;
+            if (!ts) {
+                ts = tomSelectInstances.find(instance => instance.input === selectEl);
+            }
+            activeTomSelect = ts || tomSelectInstances[tomSelectInstances.length - 1];
+        } else {
+            activeTomSelect = tomSelectInstances[tomSelectInstances.length - 1];
+        }
         document.getElementById('modal-tambah-item').classList.remove('hidden');
     }
 
     function closeModalTambahItem() {
         document.getElementById('modal-tambah-item').classList.add('hidden');
+    }
+
+    function removeItem(button) {
+        const itemDiv = button.closest('.item');
+        const select = itemDiv.querySelector('.item-select');
+        if (select && select.tomselect) {
+            const ts = select.tomselect;
+            tomSelectInstances = tomSelectInstances.filter(instance => instance !== ts);
+            ts.destroy();
+        }
+        itemDiv.remove();
     }
 
     async function simpanItemBaru() {
@@ -558,20 +583,32 @@
 
     function tambahItemKeDropdown(item){
 
-    const ts = tomSelectInstances[tomSelectInstances.length-1];
+        // 1. Add to itemData
+        itemData[item.id] = {
+            satuan: item.satuan
+        };
 
-        ts.addOption({
+        // 2. Append to optionItems for future added items
+        optionItems += `
+            <option value="${item.id}" data-satuan="${item.satuan}">
+                ${item.nama_item}
+            </option>
+        `;
 
-            value:item.id,
-
-            text:item.nama_item,
-
-            satuan:item.satuan
-
+        // 3. Add to all existing TomSelect dropdown options
+        tomSelectInstances.forEach(ts => {
+            ts.addOption({
+                value: item.id,
+                text: item.nama_item,
+                satuan: item.satuan
+            });
+            ts.refreshOptions(false);
         });
 
-        ts.refreshOptions(false);
-        ts.setValue(item.id);
+        // 4. Set the value of the active TomSelect dropdown
+        if (activeTomSelect) {
+            activeTomSelect.setValue(item.id);
+        }
 
     }
 

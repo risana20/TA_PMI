@@ -20,13 +20,34 @@ class AccReimbursementController extends Controller
         }
 
         $reimbursements = $query->paginate(10)->withQueryString();
-        return view('pages.superadmin.acc-reimbursement.index', compact('reimbursements', 'search'));
+
+        // Hitung saldo keuangan saat ini
+        $totalPemasukan = \App\Models\DonasiUang::whereHas('donasi', function($q) {
+            $q->where('status', 'Selesai');
+        })->sum('nominal');
+
+        $totalPengeluaran = Reimbursement::where('status', 'Disetujui')->sum('total');
+        $saldo = $totalPemasukan - $totalPengeluaran;
+
+        return view('pages.superadmin.acc-reimbursement.index', compact('reimbursements', 'search', 'saldo'));
     }
 
     public function validasi(Reimbursement $reimbursement)
     {
         if ($reimbursement->status !== 'Tunggu Verifikasi') {
             return back()->with('error', 'Data sudah diproses.');
+        }
+
+        // Hitung saldo keuangan saat ini
+        $totalPemasukan = \App\Models\DonasiUang::whereHas('donasi', function($q) {
+            $q->where('status', 'Selesai');
+        })->sum('nominal');
+
+        $totalPengeluaran = Reimbursement::where('status', 'Disetujui')->sum('total');
+        $saldo = $totalPemasukan - $totalPengeluaran;
+
+        if ($reimbursement->total > $saldo) {
+            return back()->with('error', 'Persetujuan gagal! Saldo keuangan tidak mencukupi untuk memproses reimbursement ini.');
         }
 
         $reimbursement->update([
