@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\KeuanganController;
 use App\Http\Controllers\Admin\ReimbursementController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\ManajemenAkunPublikController;
+use App\Http\Controllers\Admin\ItemLogistikController;
 use App\Http\Controllers\Superadmin\AccReimbursementController;
 use App\Http\Controllers\Superadmin\ManajemenAkunGriyaController;
 
@@ -122,6 +123,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/logistik/{logistik}/toggle-publik', [LogistikController::class, 'togglePublik'])->name('logistik.toggle-publik');
     Route::post('/logistik/{logistik}/pemasukan', [LogistikController::class, 'storePemasukan'])->name('logistik.store-pemasukan');
     Route::post('/logistik/{logistik}/pengeluaran', [LogistikController::class, 'storePengeluaran'])->name('logistik.store-pengeluaran');
+    Route::post('/item-logistik/store',[ItemLogistikController::class,'store'])->name('item-logistik.store');
 
     // Kunjungan
     Route::get('/kunjungan', [KunjunganController::class, 'index'])->name('kunjungan.index');

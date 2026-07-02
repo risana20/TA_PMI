@@ -27,4 +27,9 @@ class ItemLogistik extends Model
     {
         return $this->hasMany(StokLogistik::class);
     }
+    
+    public function detailReimbursements()
+    {
+        return $this->hasMany(DetailReimbursement::class);
+    }
 }

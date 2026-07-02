@@ -10,15 +10,15 @@ class DetailReimbursement extends Model
     use HasFactory;
 
     protected $fillable = [
-        'reimbursement_id', 'nama_kebutuhan', 'nominal', 'jenis_logistik_id'
+        'reimbursement_id', 'item_logistik_id', 'jumlah', 'nominal'
     ];
     public function reimbursement()
     {
         return $this->belongsTo(Reimbursement::class);
     }
 
-    public function jenisLogistik()
+    public function itemLogistik()
     {
-        return $this->belongsTo(JenisLogistik::class);
+        return $this->belongsTo(ItemLogistik::class);
     }
 }

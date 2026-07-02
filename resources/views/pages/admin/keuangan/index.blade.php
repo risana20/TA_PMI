@@ -154,8 +154,9 @@
                             @forelse($p->detailReimbursements as $detail)
 
                                 <div>
-                                    {{ $detail->nama_kebutuhan }}
-                                    ({{ $detail->jenisLogistik->nama_jenis_logistik ?? '-' }})
+                                    {{ $detail->itemLogistik->nama_item ?? '-' }}
+                                    ({{ $detail->itemLogistik->jenisLogistik->nama_jenis_logistik ?? '-' }})
+                                    - {{ $detail->jumlah }} {{ $detail->itemLogistik->satuan ?? '' }}
                                     - Rp {{ number_format($detail->nominal,0,',','.') }}
                                 </div>
 

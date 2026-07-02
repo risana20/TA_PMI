@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Reimbursement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\StokLogistik;
 
 class AccReimbursementController extends Controller
 {
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $query  = Reimbursement::with(['user', 'detailReimbursements.jenisLogistik'])->latest();
+        $query  = Reimbursement::with(['user', 'detailReimbursements.itemLogistik'])->latest();
 
         if ($search) {
             $query->whereHas('user', fn($q) => $q->where('name', 'like', "%{$search}%"));
@@ -33,6 +34,17 @@ class AccReimbursementController extends Controller
             'tgl_validasi' => now(),
             'validated_by' => Auth::id(),
         ]);
+        foreach ($reimbursement->detailReimbursements as $detail) {
+
+            $stok = StokLogistik::where(
+                'item_logistik_id',
+                $detail->item_logistik_id
+            )->first();
+
+            if ($stok) {
+                $stok->increment('jumlah_saat_ini', $detail->jumlah);
+            }
+        }
 
         return back()->with('success', 'Reimbursement berhasil disetujui.');
     }

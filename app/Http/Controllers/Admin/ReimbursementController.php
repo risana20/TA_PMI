@@ -7,21 +7,27 @@ use App\Models\Reimbursement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DetailReimbursement;
+use App\Models\ItemLogistik;
 use App\Models\JenisLogistik;
 
 class ReimbursementController extends Controller
 {
     public function index()
     {
-        
-        $reimbursements = Reimbursement::with('detailReimbursements.jenisLogistik')
+       
+        $reimbursements = Reimbursement::with('detailReimbursements.itemLogistik')
             ->where('user_id', Auth::id())
             ->latest()
             ->paginate(10);
 
+        $itemLogistiks = ItemLogistik::with('jenisLogistik')->get();
+        $satuans = ItemLogistik::select('satuan')
+            ->distinct()
+            ->orderBy('satuan')
+            ->pluck('satuan');
         $jenisLogistiks = JenisLogistik::all();
-
-        return view('pages.admin.reimbursement.index', compact('reimbursements', 'jenisLogistiks'));
+        
+        return view('pages.admin.reimbursement.index', compact('reimbursements', 'itemLogistiks', 'jenisLogistiks','satuans'));
          
     }
 
@@ -30,12 +36,13 @@ class ReimbursementController extends Controller
        
         $request->validate([
             'details' => 'required|array|min:1',
-            'details.*.nama_kebutuhan' => 'required|string',
-            'details.*.nominal' => 'required|integer|min:1',
-            'details.*.jenis_logistik_id' => 'required|exists:jenis_logistiks,id',
-            'bukti_nota' => 'required|nullable|image|max:10000',
+            'details.*.item_logistik_id' => 'required|exists:item_logistiks,id',
+            'details.*.jumlah' => 'required|integer|min:1',
+            'details.*.nominal' => 'required|numeric|min:1',
+            'bukti_nota' => 'required|image|max:10000',
         ]);
         // dd('validasi lolos');
+       
 
         // upload file
         $bukti = null;
@@ -51,18 +58,20 @@ class ReimbursementController extends Controller
             'bukti_nota' => $bukti,
             'total' => 0,
         ]);
+        
 
         // dd($reimbursement);
 
         $total = 0;
 
         // simpan detail
+        
         foreach ($request->details as $item) {
             DetailReimbursement::create([
                 'reimbursement_id' => $reimbursement->id,
-                'nama_kebutuhan' => $item['nama_kebutuhan'],
+                'item_logistik_id' => $item ['item_logistik_id'],
+                'jumlah' => $item['jumlah'],
                 'nominal' => $item['nominal'],
-                'jenis_logistik_id' => $item['jenis_logistik_id'],
             ]);
 
             $total += $item['nominal'];

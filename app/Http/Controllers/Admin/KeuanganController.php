@@ -21,7 +21,7 @@ class KeuanganController extends Controller
 
         // Pengeluaran: Reimbursement yang statusnya 'Disetujui'
         $pengeluarans = Reimbursement::where('status', 'Disetujui')
-            ->with('user','detailReimbursements.jenisLogistik')
+            ->with('user','detailReimbursements.itemLogistik.jenisLogistik')
             ->latest()
             ->paginate(10, ['*'], 'pengeluaran_page');
 
@@ -34,11 +34,9 @@ class KeuanganController extends Controller
         $saldo = $totalPemasukan - $totalPengeluaran;
 
         // Data grafik distribusi pengeluaran per kategori
-        $distribusiPengeluaran = DetailReimbursement::selectRaw('jenis_logistik_id as kategori, SUM(nominal) as total')
-            ->whereHas('reimbursement', function ($q) {
-                $q->where('status', 'disetujui');
-            })
-            ->groupBy('jenis_logistik_id')
+        $distribusiPengeluaran = DetailReimbursement::selectRaw('item_logistik_id as kategori, SUM(nominal) as total')
+            ->whereHas('reimbursement', function ($q) {$q->where('status', 'Disetujui');})
+            ->groupBy('item_logistik_id')
             ->get();
 
         $tahun = $request->tahun ?? date('Y');
@@ -79,11 +77,10 @@ class KeuanganController extends Controller
         // dd($tahun, $bulan, $pemasukanPerBulan);
 
         // DONUT CHART
-        //$bulanDipilih = $bulan;
 
 
         $barangPerBulan = DetailReimbursement::selectRaw(
-            'nama_kebutuhan, SUM(nominal) as total'
+            'item_logistik_id, SUM(nominal) as total'
         )
         ->whereHas('reimbursement', function($q) use ($bulan,$tahun){
 
@@ -92,7 +89,7 @@ class KeuanganController extends Controller
             ->whereYear('tgl_validasi',$tahun);
 
         })
-        ->groupBy('nama_kebutuhan')
+        ->groupBy('item_logistik_id')
         ->get();
 
         return view('pages.admin.keuangan.index', compact(

@@ -43,11 +43,11 @@
                 </td>
 
                 <td class="px-4 py-4 text-gray-600">
-                    @foreach($r->detailReimbursements as $d)
+                   @foreach($r->detailReimbursements as $d)
                         <div class="text-sm">
-                            • {{ $d->nama_kebutuhan }}
-                            ({{ $d->jenisLogistik->nama_jenis_logistik ?? '-' }})
-                            - Rp {{ number_format($d->nominal, 0, ',', '.') }}
+                            • {{ $d->itemLogistik->nama_item ?? '-' }}
+                            ({{ $d->jumlah }} {{ $d->itemLogistik->satuan ?? '' }})
+                            - Rp {{ number_format($d->nominal,0,',','.') }}
                         </div>
                     @endforeach
                 </td>
@@ -122,38 +122,98 @@
 
             <!-- DETAIL ITEM -->
             <div id="items">
-                <div class="item space-y-2 border p-3 rounded-lg mb-3">
+                <div class="item border rounded-lg p-4 mb-3 space-y-3">
 
-                    <input type="text"
-                        name="details[0][nama_kebutuhan]"
-                        placeholder="Nama kebutuhan"
-                        class="w-full border rounded px-3 py-2 text-sm">
+                    {{-- Item Logistik --}}
+                    <div>
+                        <label class="block text-sm font-medium mb-1">
+                            Nama Kebutuhan
+                        </label>
 
-                    <input type="number"
-                        name="details[0][nominal]"
-                        placeholder="Nominal"
-                        min="0"
-                        class="w-full border rounded px-3 py-2 text-sm">
+                        <select
+                            name="details[0][item_logistik_id]"
+                            class="item-select w-full border rounded px-3 py-2 text-sm"
+                            required>
 
-                    <select name="details[0][jenis_logistik_id]"
-                        class="w-full border rounded px-3 py-2 text-sm">
+                            <option value="">Pilih Item Logistik</option>
 
-                        <option value="">Pilih Jenis Logistik</option>
+                            @foreach($itemLogistiks as $item)
 
-                        @foreach($jenisLogistiks as $j)
-                            <option value="{{ $j->id }}"
-                                {{ old('details.0.jenis_logistik_id') == $j->id ? 'selected' : '' }}>
-                                {{ $j->nama_jenis_logistik }}
-                            </option>
-                        @endforeach
-                    </select>
+                                <option
+                                    value="{{ $item->id }}"
+                                    data-satuan="{{ $item->satuan }}">
+
+                                    {{ $item->nama_item }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                        <button
+                            type="button"
+                            onclick="openModalTambahItem()"
+                            class="mt-2 text-sm text-blue-600 hover:underline">
+
+                            + Tambahkan Item
+
+                        </button>
+
+                    </div>
+
+                    {{-- Satuan --}}
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Satuan
+                        </label>
+
+                        <input
+                            type="text"
+                            class="satuan w-full border rounded px-3 py-2 bg-gray-100"
+                            readonly>
+
+                    </div>
+
+                    {{-- Jumlah --}}
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Jumlah
+                        </label>
+
+                        <input
+                            type="number"
+                            name="details[0][jumlah]"
+                            min="1"
+                            class="w-full border rounded px-3 py-2 text-sm"
+                            required>
+
+                    </div>
+
+                    {{-- Nominal --}}
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Nominal
+                        </label>
+
+                        <input
+                            type="number"
+                            name="details[0][nominal]"
+                            min="1"
+                            class="w-full border rounded px-3 py-2 text-sm"
+                            required>
+                    </div>
+
                 </div>
-            </div>
 
+            </div>
             <button type="button"
                 onclick="addItem()"
                 class="text-sm text-blue-600 font-semibold">
-                + Tambah Item
+                + Tambah Item Reimbursement
             </button>
 
             <div>
@@ -174,70 +234,353 @@
                     Kirim Ajuan
                 </button>
             </div>
-
         </form>
     </div>
 </div>
+{{-- Modal Tambah Item Logistik --}}
+<div id="modal-tambah-item"
+    class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
 
-<script>
-let index = document.querySelectorAll('#items .item').length;
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
 
-const jenisLogistikOptions = `
-    @foreach($jenisLogistiks as $j)
-        <option value="{{ $j->id }}">
-            {{ $j->nama_jenis_logistik }}
-        </option>
-    @endforeach
-`;
-
-function addItem() {
-    const container = document.getElementById('items');
-
-    container.insertAdjacentHTML('beforeend', `
-        <div class="item space-y-2 border p-3 rounded-lg mb-3">
-
-            <input type="text"
-                name="details[${index}][nama_kebutuhan]"
-                placeholder="Nama kebutuhan"
-                class="w-full border rounded px-3 py-2 text-sm"
-                required>
-
-            <input type="number"
-                name="details[${index}][nominal]"
-                placeholder="Nominal"
-                min="0"
-                class="w-full border rounded px-3 py-2 text-sm"
-                required>
-
-            <select
-                name="details[${index}][jenis_logistik_id]"
-                class="w-full border rounded px-3 py-2 text-sm"
-                required>
-
-                <option value="">Pilih Jenis Logistik</option>
-
-                ${jenisLogistikOptions}
-
-            </select>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">Tambah Item Logistik</h3>
 
             <button type="button"
-                onclick="this.parentElement.remove()"
-                class="text-red-600 text-sm font-semibold">
-                Hapus Item
+                onclick="closeModalTambahItem()"
+                class="text-gray-400 hover:text-gray-600">
+                ✕
+            </button>
+        </div>
+
+        <div class="space-y-4">
+
+            {{-- Nama Item --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Nama Item
+                </label>
+
+                <input type="text"
+                    id="nama_item_baru"
+                    class="w-full border rounded-lg px-3 py-2"
+                    placeholder="Masukkan nama item">
+            </div>
+
+            {{-- Jenis Logistik --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Jenis Logistik
+                </label>
+
+                <select id="jenis_logistik_baru"
+                    class="w-full border rounded-lg px-3 py-2">
+
+                    <option value="">Pilih Jenis Logistik</option>
+
+                    @foreach($jenisLogistiks as $jenis)
+                        <option value="{{ $jenis->id }}">
+                            {{ $jenis->nama_jenis_logistik }}
+                        </option>
+                    @endforeach
+
+                </select>
+            </div>
+
+            {{-- Satuan --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Satuan
+                </label>
+
+                <input type="text"
+                    id="satuan_baru"
+                    class="w-full border rounded-lg px-3 py-2"
+                    placeholder="Contoh: Kg, Pcs, Box">
+            </div>
+
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+
+            <button
+                type="button"
+                onclick="closeModalTambahItem()"
+                class="border px-4 py-2 rounded-lg">
+                Batal
+            </button>
+
+            <button
+                type="button"
+                onclick="simpanItemBaru()"
+                class="bg-red-600 text-white px-4 py-2 rounded-lg">
+                Simpan
             </button>
 
         </div>
-    `);
 
-    index++;
-}
+    </div>
 
+</div>
 
-@if ($errors->any())
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('modal-ajukan').classList.remove('hidden');
-});
-@endif
+<script>
+
+    let tomSelectInstances = [];
+    let index = document.querySelectorAll('#items .item').length;
+    const itemData = {
+        @foreach($itemLogistiks as $item)
+                "{{ $item->id }}": {
+                    satuan: "{{ $item->satuan }}"
+                },
+            @endforeach
+        };
+
+    function initTomSelect(select){
+
+    const ts = new TomSelect(select,{
+
+        create:false,
+
+        onChange:function(value){
+            console.log(value);
+            console.log(itemData[value]);
+
+            const item = itemData[value];
+
+            if(!item) return;
+
+            const inputSatuan =
+                select.closest(".item").querySelector(".satuan");
+
+            inputSatuan.value = item.satuan;
+
+        }
+
+    });
+
+    tomSelectInstances.push(ts);
+
+    return ts;
+    }
+    document.addEventListener("DOMContentLoaded",function(){
+
+        document.querySelectorAll(".item-select").forEach(select=>{
+
+            initTomSelect(select);
+
+        });
+
+    });
+    
+
+    const optionItems = `
+        @foreach($itemLogistiks as $item)
+
+        <option
+        value="{{ $item->id }}"
+        data-satuan="{{ $item->satuan }}">
+
+        {{ $item->nama_item }}
+
+        </option>
+
+        @endforeach
+    `;
+
+    function addItem(){
+
+        const html=`
+
+        <div class="item border rounded-lg p-4 mb-3 space-y-3">
+
+        <div>
+
+        <label class="block text-sm font-medium mb-1">
+        Nama Kebutuhan
+        </label>
+
+        <select
+        name="details[${index}][item_logistik_id]"
+        class="item-select w-full"
+        required>
+
+        <option value="">
+        Pilih Item
+        </option>
+
+        ${optionItems}
+
+        </select>
+
+        <button
+        type="button"
+        onclick="openModalTambahItem()"
+        class="mt-2 text-sm text-blue-600">
+
+        + Tambahkan Item
+
+        </button>
+
+        </div>
+
+        <div>
+
+        <label class="block text-sm font-medium mb-1">
+        Satuan
+        </label>
+
+        <input
+        type="text"
+        class="satuan w-full border rounded px-3 py-2 bg-gray-100"
+        readonly>
+
+        </div>
+
+        <div>
+
+        <label class="block text-sm font-medium mb-1">
+        Jumlah
+        </label>
+
+        <input
+        type="number"
+        name="details[${index}][jumlah]"
+        min="1"
+        required
+        class="w-full border rounded px-3 py-2">
+
+        </div>
+
+        <div>
+
+        <label class="block text-sm font-medium mb-1">
+        Nominal
+        </label>
+
+        <input
+        type="number"
+        name="details[${index}][nominal]"
+        min="1"
+        required
+        class="w-full border rounded px-3 py-2">
+
+        </div>
+
+        <button
+        type="button"
+        class="text-red-600"
+        onclick="this.parentElement.remove()">
+
+        Hapus Item
+
+        </button>
+
+        </div>
+
+        `;
+
+            const container=document.getElementById("items");
+
+            container.insertAdjacentHTML("beforeend",html);
+
+            const selectBaru=container.querySelectorAll(".item-select");
+
+            initTomSelect(selectBaru[selectBaru.length-1]);
+
+            index++;
+
+        }
+
+    function openModalTambahItem() {
+        document.getElementById('modal-tambah-item').classList.remove('hidden');
+    }
+
+    function closeModalTambahItem() {
+        document.getElementById('modal-tambah-item').classList.add('hidden');
+    }
+
+    async function simpanItemBaru() {
+
+        let nama = document.getElementById('nama_item_baru').value;
+        let satuan = document.getElementById('satuan_baru').value;
+        let jenis = document.getElementById('jenis_logistik_baru').value;
+
+        if (!nama || !satuan || !jenis) {
+            alert('Semua field wajib diisi.');
+            return;
+        }
+
+        try {
+
+            const response = await fetch("{{ route('admin.item-logistik.store') }}", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    "Accept": "application/json"
+                },
+
+                body: JSON.stringify({
+                    nama_item: nama,
+                    satuan: satuan,
+                    jenis_logistik_id: jenis
+                })
+
+            });
+
+            const result = await response.json();
+
+            if(!response.ok){
+
+                alert("Gagal menambahkan item.");
+
+                return;
+
+            }
+
+            tambahItemKeDropdown(result.item);
+            document.getElementById("nama_item_baru").value="";
+            document.getElementById("jenis_logistik_baru").value="";
+            document.getElementById("satuan_baru").value="";
+
+            closeModalTambahItem();
+
+            } catch(error){
+
+                console.log(error);
+
+                alert("Terjadi kesalahan.");
+
+            }
+
+    }
+
+    function tambahItemKeDropdown(item){
+
+    const ts = tomSelectInstances[tomSelectInstances.length-1];
+
+        ts.addOption({
+
+            value:item.id,
+
+            text:item.nama_item,
+
+            satuan:item.satuan
+
+        });
+
+        ts.refreshOptions(false);
+        ts.setValue(item.id);
+
+    }
+
+    @if ($errors->any())
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('modal-ajukan').classList.remove('hidden');
+    });
+    @endif
 </script>
 
 @endsection

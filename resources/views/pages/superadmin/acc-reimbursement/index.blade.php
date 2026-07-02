@@ -29,13 +29,20 @@
                     @foreach($r->detailReimbursements as $detail)
                         <div class="mb-2 text-sm border-b pb-1">
                             <div>
-                                <strong>{{ $detail->nama_kebutuhan }}</strong>
+                                <strong>{{ $detail->itemLogistik->nama_item ?? '-' }}</strong>
                             </div>
 
                             <div>
                                 Jenis:
-                                {{ $detail->jenisLogistik->nama_jenis_logistik ?? '-' }}
+                                {{ $detail->itemLogistik->jenisLogistik->nama_jenis_logistik ?? '-' }}
                             </div>
+
+                            <div>
+                                Jumlah:
+                                {{ $detail->jumlah }}
+                                {{ $detail->itemLogistik->satuan ?? '' }}
+                            </div>
+
                             <div>
                                 Rp {{ number_format($detail->nominal, 0, ',', '.') }}
                             </div>
@@ -66,19 +73,29 @@
                 <td class="px-4 py-4">
                 @if($r->status === 'Tunggu Verifikasi')
 
-                        <button type="submit"
-                            class="text-green-600 hover:text-green-800 text-xs font-medium mr-2">
-                            Setujui
-                        </button>
-                    
+                    <div class="flex items-center gap-2">
 
-                    
+                        <form action="{{ route('superadmin.acc-reimbursement.validasi', $r->id) }}"
+                            method="POST"
+                            class="inline">
+
+                            @csrf
+
+                            <button
+                                type="submit"
+                                class="text-green-600 hover:text-green-800 text-xs font-medium">
+                                Setujui
+                            </button>
+
+                        </form>
+
                         <button type="button"
                             onclick="openTolakModal({{ $r->id }})"
                             class="text-red-600 hover:text-red-800 text-xs font-medium">
                             Tolak
                         </button>
-                    
+
+                    </div>
 
                 @endif
             </td>
