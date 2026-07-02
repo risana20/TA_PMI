@@ -261,4 +261,19 @@ class LogistikController extends Controller
 
         return back()->with('success', 'Pengeluaran stok berhasil dicatat.');
     }
+
+    public function updateStok(Request $request, $id)
+    {
+        $logistik = StokLogistik::findOrFail($id);
+
+        $request->validate([
+            'jumlah_minimum' => 'required|integer|min:0',
+        ]);
+
+        $logistik->update([
+            'jumlah_minimum' => $request->jumlah_minimum,
+        ]);
+
+        return back()->with('success', 'Stok minimum berhasil diperbarui.');
+    }
 }

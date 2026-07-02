@@ -63,9 +63,16 @@
             <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Stok Saat Ini</p>
             <p class="text-base sm:text-lg font-bold {{ $logistik->status !== 'Aman' ? 'text-red-600' : 'text-gray-800' }}">{{ $logistik->jumlah_saat_ini }}</p>
         </div>
-        <div class="bg-gray-50 rounded-xl p-3 sm:p-4 text-center">
+        <div class="bg-gray-50 rounded-xl p-3 sm:p-4 text-center relative group">
             <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Stok Minimum</p>
-            <p class="text-base sm:text-lg font-bold text-gray-800">{{ $logistik->jumlah_minimum }}</p>
+            <div class="flex items-center justify-center gap-1.5">
+                <p class="text-base sm:text-lg font-bold text-gray-800">{{ $logistik->jumlah_minimum }}</p>
+                <button onclick="document.getElementById('modal-edit-minimum').classList.remove('hidden')" 
+                    class="text-gray-400 hover:text-red-500 transition" 
+                    title="Edit Stok Minimum">
+                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                </button>
+            </div>
         </div>
         <div class="bg-gray-50 rounded-xl p-3 sm:p-4 text-center">
             <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Satuan</p>
@@ -284,6 +291,33 @@
 
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" onclick="document.getElementById('modal-pengeluaran').classList.add('hidden')"
+                    class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-5 py-2 text-sm font-medium transition">Batal</button>
+                <button type="submit"
+                    class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-6 py-2 text-sm transition">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Modal: Edit Stok Minimum --}}
+<div id="modal-edit-minimum" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 sm:p-6">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-lg text-gray-900">Edit Stok Minimum</h3>
+            <button onclick="document.getElementById('modal-edit-minimum').classList.add('hidden')"
+                class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+        <p class="text-sm text-gray-400 mb-5">Atur ambang batas stok minimum untuk item ini</p>
+
+        <form method="POST" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'logistik.update-stok', $logistik) }}" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Stok Minimum Baru</label>
+                <input type="number" name="jumlah_minimum" min="0" value="{{ $logistik->jumlah_minimum }}" required
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('modal-edit-minimum').classList.add('hidden')"
                     class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-5 py-2 text-sm font-medium transition">Batal</button>
                 <button type="submit"
                     class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-6 py-2 text-sm transition">Simpan</button>

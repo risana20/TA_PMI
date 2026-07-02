@@ -282,4 +282,42 @@ class DonasiDanLogistikTest extends TestCase
         $response->assertSee('Donatur A');
         $response->assertDontSee('Donatur B');
     }
+
+    public function test_admin_bisa_mengedit_stok_minimum_logistik()
+    {
+        $admin = User::factory()->create([
+            'role_id' => $this->roleAdmin->id,
+            'is_active' => true,
+        ]);
+        $admin->markEmailAsVerified();
+
+        $jenisLogistik = JenisLogistik::create([
+            'nama_jenis_logistik' => 'Makanan',
+            'deskripsi' => 'Konsumsi'
+        ]);
+
+        $itemLogistik = \App\Models\ItemLogistik::create([
+            'jenis_logistik_id' => $jenisLogistik->id,
+            'nama_item' => 'Beras Pandan Wangi',
+            'satuan' => 'Kg',
+        ]);
+
+        $stokLogistik = \App\Models\StokLogistik::create([
+            'item_logistik_id' => $itemLogistik->id,
+            'jumlah_saat_ini' => 50,
+            'jumlah_minimum' => 10,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.logistik.update-stok', $stokLogistik->id), [
+            'jumlah_minimum' => 15,
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('success', 'Stok minimum berhasil diperbarui.');
+
+        $this->assertDatabaseHas('stok_logistiks', [
+            'id' => $stokLogistik->id,
+            'jumlah_minimum' => 15,
+        ]);
+    }
 }
