@@ -186,7 +186,7 @@
                             type="number"
                             name="details[0][jumlah]"
                             min="1"
-                            class="w-full border rounded px-3 py-2 text-sm"
+                            class="input-jumlah w-full border rounded px-3 py-2 text-sm"
                             required>
 
                     </div>
@@ -202,7 +202,7 @@
                             type="number"
                             name="details[0][nominal]"
                             min="1"
-                            class="w-full border rounded px-3 py-2 text-sm"
+                            class="input-nominal w-full border rounded px-3 py-2 text-sm"
                             required>
                     </div>
 
@@ -228,7 +228,8 @@
                     Batal
                 </button>
 
-                <button type="submit"
+                <button type="button"
+                    onclick="showKonfirmasiModal()"
                     class="bg-red-600 text-white px-4 py-2 rounded text-sm font-semibold">
                     Kirim Ajuan
                 </button>
@@ -322,10 +323,67 @@
 
 </div>
 
+{{-- Modal Konfirmasi Reimbursement --}}
+<div id="modal-konfirmasi" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto relative animate-fade-in">
+
+        {{-- Header --}}
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-circle-question text-red-600 text-lg"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg text-gray-800">Konfirmasi Pengajuan</h3>
+                <p class="text-sm text-gray-500">Pastikan rincian berikut sudah benar</p>
+            </div>
+        </div>
+
+        {{-- Rincian Item --}}
+        <div class="mb-4">
+            <p class="text-xs font-semibold uppercase text-gray-400 tracking-wide mb-2">Rincian Item Reimbursement</p>
+            <div id="konfirmasi-items" class="space-y-2">
+                {{-- Diisi JS --}}
+            </div>
+        </div>
+
+        {{-- Garis pemisah --}}
+        <div class="border-t border-gray-100 my-4"></div>
+
+        {{-- Total --}}
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-600">Total Nominal</span>
+            <span id="konfirmasi-total" class="text-base font-bold text-red-600">Rp 0</span>
+        </div>
+
+        {{-- Nota --}}
+        <div id="konfirmasi-nota-wrapper" class="mt-3 text-sm text-gray-500 hidden">
+            <span class="font-medium text-gray-600">Bukti Nota:</span>
+            <span id="konfirmasi-nota" class="ml-1"></span>
+        </div>
+
+        {{-- Tombol Aksi --}}
+        <div class="flex justify-end gap-3 mt-6">
+            <button
+                type="button"
+                onclick="document.getElementById('modal-konfirmasi').classList.add('hidden')"
+                class="border border-gray-300 text-gray-600 hover:bg-gray-50 px-5 py-2 rounded-lg text-sm font-medium transition">
+                Batal
+            </button>
+            <button
+                type="button"
+                onclick="submitAjuan()"
+                class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                Ya, Ajukan
+            </button>
+        </div>
+
+    </div>
+</div>
+
 <script>
 
     let tomSelectInstances = [];
-    let index = document.querySelectorAll('#items .item').length;
+    let index = document.querySelectorAll('#items > .item').length;
     const itemData = {
         @foreach($itemLogistiks as $item)
                 "{{ $item->id }}": {
@@ -364,7 +422,7 @@
     }
     document.addEventListener("DOMContentLoaded",function(){
 
-        document.querySelectorAll(".item-select").forEach(select=>{
+        document.querySelectorAll("select.item-select").forEach(select=>{
 
             initTomSelect(select);
 
@@ -447,7 +505,7 @@
         name="details[${index}][jumlah]"
         min="1"
         required
-        class="w-full border rounded px-3 py-2">
+        class="input-jumlah w-full border rounded px-3 py-2">
 
         </div>
 
@@ -462,7 +520,7 @@
         name="details[${index}][nominal]"
         min="1"
         required
-        class="w-full border rounded px-3 py-2">
+        class="input-nominal w-full border rounded px-3 py-2">
 
         </div>
 
@@ -483,7 +541,7 @@
 
             container.insertAdjacentHTML("beforeend",html);
 
-            const selectBaru=container.querySelectorAll(".item-select");
+            const selectBaru=container.querySelectorAll("select.item-select");
 
             initTomSelect(selectBaru[selectBaru.length-1]);
 
@@ -496,7 +554,7 @@
     function openModalTambahItem(button) {
         if (button) {
             const itemDiv = button.closest('.item');
-            const selectEl = itemDiv.querySelector('.item-select');
+            const selectEl = itemDiv.querySelector('select');
             let ts = selectEl.tomselect;
             if (!ts) {
                 ts = tomSelectInstances.find(instance => instance.input === selectEl);
@@ -514,7 +572,7 @@
 
     function removeItem(button) {
         const itemDiv = button.closest('.item');
-        const select = itemDiv.querySelector('.item-select');
+        const select = itemDiv.querySelector('select');
         if (select && select.tomselect) {
             const ts = select.tomselect;
             tomSelectInstances = tomSelectInstances.filter(instance => instance !== ts);
@@ -610,6 +668,87 @@
             activeTomSelect.setValue(item.id);
         }
 
+    }
+
+    function showKonfirmasiModal() {
+        const form = document.querySelector('#modal-ajukan form');
+
+        // Kumpulkan semua item
+        const items = document.querySelectorAll('#items > .item');
+        let total = 0;
+        let itemsHTML = '';
+        let valid = true;
+
+        items.forEach((item, i) => {
+            const selectEl = item.querySelector('select');
+            const satuanEl = item.querySelector('.satuan');
+            const jumlahEl = item.querySelector('.input-jumlah') || item.querySelector('input[name*="[jumlah]"]');
+            const nominalEl = item.querySelector('.input-nominal') || item.querySelector('input[name*="[nominal]"]');
+
+            // Ambil nama item — baca value dari native select (selalu di-sync TomSelect),
+            // lalu cari teks label-nya
+            let namaItem = '';
+            const selectedVal = selectEl ? selectEl.value : '';
+
+            if (selectEl) {
+                if (selectEl.tomselect && selectEl.tomselect.options[selectedVal]) {
+                    namaItem = (selectEl.tomselect.options[selectedVal].text || selectEl.tomselect.options[selectedVal].label || '').trim();
+                }
+                if (!namaItem && selectEl.selectedIndex !== -1) {
+                    const nativeOpt = selectEl.options[selectEl.selectedIndex];
+                    namaItem = nativeOpt ? nativeOpt.text.trim() : '';
+                }
+            }
+
+            const satuan = satuanEl ? satuanEl.value.trim() : '';
+            const jumlah = jumlahEl ? (parseFloat(jumlahEl.value) || 0) : 0;
+            const nominal = nominalEl ? (parseFloat(nominalEl.value) || 0) : 0;
+
+            if (!selectedVal || jumlah < 1 || nominal < 1) {
+                valid = false;
+            }
+
+            namaItem = namaItem || 'Item Kebutuhan';
+
+            total += nominal;
+
+            itemsHTML += `
+                <div class="flex items-start justify-between bg-gray-50 rounded-lg px-4 py-3">
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-gray-800">${namaItem || '<span class="text-red-400">Belum dipilih</span>'}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">${jumlah} ${satuan}</p>
+                    </div>
+                    <p class="text-sm font-bold text-gray-700 ml-4">Rp ${nominal.toLocaleString('id-ID')}</p>
+                </div>
+            `;
+        });
+
+        if (!valid) {
+            alert('Harap lengkapi semua item reimbursement terlebih dahulu.');
+            return;
+        }
+
+        // Isi konten modal konfirmasi
+        document.getElementById('konfirmasi-items').innerHTML = itemsHTML;
+        document.getElementById('konfirmasi-total').textContent = 'Rp ' + total.toLocaleString('id-ID');
+
+        // Cek bukti nota
+        const notaInput = form.querySelector('input[name="bukti_nota"]');
+        const notaWrapper = document.getElementById('konfirmasi-nota-wrapper');
+        const notaText = document.getElementById('konfirmasi-nota');
+        if (notaInput && notaInput.files.length > 0) {
+            notaText.textContent = notaInput.files[0].name;
+            notaWrapper.classList.remove('hidden');
+        } else {
+            notaWrapper.classList.add('hidden');
+        }
+
+        document.getElementById('modal-konfirmasi').classList.remove('hidden');
+    }
+
+    function submitAjuan() {
+        document.getElementById('modal-konfirmasi').classList.add('hidden');
+        document.querySelector('#modal-ajukan form').submit();
     }
 
     @if ($errors->any())
