@@ -70,6 +70,21 @@
                         {{-- Dropdown Menu --}}
                         <div id="profile-dropdown"
                             class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                            @if (auth()->user()->hasRole('superadmin'))
+                                <a href="{{ route('superadmin.dashboard') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                                    <i class="fa-solid fa-gauge text-gray-400 w-4 text-center"></i>
+                                    Dashboard Superadmin
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                            @elseif (auth()->user()->hasRole('admin'))
+                                <a href="{{ route('admin.dashboard') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                                    <i class="fa-solid fa-gauge text-gray-400 w-4 text-center"></i>
+                                    Dashboard Admin
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                            @endif
                             <a href="{{ route('profil.edit') }}"
                                 class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
                                 <i class="fa-solid fa-circle-user text-gray-400 w-4 text-center"></i>
@@ -147,6 +162,19 @@
                         {{ auth()->user()->name }}
                     </span>
                 </div>
+                @if (auth()->user()->hasRole('superadmin'))
+                    <a href="{{ route('superadmin.dashboard') }}"
+                       class="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition">
+                        <i class="fa-solid fa-gauge text-gray-400 w-4 text-center"></i>
+                        Dashboard Superadmin
+                    </a>
+                @elseif (auth()->user()->hasRole('admin'))
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition">
+                        <i class="fa-solid fa-gauge text-gray-400 w-4 text-center"></i>
+                        Dashboard Admin
+                    </a>
+                @endif
                 <a href="{{ route('profil.edit') }}"
                    class="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition">
                     <i class="fa-solid fa-circle-user text-gray-400 w-4 text-center"></i>
