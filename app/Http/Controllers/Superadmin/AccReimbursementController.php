@@ -64,6 +64,16 @@ class AccReimbursementController extends Controller
 
             if ($stok) {
                 $stok->increment('jumlah_saat_ini', $detail->jumlah);
+
+                // Catat otomatis riwayat pemasukan logistik
+                \App\Models\PemasukanLogistik::create([
+                    'stok_logistik_id' => $stok->id,
+                    'user_id'          => Auth::id(),
+                    'jumlah'           => $detail->jumlah,
+                    'tanggal'          => now()->toDateString(),
+                    'keterangan'       => 'pembelian',
+                    'kondisi'          => 'Baru',
+                ]);
             }
         }
 
