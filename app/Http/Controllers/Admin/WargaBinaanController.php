@@ -103,7 +103,7 @@ class WargaBinaanController extends Controller
             'no_bpjs'         => 'nullable|string|max:13',
             'catatan'         => 'nullable|string',
             'penanggung_jawab' => 'nullable|string',
-            'foto'            => 'nullable|image|max:2048',
+            'foto'            => 'nullable|image|max:10048',
             'kontak_pj'       => 'nullable|string|max:12',
         ]);
 
@@ -156,7 +156,7 @@ class WargaBinaanController extends Controller
             'no_bpjs'         => 'nullable|string|max:13|regex:/^[0-9]+$/',
             'catatan'         => 'nullable|string',
             'penanggung_jawab' => 'nullable|string',
-            'foto'            => 'nullable|image|max:2048',
+            'foto'            => 'nullable|image|max:10048',
             'kontak_pj'       => 'nullable|string|regex:/^[0-9]+$/|max:12',
         ]);
 
