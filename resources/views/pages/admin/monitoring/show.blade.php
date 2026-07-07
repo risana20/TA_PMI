@@ -763,7 +763,8 @@
                     <input type="text" name="aturan_minum" placeholder="2 kali sehari sebelum makan" required
                         class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
-                <div>
+                {{-- Bentuk Obat: hanya tampil saat Obat Periksa; saat Obat Griya, satuan diambil otomatis dari logistik --}}
+                <div id="container-bentuk-obat">
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Bentuk Obat</label>
                     <div class="relative">
                         <select id="input-bentuk-obat" name="bentuk_obat" required
@@ -780,6 +781,13 @@
                             <i class="fa-solid fa-chevron-down text-xs"></i>
                         </span>
                     </div>
+                </div>
+                {{-- Satuan otomatis dari logistik (hanya tampil saat Obat Griya) --}}
+                <div id="container-satuan-griya" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Satuan</label>
+                    <input type="text" id="display-satuan-griya" readonly
+                        class="w-full border border-gray-100 bg-gray-50 text-gray-500 rounded-lg px-3 py-2.5 text-sm cursor-not-allowed"
+                        placeholder="Otomatis dari logistik">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -1037,13 +1045,19 @@
         const select = document.getElementById('select-logistik-id');
         const inputNama = document.getElementById('input-nama-obat');
         const inputBentuk = document.getElementById('input-bentuk-obat');
+        const displaySatuan = document.getElementById('display-satuan-griya');
         
         if (select.selectedIndex > 0) {
             const opt = select.options[select.selectedIndex];
             if (opt.dataset.nama) inputNama.value = opt.dataset.nama;
-            if (opt.dataset.bentuk) inputBentuk.value = opt.dataset.bentuk;
+            if (opt.dataset.bentuk) {
+                // Set nilai pada select (dipakai saat submit) dan tampilkan di field readonly
+                inputBentuk.value = opt.dataset.bentuk;
+                if (displaySatuan) displaySatuan.value = opt.dataset.bentuk;
+            }
         } else {
             inputNama.value = 'dummy';
+            if (displaySatuan) displaySatuan.value = '';
         }
     }
 
@@ -1072,6 +1086,11 @@
                 inputNama.value = '';
             }
             selectLogistik.removeAttribute('required');
+
+            // Tampilkan kembali dropdown bentuk obat, sembunyikan field satuan readonly
+            document.getElementById('container-bentuk-obat').classList.remove('hidden');
+            document.getElementById('container-satuan-griya').classList.add('hidden');
+            document.getElementById('input-bentuk-obat').setAttribute('required', 'required');
         } else {
             btnGriya.classList.remove('text-gray-500');
             btnGriya.classList.add('bg-white', 'text-gray-900', 'shadow', 'font-semibold');
@@ -1084,6 +1103,12 @@
             inputNama.setAttribute('readonly', 'readonly');
             inputNama.removeAttribute('required');
             selectLogistik.setAttribute('required', 'required');
+
+            // Sembunyikan dropdown bentuk obat, tampilkan field satuan readonly
+            document.getElementById('container-bentuk-obat').classList.add('hidden');
+            document.getElementById('container-satuan-griya').classList.remove('hidden');
+            document.getElementById('input-bentuk-obat').removeAttribute('required');
+
             syncObatGriya();
         }
     }
