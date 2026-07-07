@@ -26,6 +26,7 @@ class PengeluaranLogistik extends Model
         'jumlah',
         'tanggal',
         'keterangan',
+        'aturan_minum',
     ];
 
     public function stokLogistik()

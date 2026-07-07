@@ -243,11 +243,12 @@ class MonitoringController extends Controller
                 // Catat riwayat pengeluaran di PengeluaranLogistik
                 PengeluaranLogistik::create([
                     'stok_logistik_id' => $logistik->id,
-                    'user_id' => auth()->id() ?? 1,
-                    'warga_binaan_id' => $wargaBinaan->id,
-                    'jumlah' => $data['jumlah_awal'],
-                    'tanggal' => $data['tgl_mulai'],
-                    'keterangan' => 'Pengeluaran untuk OBAT GRIYA',
+                    'user_id'          => auth()->id() ?? 1,
+                    'warga_binaan_id'  => $wargaBinaan->id,
+                    'jumlah'           => $data['jumlah_awal'],
+                    'tanggal'          => $data['tgl_mulai'],
+                    'keterangan'       => 'Pengeluaran untuk OBAT GRIYA',
+                    'aturan_minum'     => $data['aturan_minum'] ?? null,
                 ]);
 
                 // Pastikan nama dan bentuk obat selaras dengan data logistik
