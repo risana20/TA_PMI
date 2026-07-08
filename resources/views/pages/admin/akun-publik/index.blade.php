@@ -4,7 +4,7 @@
 
 @section('content')
 
-@include('sections.page-header', ['title' => 'Manajemen Akun Publik', 'subtitle' => 'Kelola akun user dan donatur'])
+@include('sections.page-header', ['title' => 'Manajemen Akun Publik', 'subtitle' => 'Kelola akun pengguna umum '])
 
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 w-full">
     <form method="GET" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'akun-publik.index') }}" id="filterForm" class="w-full sm:w-auto">
