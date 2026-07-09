@@ -29,7 +29,7 @@ class ArtikelController extends Controller
             'judul'    => 'required|string|max:255',
             'kategori' => 'nullable|string',
             'konten'   => 'required|string',
-            'gambar'   => 'nullable|image|max:2048',
+            'gambar'   => 'required|image|max:10048',
             'status'   => 'required|in:PUBLISHED,DRAFT',
         ]);
 
@@ -50,7 +50,7 @@ class ArtikelController extends Controller
             'judul'    => 'required|string|max:255',
             'kategori' => 'nullable|string',
             'konten'   => 'required|string',
-            'gambar'   => 'nullable|image|max:2048',
+            'gambar'   => 'required|image|max:10048',
             'status'   => 'required|in:PUBLISHED,DRAFT',
         ]);
 

@@ -174,6 +174,32 @@ class ReimbursementTest extends TestCase
             'total' => 150000,
         ]);
 
+        // Setup Item & Stok Logistik
+        $jenisLogistik = JenisLogistik::create([
+            'nama_jenis_logistik' => 'Bahan Pokok',
+            'deskripsi' => 'Kebutuhan pangan',
+        ]);
+
+        $itemBeras = \App\Models\ItemLogistik::create([
+            'jenis_logistik_id' => $jenisLogistik->id,
+            'nama_item' => 'Beras 5kg',
+            'satuan' => 'Pcs',
+        ]);
+
+        $stokBeras = \App\Models\StokLogistik::create([
+            'item_logistik_id' => $itemBeras->id,
+            'jumlah_saat_ini' => 10,
+            'jumlah_minimum' => 5,
+        ]);
+
+        // Setup Detail Reimbursement
+        \App\Models\DetailReimbursement::create([
+            'reimbursement_id' => $reimbursement->id,
+            'item_logistik_id' => $itemBeras->id,
+            'jumlah' => 5,
+            'nominal' => 75000,
+        ]);
+
         // Kirim request approve (validasi) oleh superadmin
         $response = $this->actingAs($superadmin)
             ->post(route('superadmin.acc-reimbursement.validasi', $reimbursement->id));
@@ -187,5 +213,21 @@ class ReimbursementTest extends TestCase
             'id' => $reimbursement->id,
             'status' => 'Disetujui',
         ]);
+
+        // Pastikan jumlah stok logistik bertambah (10 + 5 = 15)
+        $this->assertEquals(15, $stokBeras->fresh()->jumlah_saat_ini);
+
+        // Pastikan data riwayat pemasukan otomatis tercatat
+        $this->assertDatabaseHas('pemasukan_logistiks', [
+            'stok_logistik_id' => $stokBeras->id,
+            'user_id'          => $superadmin->id,
+            'jumlah'           => 5,
+            'keterangan'       => 'pembelian',
+            'kondisi'          => 'Baru',
+        ]);
+
+        $pemasukan = \App\Models\PemasukanLogistik::where('stok_logistik_id', $stokBeras->id)->first();
+        $this->assertNotNull($pemasukan);
+        $this->assertEquals(now()->toDateString(), $pemasukan->tanggal->toDateString());
     }
 }

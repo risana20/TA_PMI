@@ -239,6 +239,7 @@ class LogistikController extends Controller
             'jumlah'           => $data['jumlah'],
             'tanggal'          => $data['tanggal'],
             'keterangan'       => $data['keterangan'] ?? null,
+            'aturan_minum'     => $data['aturan_minum'] ?? null,
         ]);
 
         if ($isObat) {
