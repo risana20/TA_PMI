@@ -55,7 +55,6 @@ class KunjunganUserController extends Controller
             'warga_binaan_id'   => 'required_if:mengunjungi_wbp,1|nullable|exists:warga_binaans,id',
         ]);
 
-        // Pastikan jam kunjungan pada hari ini belum terlewati
         if ($request->tgl_kunjungan == now()->toDateString()) {
             if ($this->getSessionStartTime($request->jam) <= now()->format('H:i')) {
                 return back()->withErrors([
@@ -64,7 +63,6 @@ class KunjunganUserController extends Controller
             }
         }
 
-        // Pastikan sesi kunjungan belum dipesan/disetujui oleh orang lain
         if ($this->isSessionBooked($request->tgl_kunjungan, $request->jam)) {
             return back()->withErrors([
                 'jam' => 'Sesi kunjungan pada tanggal tersebut sudah terisi.'

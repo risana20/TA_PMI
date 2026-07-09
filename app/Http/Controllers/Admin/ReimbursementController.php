@@ -41,8 +41,6 @@ class ReimbursementController extends Controller
             'details.*.nominal' => 'required|numeric|min:1',
             'bukti_nota' => 'required|image|max:10000',
         ]);
-        // dd('validasi lolos');
-       
 
         // upload file
         $bukti = null;
@@ -58,9 +56,6 @@ class ReimbursementController extends Controller
             'bukti_nota' => $bukti,
             'total' => 0,
         ]);
-        
-
-        // dd($reimbursement);
 
         $total = 0;
 
