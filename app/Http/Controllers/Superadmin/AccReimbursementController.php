@@ -7,6 +7,9 @@ use App\Models\Reimbursement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\StokLogistik;
+use App\Exports\ACCReimbursementExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AccReimbursementController extends Controller
 {
@@ -16,7 +19,17 @@ class AccReimbursementController extends Controller
         $query  = Reimbursement::with(['user', 'detailReimbursements.itemLogistik'])->latest();
 
         if ($search) {
-            $query->whereHas('user', fn($q) => $q->where('name', 'like', "%{$search}%"));
+            $query->whereHas('user', fn($q) => $q->where('name', 'like', "%{$search}%"))
+            ->orWhere('total', 'like', "%{$search}%")
+            ->orWhere('status', 'like', "%{$search}%")
+            ->orWhereHas('detailReimbursements', function ($detail) use ($search) {
+                    $detail->where('jumlah', 'like', "%{$search}%")
+                            ->orWhere('nominal', 'like', "%{$search}%")
+                            ->orWhereHas('itemLogistik', function ($item) use ($search) {
+                                $item->where('nama_item', 'like', "%{$search}%")
+                                    ->orWhere('satuan', 'like', "%{$search}%");
+                            });
+                });
         }
 
         $reimbursements = $query->paginate(10)->withQueryString();
@@ -97,5 +110,38 @@ class AccReimbursementController extends Controller
         ]);
 
         return back()->with('success', 'Reimbursement berhasil ditolak.');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = Reimbursement::with([
+            'user',
+            'validator',
+            'detailReimbursements.itemLogistik'
+        ]);
+
+        if ($request->search) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', "%{$request->search}%");
+            });
+        }
+
+        $reimbursements = $query->latest()->get();
+
+        $pdf = Pdf::loadView(
+            'pages.superadmin.acc-reimbursement.export_pdf',
+            compact('reimbursements')
+        );
+
+        return $pdf->download('Laporan_ACC_Reimbursement.pdf');
+    }
+    public function exportExcel(Request $request)
+    {
+        return Excel::download(
+            new ACCReimbursementExport(
+                $request->search
+            ),
+            'Laporan_ACC_Reimbursement.xlsx'
+        );
     }
 }

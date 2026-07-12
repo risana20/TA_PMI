@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kunjungan;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\KunjunganExport;
+
+
 
 class KunjunganController extends Controller
 {
@@ -83,7 +88,40 @@ class KunjunganController extends Controller
 
         return back()->with('success', 'Kunjungan berhasil ditambahkan');
     }
+    public function exportPdf(Request $request)
+    {
+        $query = Kunjungan::with('wargaBinaan');
 
-    
-    
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_pengunjung', 'like', "%{$request->search}%")
+                ->orWhere('instansi', 'like', "%{$request->search}%")
+                ->orWhere('tujuan', 'like', "%{$request->search}%");
+            });
+        }
+
+        $kunjungans = $query->latest()->get();
+
+        $pdf = Pdf::loadView('pages.admin.Kunjungan.export_pdf', compact('kunjungans'));
+
+        return $pdf->download('Laporan Kunjungan.pdf');
+    }
+
+    // Export Excel (download .xlsx)
+
+    public function exportExcel(Request $request)
+    {
+        return Excel::download(
+            new KunjunganExport(
+                $request->status,
+                $request->search
+            ),
+            'Laporan Kunjungan.xlsx'
+        );
+    }
+
 }
