@@ -7,6 +7,9 @@ use App\Models\Artikel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Exports\ArtikelExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ArtikelController extends Controller
 {
@@ -16,7 +19,13 @@ class ArtikelController extends Controller
         $query  = Artikel::query();
 
         if ($search) {
-            $query->where('judul', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                ->orWhere('Kategori', 'like', "%{$search}%")
+                ->orWhere('status', 'like', "%{$search}%")
+                ->orWhere('tgl_terbit', 'like', "%{$search}%")
+                ->orWhere('user_id', 'like', "%{$search}%");
+            });
         }
 
         $artikels = $query->paginate(10)->withQueryString();
@@ -50,7 +59,7 @@ class ArtikelController extends Controller
             'judul'    => 'required|string|max:255',
             'kategori' => 'nullable|string',
             'konten'   => 'required|string',
-            'gambar'   => 'required|image|max:10048',
+            'gambar'   => 'nullable|image|max:10048',
             'status'   => 'required|in:PUBLISHED,DRAFT',
         ]);
 
@@ -72,5 +81,41 @@ class ArtikelController extends Controller
         if ($artikel->gambar) Storage::disk('public')->delete($artikel->gambar);
         $artikel->delete();
         return back()->with('success', 'Artikel berhasil dihapus.');
+    }
+    public function exportPdf(Request $request)
+    {
+        $query = Artikel::with('penulis');
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('judul', 'like', "%{$request->search}%")
+              ->orWhere('kategori', 'like', "%{$request->search}%")
+              ->orWhere('status', 'like', "%{$request->search}%")
+              ->orWhere('tgl_terbit', 'like', "%{$request->search}%");
+        });
+        }
+
+        $artikels = $query->latest()->get();
+
+        $pdf = Pdf::loadView('pages.admin.artikel.export_pdf', compact('artikels'));
+
+        return $pdf->download('Laporan artikel.pdf');
+    }
+
+    // Export Excel (download .xlsx)
+
+    public function exportExcel(Request $request)
+    {
+        return Excel::download(
+            new ArtikelExport(
+                $request->status,
+                $request->search
+            ),
+            'Laporan Artikel.xlsx'
+        );
     }
 }

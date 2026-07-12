@@ -131,7 +131,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/kunjungan/store', [KunjunganController::class, 'store'])->name('kunjungan.store');
     Route::post('/kunjungan/{kunjungan}/approve', [KunjunganController::class, 'approve'])->name('kunjungan.approve');
     Route::post('/kunjungan/{kunjungan}/reject', [KunjunganController::class, 'reject'])->name('kunjungan.reject');
-
+    Route::get('/kunjungan/export/pdf', [KunjunganController::class, 'exportPdf'])->name('kunjungan.export.pdf');
+    Route::get('/kunjungan/export/excel', [KunjunganController::class, 'exportExcel'])->name('kunjungan.export.excel');
     // Donasi
     Route::get('/donasi', [DonasiController::class, 'index'])->name('donasi.index');
     Route::post('/donasi', [DonasiController::class, 'store'])->name('donasi.store');
@@ -165,9 +166,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Reimbursement (Admin hanya bisa ajukan)
     Route::get('/reimbursement', [ReimbursementController::class, 'index'])->name('reimbursement.index');
     Route::post('/reimbursement', [ReimbursementController::class, 'store'])->name('reimbursement.store');
+    Route::get('/reimbursement/export/pdf', [ReimbursementController::class, 'exportPdf'])->name('reimbursement.export.pdf');
+    Route::get('/reimbursement/export/excel', [ReimbursementController::class, 'exportExcel'])->name('reimbursement.export.excel');
 
     // Artikel
     Route::resource('artikel', ArtikelController::class);
+    Route::get('/artikel/export/pdf', [ArtikelController::class, 'exportPdf'])->name('artikel.export.pdf');
+    Route::get('/artikel/export/excel', [ArtikelController::class, 'exportExcel'])->name('artikel.export.excel');
 
     // Manajemen Akun Publik
     Route::get('/akun-publik', [ManajemenAkunPublikController::class, 'index'])->name('akun-publik.index');
@@ -202,7 +207,8 @@ Route::middleware(['auth', 'verified', 'role:superadmin'])->prefix('superadmin')
     Route::post('/kunjungan/store', [KunjunganController::class, 'store'])->name('kunjungan.store');
     Route::post('/kunjungan/{kunjungan}/approve', [KunjunganController::class, 'approve'])->name('kunjungan.approve');
     Route::post('/kunjungan/{kunjungan}/reject', [KunjunganController::class, 'reject'])->name('kunjungan.reject');
-
+    Route::get('/kunjungan/export/pdf', [KunjunganController::class, 'exportPdf'])->name('kunjungan.export.pdf');
+    Route::get('/kunjungan/export/excel', [KunjunganController::class, 'exportExcel'])->name('kunjungan.export.excel');
     // Donasi
     Route::get('/donasi', [DonasiController::class, 'index'])->name('donasi.index');
     Route::post('/donasi', [DonasiController::class, 'store'])->name('donasi.store');
@@ -239,6 +245,8 @@ Route::middleware(['auth', 'verified', 'role:superadmin'])->prefix('superadmin')
 
     // Artikel
     Route::resource('artikel', ArtikelController::class);
+    Route::get('/artikel/export/pdf', [ArtikelController::class, 'exportPdf'])->name('artikel.export.pdf');
+    Route::get('/artikel/export/excel', [ArtikelController::class, 'exportExcel'])->name('artikel.export.excel');
 
     // Manajemen Akun Publik
     Route::get('/akun-publik', [ManajemenAkunPublikController::class, 'index'])->name('akun-publik.index');
@@ -248,6 +256,8 @@ Route::middleware(['auth', 'verified', 'role:superadmin'])->prefix('superadmin')
     Route::get('/acc-reimbursement', [AccReimbursementController::class, 'index'])->name('acc-reimbursement.index');
     Route::post('/acc-reimbursement/{reimbursement}/validasi', [AccReimbursementController::class, 'validasi'])->name('acc-reimbursement.validasi');
     Route::post('/acc-reimbursement/{reimbursement}/batalkan', [AccReimbursementController::class, 'batalkan'])->name('acc-reimbursement.batalkan');
+    Route::get('/acc-reimbursement/export/pdf', [AccReimbursementController::class, 'exportPdf'])->name('acc-reimbursement.export.pdf');
+    Route::get('/acc-reimbursement/export/excel', [AccReimbursementController::class, 'exportExcel'])->name('acc-reimbursement.export.excel');
 
     // Manajemen Akun Griya
     Route::get('/akun-griya', [ManajemenAkunGriyaController::class, 'index'])->name('akun-griya.index');

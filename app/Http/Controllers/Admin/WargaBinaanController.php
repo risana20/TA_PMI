@@ -34,7 +34,12 @@ class WargaBinaanController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                ->orWhere('nik', 'like', "%{$search}%");
+                ->orWhere('nik', 'like', "%{$search}%")
+                ->orWhere('tgl_lahir', 'like', "%{$search}%")
+                ->orWhere('alamat', 'like', "%{$search}%")
+                ->orWhere('jenis_kelamin', 'like', "%{$search}%")
+                ->orWhere('tgl_lahir', 'like', "%{$search}%")
+                ->orWhere('tempat_lahir', 'like', "%{$search}%");
             });
         }
 

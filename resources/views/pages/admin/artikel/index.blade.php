@@ -18,15 +18,24 @@
                 placeholder="Cari judul artikel..."
                 class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-64 focus:outline-none focus:ring-2 focus:ring-red-500">
         </div>
-
     </form>
+    <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 mt-4">
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.export.pdf', request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-download"></i> Ekspor PDF
+        </a>
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.export.excel', request()->query())  }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
+        </a>
     <button onclick="document.getElementById('modal-buat').classList.remove('hidden')"
         class="bg-red-600 text-white rounded-full px-5 py-2 font-semibold text-sm hover:bg-red-700 flex items-center gap-2">
         <i class="fa-solid fa-plus"></i> Buat Artikel
     </button>
+    
 </div>
 
-<div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+<div class="bg-white rounded-xl shadow overflow-hidden border border-gray-90 w-full">
     <table class="w-full text-sm">
         <thead class="bg-gray-50">
             <tr>
@@ -59,18 +68,25 @@
                 <td class="px-4 py-3">
                     {{-- Preview --}}
                     <button 
-                        onclick="openPreview(
-                            '{{ addslashes($artikel->judul) }}',
-                            `{!! addslashes($artikel->konten) !!}`,
-                            '{{ $artikel->gambar ? Storage::url($artikel->gambar) : '' }}'
-                        )"
+                        onclick='openPreview(
+                            @json($artikel->judul),
+                            @json($artikel->konten),
+                            @json($artikel->gambar ? Storage::url($artikel->gambar) : "")
+                        )'
                         class="text-gray-400 hover:text-blue-500 mr-2">
                         <i class="fa-solid fa-eye"></i>
                     </button>
 
                     {{-- Edit --}}
                     <button 
-                        onclick="openEditArtikel({{ $artikel->id }}, '{{ addslashes($artikel->judul) }}', '{{ $artikel->kategori }}', '{{ $artikel->status }}', `{!! addslashes($artikel->konten) !!}`, '{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.update', $artikel) }}')"
+                        onclick='openEditArtikel(
+                            {{ $artikel->id }},
+                            @json($artikel->judul),
+                            @json($artikel->kategori),
+                            @json($artikel->status),
+                            @json($artikel->konten),
+                            @json(route((auth()->user()->hasRole("superadmin") ? "superadmin." : "admin.") . "artikel.update", $artikel))
+                        )'
                         class="text-gray-400 hover:text-yellow-500 mr-2">
                         <i class="fa-solid fa-pen"></i>
                     </button>
@@ -232,6 +248,7 @@
 
 @push('scripts')
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
 <script>
 const quilBuat = new Quill('#editor-buat', { theme: 'snow', placeholder: 'Tulis konten artikel...' });
 const quilEdit = new Quill('#editor-edit', { theme: 'snow' });
@@ -276,6 +293,25 @@ document.getElementById('searchInput').addEventListener('keyup', function () {
         document.getElementById('filterForm').submit();
     }, 500);
 
+});
+document.getElementById('konten-buat').value =
+DOMPurify.sanitize(quilBuat.root.innerHTML,{
+    ALLOWED_TAGS:[
+        'p','br',
+        'strong','b',
+        'em','i',
+        'u',
+        'ul','ol','li',
+        'h1','h2','h3','h4',
+        'blockquote',
+        'a',
+        'img'
+    ],
+    ALLOWED_ATTR:[
+        'href',
+        'src',
+        'alt'
+    ]
 });
 
 </script>

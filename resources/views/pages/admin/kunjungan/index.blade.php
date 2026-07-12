@@ -9,30 +9,37 @@
 {{-- Toolbar --}}
 <div class="flex flex-wrap items-center gap-3 mb-4">
     <form method="GET" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.index') }}" id="filterForm" class="flex items-center gap-3 flex-1">
+        <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text"
+                id="searchInput"
+                name="search"
+                value="{{ request('search') }}"
+                placeholder="Cari nama, no HP, instansi, tujuan..."
+                class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-64 focus:outline-none focus:ring-2 focus:ring-red-500">
+        </div>
 
-    <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-        <input type="text"
-            id="searchInput"
-            name="search"
-            value="{{ request('search') }}"
-            placeholder="Cari nama, no HP, instansi, tujuan..."
-            class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-64 focus:outline-none focus:ring-2 focus:ring-red-500">
-    </div>
-
-    <select name="status" id="statusFilter"
-        class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
-        <option value="">Semua Status</option>
-        <option value="PROSES" {{ request('status') == 'PROSES' ? 'selected' : '' }}>PROSES</option>
-        <option value="DISETUJUI" {{ request('status') == 'DISETUJUI' ? 'selected' : '' }}>DISETUJUI</option>
-        <option value="DITOLAK" {{ request('status') == 'DITOLAK' ? 'selected' : '' }}>DITOLAK</option>
-    </select>
-
-</form> 
-<button onclick="openModal()"
-            class="inline-flex items-center bg-red-600 text-white rounded-full px-5 py-2 font-semibold text-sm  gap-2 transition ">
-        <i class="fa-solid fa-plus"></i> Tambah Kunjungan
-</button>
+        <select name="status" id="statusFilter"
+            class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+            <option value="">Semua Status</option>
+            <option value="PROSES" {{ request('status') == 'PROSES' ? 'selected' : '' }}>PROSES</option>
+            <option value="DISETUJUI" {{ request('status') == 'DISETUJUI' ? 'selected' : '' }}>DISETUJUI</option>
+            <option value="DITOLAK" {{ request('status') == 'DITOLAK' ? 'selected' : '' }}>DITOLAK</option>
+        </select>
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.export.pdf', request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-download"></i> Ekspor PDF
+        </a>
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.export.excel', request()->query())  }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
+        </a>
+    </form> 
+    <button onclick="openModal()"
+                class="inline-flex items-center bg-red-600 text-white rounded-full px-5 py-2 font-semibold text-sm  gap-2 transition ">
+            <i class="fa-solid fa-plus"></i> Tambah Kunjungan
+    </button>
+    
 </div>
 
 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
