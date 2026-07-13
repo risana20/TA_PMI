@@ -421,470 +421,481 @@
 
 @push('scripts')
 <script>
-const dbJadwalDisetujui = @json($jadwalDisetujui);
+    const dbJadwalDisetujui = @json($jadwalDisetujui);
 
-const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni',
-                   'Juli','Agustus','September','Oktober','November','Mei']; // Mei/Desember
-// Let's make sure December is correct
-MONTHS_ID[11] = 'Desember';
+    const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; 
 
-const DAYS_ID   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    MONTHS_ID[11] = 'Desember';
 
-let viewDate = new Date();
-let selectedDateStr = "";
+    const DAYS_ID   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 
-// Helper to format Date to YYYY-MM-DD local timezone
-function formatYYYYMMDD(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-}
+    //menyimpan bulan dan tanggal hari ini
+    let viewDate = new Date();
+    let selectedDateStr = "";
 
-function getVisitDateString(visit) {
-    if (!visit.tgl_kunjungan) return "";
-    return visit.tgl_kunjungan.split('T')[0].split(' ')[0];
-}
-
-function mapJamToSession(jamStr) {
-    if (!jamStr) return null;
-    jamStr = jamStr.trim();
-    if (jamStr.toLowerCase().startsWith('sesi 1')) return 'Sesi 1';
-    if (jamStr.toLowerCase().startsWith('sesi 2')) return 'Sesi 2';
-    if (jamStr.toLowerCase().startsWith('sesi 3')) return 'Sesi 3';
-    if (jamStr.toLowerCase().startsWith('sesi 4')) return 'Sesi 4';
-    if (jamStr.toLowerCase().startsWith('sesi 5')) return 'Sesi 5';
-
-    // Parse HH:MM from HH:MM:SS or HH.MM
-    let timePart = jamStr.replace('.', ':');
-    let match = timePart.match(/(\d{2}):(\d{2})/);
-    if (!match) return null;
-    let hour = parseInt(match[1]);
-    let min = parseInt(match[2]);
-    let totalMinutes = hour * 60 + min;
-
-    // Sesi 1: 08.00-09.30 -> 480 to 570 mins
-    if (totalMinutes >= 480 && totalMinutes < 570) return 'Sesi 1';
-    // Sesi 2: 09.30-11.00 -> 570 to 660 mins
-    if (totalMinutes >= 570 && totalMinutes < 660) return 'Sesi 2';
-    // Sesi 3: 11.00-12.30 -> 660 to 750 mins
-    if (totalMinutes >= 660 && totalMinutes < 780) return 'Sesi 3';
-    // Sesi 4: 13.00-14.30 -> 780 to 870 mins
-    if (totalMinutes >= 780 && totalMinutes < 870) return 'Sesi 4';
-    // Sesi 5: 14.30-16.00 -> 870 to 990 mins
-    if (totalMinutes >= 870 && totalMinutes <= 990) return 'Sesi 5';
-
-    return null;
-}
-
-function renderCalendar() {
-    const grid = document.getElementById('calendar-grid');
-    const label = document.getElementById('current-month-year');
-    if (!grid || !label) return;
-
-    grid.innerHTML = "";
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
-
-    label.textContent = `${MONTHS_ID[month]} ${year}`;
-
-    const firstDayIndex = new Date(year, month, 1).getDay();
-    const lastDay = new Date(year, month + 1, 0).getDate();
-    const prevLastDay = new Date(year, month, 0).getDate();
-
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    // Padding cells from previous month
-    for (let i = firstDayIndex; i > 0; i--) {
-        const dayNum = prevLastDay - i + 1;
-        const cell = document.createElement('div');
-        cell.className = 'bg-gray-50/50 border border-gray-100/50 rounded-2xl min-h-[65px] p-2 text-center text-xs text-gray-300 flex items-center justify-center cursor-not-allowed';
-        cell.textContent = dayNum;
-        grid.appendChild(cell);
+    // mengubah date menjadi format
+    function formatYYYYMMDD(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
     }
 
-    // Days in current month
-    for (let day = 1; day <= lastDay; day++) {
-        const currentCellDate = new Date(year, month, day);
-        const dateStr = formatYYYYMMDD(currentCellDate);
-        const isPast = currentCellDate < today;
+    //mengambil tanggal kunjungan
+    function getVisitDateString(visit) {
+        if (!visit.tgl_kunjungan) return "";
+        return visit.tgl_kunjungan.split('T')[0].split(' ')[0];
+    }
 
-        const cell = document.createElement('button');
-        cell.type = "button";
-        cell.className = 'relative flex flex-col items-center justify-between p-2 rounded-2xl border transition text-center min-h-[65px]';
+    //mengubah jam menjadi sesi
+    function mapJamToSession(jamStr) {
+        if (!jamStr) return null;
+        jamStr = jamStr.trim();
+        if (jamStr.toLowerCase().startsWith('sesi 1')) return 'Sesi 1';
+        if (jamStr.toLowerCase().startsWith('sesi 2')) return 'Sesi 2';
+        if (jamStr.toLowerCase().startsWith('sesi 3')) return 'Sesi 3';
+        if (jamStr.toLowerCase().startsWith('sesi 4')) return 'Sesi 4';
+        if (jamStr.toLowerCase().startsWith('sesi 5')) return 'Sesi 5';
 
-        const numSpan = document.createElement('span');
-        numSpan.className = 'text-xs font-bold';
-        numSpan.textContent = day;
-        cell.appendChild(numSpan);
+        // Parse HH:MM from HH:MM:SS or HH.MM
+        let timePart = jamStr.replace('.', ':');
+        let match = timePart.match(/(\d{2}):(\d{2})/);
+        if (!match) return null;
+        let hour = parseInt(match[1]);
+        let min = parseInt(match[2]);
+        let totalMinutes = hour * 60 + min;
 
-        if (isPast) {
-            cell.className += ' bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed';
-            cell.disabled = true;
-        } else {
-            // Find booked sessions for this date
-            const booked = [];
-            dbJadwalDisetujui.forEach(v => {
-                const vDate = getVisitDateString(v);
-                if (vDate === dateStr) {
-                    const sess = mapJamToSession(v.jam);
-                    if (sess) booked.push(sess);
-                }
-            });
+        // Sesi 1: 08.00-09.30 -> 480 to 570 mins
+        if (totalMinutes >= 480 && totalMinutes < 570) return 'Sesi 1';
+        // Sesi 2: 09.30-11.00 -> 570 to 660 mins
+        if (totalMinutes >= 570 && totalMinutes < 660) return 'Sesi 2';
+        // Sesi 3: 11.00-12.30 -> 660 to 750 mins
+        if (totalMinutes >= 660 && totalMinutes < 780) return 'Sesi 3';
+        // Sesi 4: 13.00-14.30 -> 780 to 870 mins
+        if (totalMinutes >= 780 && totalMinutes < 870) return 'Sesi 4';
+        // Sesi 5: 14.30-16.00 -> 870 to 990 mins
+        if (totalMinutes >= 870 && totalMinutes <= 990) return 'Sesi 5';
 
-            const isFull = booked.length >= 5;
+        return null;
+    }
 
-            if (isFull) {
-                cell.className += ' bg-red-50 border-red-200 text-red-700 hover:bg-red-100';
-            } else if (booked.length > 0) {
-                cell.className += ' bg-orange-50 border-orange-200 text-orange-800 hover:bg-orange-100';
+    //menampilkan kalender
+    function renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        const label = document.getElementById('current-month-year');
+        if (!grid || !label) return;
+
+        grid.innerHTML = "";
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+
+        //bulan
+        label.textContent = `${MONTHS_ID[month]} ${year}`;
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        const prevLastDay = new Date(year, month, 0).getDate();
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        // Padding cells from previous month
+        for (let i = firstDayIndex; i > 0; i--) {
+            const dayNum = prevLastDay - i + 1;
+            const cell = document.createElement('div');
+            cell.className = 'bg-gray-50/50 border border-gray-100/50 rounded-2xl min-h-[65px] p-2 text-center text-xs text-gray-300 flex items-center justify-center cursor-not-allowed';
+            cell.textContent = dayNum;
+            grid.appendChild(cell);
+        }
+
+        // membuat tanggal 
+        for (let day = 1; day <= lastDay; day++) {
+            const currentCellDate = new Date(year, month, day);
+            const dateStr = formatYYYYMMDD(currentCellDate);
+            const isPast = currentCellDate < today;
+
+            const cell = document.createElement('button');
+            cell.type = "button";
+            cell.className = 'relative flex flex-col items-center justify-between p-2 rounded-2xl border transition text-center min-h-[65px]';
+
+            const numSpan = document.createElement('span');
+            numSpan.className = 'text-xs font-bold';
+            numSpan.textContent = day;
+            cell.appendChild(numSpan);
+
+            if (isPast) {
+                cell.className += ' bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed';
+                cell.disabled = true;
             } else {
-                cell.className += ' bg-white border-gray-100 text-gray-700 hover:border-red-300 hover:bg-red-50/30';
-            }
-
-            // Draw dots indicator for the 5 sessions
-            const dotsContainer = document.createElement('div');
-            dotsContainer.className = 'flex justify-center gap-0.5 mt-1';
-            for (let s = 1; s <= 5; s++) {
-                const isBooked = booked.includes('Sesi ' + s);
-                const dot = document.createElement('span');
-                dot.className = `w-1.5 h-1.5 rounded-full ${isBooked ? 'bg-red-500' : 'bg-green-400'}`;
-                dotsContainer.appendChild(dot);
-            }
-            cell.appendChild(dotsContainer);
-
-            // Click handler
-            cell.addEventListener('click', () => {
-                showDayDetail(dateStr);
-            });
-        }
-
-        grid.appendChild(cell);
-    }
-
-    // Padding cells from next month
-    const totalCells = firstDayIndex + lastDay;
-    const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-    for (let i = 1; i <= remaining; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'bg-gray-50/50 border border-gray-100/50 rounded-2xl min-h-[65px] p-2 text-center text-xs text-gray-300 flex items-center justify-center cursor-not-allowed';
-        cell.textContent = i;
-        grid.appendChild(cell);
-    }
-}
-
-function showDayDetail(dateStr) {
-    selectedDateStr = dateStr;
-    const parts = dateStr.split('-');
-    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateTitleStr = dateObj.toLocaleDateString('id-ID', options);
-    document.getElementById('detail-date-title').textContent = dateTitleStr;
-
-    const booked = [];
-    dbJadwalDisetujui.forEach(v => {
-        const vDate = getVisitDateString(v);
-        if (vDate === dateStr) {
-            const sess = mapJamToSession(v.jam);
-            if (sess) booked.push(sess);
-        }
-    });
-
-    const todayStr = formatYYYYMMDD(new Date());
-    const isToday = (dateStr === todayStr);
-
-    const nowTime = new Date();
-    const currentHour = nowTime.getHours();
-    const currentMin = nowTime.getMinutes();
-    const currentTotalMinutes = currentHour * 60 + currentMin;
-
-    const sessionStartTimes = {
-        'Sesi 1': 480, // 08:00
-        'Sesi 2': 570, // 09:30
-        'Sesi 3': 660, // 11:00
-        'Sesi 4': 780, // 13:00
-        'Sesi 5': 870, // 14:30
-    };
-
-    let availableCount = 0;
-
-    for (let s = 1; s <= 5; s++) {
-        const sessionName = 'Sesi ' + s;
-        const statusEl = document.getElementById(`sesi-${s}-status`);
-        const itemEl = document.getElementById(`sesi-${s}-item`);
-
-        const isBooked = booked.includes(sessionName);
-        const startTime = sessionStartTimes[sessionName];
-        const isPassed = isToday && (currentTotalMinutes >= startTime);
-
-        if (isBooked) {
-            statusEl.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1 text-[10px]"></i> Terisi (Tidak Tersedia)`;
-            statusEl.className = "text-xs text-red-600 mt-0.5 font-medium";
-            itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-red-100 bg-red-50/20 opacity-85 transition";
-        } else if (isPassed) {
-            statusEl.innerHTML = `<i class="fa-solid fa-clock-rotate-left mr-1 text-[10px]"></i> Sudah Terlewat`;
-            statusEl.className = "text-xs text-gray-400 mt-0.5 font-medium";
-            itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50 opacity-60 transition";
-        } else {
-            statusEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Tersedia`;
-            statusEl.className = "text-xs text-green-600 mt-0.5 font-medium";
-            itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-gray-100 transition bg-white";
-            availableCount++;
-        }
-    }
-
-    const btnAjukan = document.getElementById('btn-ajukan-kunjungan-detail');
-    if (btnAjukan) {
-        if (availableCount === 0) {
-            btnAjukan.disabled = true;
-            btnAjukan.className = "inline-flex items-center bg-gray-300 text-gray-500 rounded-xl px-4 py-2 font-semibold text-xs cursor-not-allowed gap-1.5 transition";
-            btnAjukan.innerHTML = `<i class="fa-solid fa-ban"></i> Jadwal Penuh`;
-        } else {
-            btnAjukan.disabled = false;
-            btnAjukan.className = "inline-flex items-center bg-red-600 text-white rounded-xl px-4 py-2 font-semibold text-xs hover:bg-red-700 gap-1.5 transition";
-            btnAjukan.innerHTML = `<i class="fa-solid fa-plus"></i> Ajukan Kunjungan`;
-        }
-    }
-
-    document.getElementById('calendar-view').classList.replace('block', 'hidden');
-    document.getElementById('detail-view').classList.replace('hidden', 'block');
-}
-
-function showCalendarView() {
-    document.getElementById('detail-view').classList.replace('block', 'hidden');
-    document.getElementById('calendar-view').classList.replace('hidden', 'block');
-    renderCalendar();
-}
-
-function openModalWithSelectedDate() {
-    const tglPicker = document.getElementById('tgl-picker');
-    if (tglPicker && selectedDateStr) {
-        tglPicker.value = selectedDateStr;
-        updateAvailableSessions(selectedDateStr);
-    }
-    openModal();
-}
-
-function updateAvailableSessions(dateStr) {
-    const jamSelect = document.getElementById('jam-select');
-    if (!jamSelect) return;
-
-    // Reset all options
-    Array.from(jamSelect.options).forEach(opt => {
-        if (!opt.value) return;
-        opt.disabled = false;
-        opt.textContent = opt.value;
-    });
-
-    if (!dateStr) return;
-
-    // Find booked sessions
-    const bookedSessions = [];
-    dbJadwalDisetujui.forEach(v => {
-        const vDate = getVisitDateString(v);
-        if (vDate === dateStr) {
-            const sess = mapJamToSession(v.jam);
-            if (sess) bookedSessions.push(sess);
-        }
-    });
-
-    // Check today's time logic
-    const todayStr = formatYYYYMMDD(new Date());
-    const isToday = (dateStr === todayStr);
-
-    const nowTime = new Date();
-    const currentHour = nowTime.getHours();
-    const currentMin = nowTime.getMinutes();
-    const currentTotalMinutes = currentHour * 60 + currentMin;
-
-    const sessionStartTimes = {
-        'Sesi 1: 08.00-09.30': 480,
-        'Sesi 2: 09.30-11.00': 570,
-        'Sesi 3: 11.00-12.30': 660,
-        'Sesi 4: 13.00-14.30': 780,
-        'Sesi 5: 14.30-16.00': 870,
-    };
-
-    // Disable booked or passed options
-    Array.from(jamSelect.options).forEach(opt => {
-        if (!opt.value) return;
-        const optSess = mapJamToSession(opt.value);
-        const startTime = sessionStartTimes[opt.value];
-        const isPassed = isToday && (currentTotalMinutes >= startTime);
-
-        if (bookedSessions.includes(optSess)) {
-            opt.disabled = true;
-            opt.textContent = opt.value + ' (Terisi)';
-        } else if (isPassed) {
-            opt.disabled = true;
-            opt.textContent = opt.value + ' (Sudah Terlewat)';
-        }
-    });
-}
-
-// Bind navigation buttons
-document.getElementById('prev-month-btn').addEventListener('click', () => {
-    viewDate.setMonth(viewDate.getMonth() - 1);
-    renderCalendar();
-});
-
-document.getElementById('next-month-btn').addEventListener('click', () => {
-    viewDate.setMonth(viewDate.getMonth() + 1);
-    renderCalendar();
-});
-
-// Bind date picker change listener
-document.getElementById('tgl-picker').addEventListener('change', function() {
-    updateAvailableSessions(this.value);
-});
-
-function initSurat() {
-    const tujuan = document.getElementById('tujuan');
-    const suratInput = document.getElementById('surat-input');
-    const suratLabel = document.getElementById('surat-upload');
-
-    if (!tujuan || !suratInput || !suratLabel) return;
-
-    function updateSurat() {
-        const value = tujuan.value;
-        const aktif = (
-            value === "Penelitian" ||
-            value === "Kerjasama" ||
-            value === "Magang/PKL"
-        );
-
-        if (aktif) {
-            suratInput.disabled = false;
-            suratInput.required = true;
-            suratLabel.classList.remove('opacity-50', 'pointer-events-none');
-        } else {
-            suratInput.disabled = true;
-            suratInput.required = false;
-            suratInput.value = "";
-            suratLabel.classList.add('opacity-50', 'pointer-events-none');
-        }
-    }
-
-    tujuan.addEventListener('change', updateSurat);
-    updateSurat();
-}
-
-function openModal() {
-    const modal = document.getElementById('modal-tambah');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-
-    const tglPicker = document.getElementById('tgl-picker');
-    if (tglPicker) {
-        if (!tglPicker.value) {
-            tglPicker.value = formatYYYYMMDD(new Date());
-        }
-        updateAvailableSessions(tglPicker.value);
-    }
-    initSurat();
-}
-
-function previewSurat(input) {
-    const lbl = document.getElementById('surat-label-text');
-    if (input.files && input.files[0]) {
-        lbl.textContent = input.files[0].name;
-        lbl.classList.remove('text-gray-400');
-        lbl.classList.add('text-gray-700');
-    }
-}
-
-// Autocomplete WBP Search
-let wbpTimeout = null;
-const wbpSearchInput = document.getElementById('wbp-search-input');
-const wbpIdInput = document.getElementById('wbp-id-input');
-const wbpSuggestions = document.getElementById('wbp-suggestions');
-const clearWbpBtn = document.getElementById('clear-wbp-btn');
-
-function toggleWbpSearch(checked) {
-    const container = document.getElementById('wbp-search-container');
-    if (checked) {
-        container.classList.remove('hidden');
-        wbpSearchInput.required = true;
-    } else {
-        container.classList.add('hidden');
-        wbpSearchInput.required = false;
-        clearWbpSelection();
-    }
-}
-
-function clearWbpSelection() {
-    wbpSearchInput.value = '';
-    wbpIdInput.value = '';
-    wbpSearchInput.readOnly = false;
-    clearWbpBtn.classList.add('hidden');
-    wbpSuggestions.innerHTML = '';
-    wbpSuggestions.classList.add('hidden');
-}
-
-if (wbpSearchInput) {
-    wbpSearchInput.addEventListener('input', function() {
-        const query = this.value.trim();
-        clearTimeout(wbpTimeout);
-        
-        if (query.length < 2) {
-            wbpSuggestions.innerHTML = '';
-            wbpSuggestions.classList.add('hidden');
-            return;
-        }
-        
-        wbpTimeout = setTimeout(() => {
-            fetch(`/kunjungan/search-wbp?q=${encodeURIComponent(query)}`)
-                .then(res => res.json())
-                .then(data => {
-                    wbpSuggestions.innerHTML = '';
-                    if (data.length === 0) {
-                        wbpSuggestions.innerHTML = '<div class="px-4 py-3 text-sm text-gray-500">Tidak ada warga binaan aktif ditemukan</div>';
-                        wbpSuggestions.classList.remove('hidden');
-                        return;
+                // memeriksa kunjungan
+                const booked = [];
+                dbJadwalDisetujui.forEach(v => {
+                    const vDate = getVisitDateString(v);
+                    if (vDate === dateStr) {
+                        const sess = mapJamToSession(v.jam);
+                        if (sess) booked.push(sess);
                     }
-                    
-                    data.forEach(wbp => {
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'w-full text-left px-4 py-2.5 hover:bg-red-50 text-sm text-gray-700 border-b last:border-0 border-gray-100 flex items-center justify-between transition';
-                        btn.innerHTML = `
-                            <span class="font-medium">${wbp.nama}</span>
-                            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">NIK: ${wbp.nik}</span>
-                        `;
-                        btn.addEventListener('click', () => {
-                            selectWbp(wbp.id, wbp.nama);
-                        });
-                        wbpSuggestions.appendChild(btn);
-                    });
-                    wbpSuggestions.classList.remove('hidden');
                 });
-        }, 300);
-    });
 
-    // Close suggestions when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!wbpSearchInput.contains(e.target) && !wbpSuggestions.contains(e.target)) {
-            wbpSuggestions.classList.add('hidden');
+                const isFull = booked.length >= 5;
+
+                if (isFull) {
+                    cell.className += ' bg-red-50 border-red-200 text-red-700 hover:bg-red-100';
+                } else if (booked.length > 0) {
+                    cell.className += ' bg-orange-50 border-orange-200 text-orange-800 hover:bg-orange-100';
+                } else {
+                    cell.className += ' bg-white border-gray-100 text-gray-700 hover:border-red-300 hover:bg-red-50/30';
+                }
+
+                // Draw dots indicator for the 5 sessions
+                const dotsContainer = document.createElement('div');
+                dotsContainer.className = 'flex justify-center gap-0.5 mt-1';
+                for (let s = 1; s <= 5; s++) {
+                    const isBooked = booked.includes('Sesi ' + s);
+                    const dot = document.createElement('span');
+                    dot.className = `w-1.5 h-1.5 rounded-full ${isBooked ? 'bg-red-500' : 'bg-green-400'}`;
+                    dotsContainer.appendChild(dot);
+                }
+                cell.appendChild(dotsContainer);
+
+                // Click handler
+                cell.addEventListener('click', () => {
+                    showDayDetail(dateStr);
+                });
+            }
+
+            grid.appendChild(cell);
         }
+
+        // Padding cells from next month
+        const totalCells = firstDayIndex + lastDay;
+        const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+        for (let i = 1; i <= remaining; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'bg-gray-50/50 border border-gray-100/50 rounded-2xl min-h-[65px] p-2 text-center text-xs text-gray-300 flex items-center justify-center cursor-not-allowed';
+            cell.textContent = i;
+            grid.appendChild(cell);
+        }
+    }
+
+    //menampilkan sesi tanggal
+    function showDayDetail(dateStr) {
+        selectedDateStr = dateStr;
+        const parts = dateStr.split('-');
+        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateTitleStr = dateObj.toLocaleDateString('id-ID', options);
+        document.getElementById('detail-date-title').textContent = dateTitleStr;
+
+        const booked = [];
+        dbJadwalDisetujui.forEach(v => {
+            const vDate = getVisitDateString(v);
+            if (vDate === dateStr) {
+                const sess = mapJamToSession(v.jam);
+                if (sess) booked.push(sess);
+            }
+        });
+
+        const todayStr = formatYYYYMMDD(new Date());
+        const isToday = (dateStr === todayStr);
+
+        const nowTime = new Date();
+        const currentHour = nowTime.getHours();
+        const currentMin = nowTime.getMinutes();
+        const currentTotalMinutes = currentHour * 60 + currentMin;
+
+        const sessionStartTimes = {
+            'Sesi 1': 480, // 08:00
+            'Sesi 2': 570, // 09:30
+            'Sesi 3': 660, // 11:00
+            'Sesi 4': 780, // 13:00
+            'Sesi 5': 870, // 14:30
+        };
+
+        let availableCount = 0;
+
+        //mengecek setiap sesi
+        for (let s = 1; s <= 5; s++) {
+            const sessionName = 'Sesi ' + s;
+            const statusEl = document.getElementById(`sesi-${s}-status`);
+            const itemEl = document.getElementById(`sesi-${s}-item`);
+
+            const isBooked = booked.includes(sessionName);
+            const startTime = sessionStartTimes[sessionName];
+            const isPassed = isToday && (currentTotalMinutes >= startTime);
+
+            if (isBooked) {
+                statusEl.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1 text-[10px]"></i> Terisi (Tidak Tersedia)`;
+                statusEl.className = "text-xs text-red-600 mt-0.5 font-medium";
+                itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-red-100 bg-red-50/20 opacity-85 transition";
+            } else if (isPassed) {
+                statusEl.innerHTML = `<i class="fa-solid fa-clock-rotate-left mr-1 text-[10px]"></i> Sudah Terlewat`;
+                statusEl.className = "text-xs text-gray-400 mt-0.5 font-medium";
+                itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50 opacity-60 transition";
+            } else {
+                statusEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Tersedia`;
+                statusEl.className = "text-xs text-green-600 mt-0.5 font-medium";
+                itemEl.className = "flex items-center justify-between p-4 rounded-xl border border-gray-100 transition bg-white";
+                availableCount++;
+            }
+        }
+
+        //tanggal tidak bisa diklik
+        const btnAjukan = document.getElementById('btn-ajukan-kunjungan-detail');
+        if (btnAjukan) {
+            if (availableCount === 0) {
+                btnAjukan.disabled = true;
+                btnAjukan.className = "inline-flex items-center bg-gray-300 text-gray-500 rounded-xl px-4 py-2 font-semibold text-xs cursor-not-allowed gap-1.5 transition";
+                btnAjukan.innerHTML = `<i class="fa-solid fa-ban"></i> Jadwal Penuh`;
+            } else {
+                btnAjukan.disabled = false;
+                btnAjukan.className = "inline-flex items-center bg-red-600 text-white rounded-xl px-4 py-2 font-semibold text-xs hover:bg-red-700 gap-1.5 transition";
+                btnAjukan.innerHTML = `<i class="fa-solid fa-plus"></i> Ajukan Kunjungan`;
+            }
+        }
+
+        document.getElementById('calendar-view').classList.replace('block', 'hidden');
+        document.getElementById('detail-view').classList.replace('hidden', 'block');
+    }
+
+    //halaman detail disembunyikan
+    function showCalendarView() {
+        document.getElementById('detail-view').classList.replace('block', 'hidden');
+        document.getElementById('calendar-view').classList.replace('hidden', 'block');
+        renderCalendar();
+    }
+
+    //membuka modal ajuan
+    function openModalWithSelectedDate() {
+        const tglPicker = document.getElementById('tgl-picker');
+        if (tglPicker && selectedDateStr) {
+            tglPicker.value = selectedDateStr;
+            updateAvailableSessions(selectedDateStr);
+        }
+        openModal();
+    }
+
+    function updateAvailableSessions(dateStr) {
+        const jamSelect = document.getElementById('jam-select');
+        if (!jamSelect) return;
+
+        // Reset all options
+        Array.from(jamSelect.options).forEach(opt => {
+            if (!opt.value) return;
+            opt.disabled = false;
+            opt.textContent = opt.value;
+        });
+
+        if (!dateStr) return;
+
+        // Find booked sessions
+        const bookedSessions = [];
+        dbJadwalDisetujui.forEach(v => {
+            const vDate = getVisitDateString(v);
+            if (vDate === dateStr) {
+                const sess = mapJamToSession(v.jam);
+                if (sess) bookedSessions.push(sess);
+            }
+        });
+
+        // Check today's time logic
+        const todayStr = formatYYYYMMDD(new Date());
+        const isToday = (dateStr === todayStr);
+
+        const nowTime = new Date();
+        const currentHour = nowTime.getHours();
+        const currentMin = nowTime.getMinutes();
+        const currentTotalMinutes = currentHour * 60 + currentMin;
+
+        const sessionStartTimes = {
+            'Sesi 1: 08.00-09.30': 480,
+            'Sesi 2: 09.30-11.00': 570,
+            'Sesi 3: 11.00-12.30': 660,
+            'Sesi 4: 13.00-14.30': 780,
+            'Sesi 5: 14.30-16.00': 870,
+        };
+
+        // Disable booked or passed options
+        Array.from(jamSelect.options).forEach(opt => {
+            if (!opt.value) return;
+            const optSess = mapJamToSession(opt.value);
+            const startTime = sessionStartTimes[opt.value];
+            const isPassed = isToday && (currentTotalMinutes >= startTime);
+
+            if (bookedSessions.includes(optSess)) {
+                opt.disabled = true;
+                opt.textContent = opt.value + ' (Terisi)';
+            } else if (isPassed) {
+                opt.disabled = true;
+                opt.textContent = opt.value + ' (Sudah Terlewat)';
+            }
+        });
+    }
+
+    // Bind navigation buttons
+    document.getElementById('prev-month-btn').addEventListener('click', () => {
+        viewDate.setMonth(viewDate.getMonth() - 1);
+        renderCalendar();
     });
-}
 
-function selectWbp(id, name) {
-    wbpSearchInput.value = name;
-    wbpIdInput.value = id;
-    wbpSearchInput.readOnly = true;
-    wbpSuggestions.classList.add('hidden');
-    clearWbpBtn.classList.remove('hidden');
-}
+    document.getElementById('next-month-btn').addEventListener('click', () => {
+        viewDate.setMonth(viewDate.getMonth() + 1);
+        renderCalendar();
+    });
 
-if (clearWbpBtn) {
-    clearWbpBtn.addEventListener('click', clearWbpSelection);
-}
+    // mengubah tanggal kunjungan di form
+    document.getElementById('tgl-picker').addEventListener('change', function() {
+        updateAvailableSessions(this.value);
+    });
 
-// Initial Render
-renderCalendar();
+    function initSurat() {
+        const tujuan = document.getElementById('tujuan');
+        const suratInput = document.getElementById('surat-input');
+        const suratLabel = document.getElementById('surat-upload');
+
+        if (!tujuan || !suratInput || !suratLabel) return;
+
+        function updateSurat() {
+            const value = tujuan.value;
+            const aktif = (
+                value === "Penelitian" ||
+                value === "Kerjasama" ||
+                value === "Magang/PKL"
+            );
+
+            if (aktif) {
+                suratInput.disabled = false;
+                suratInput.required = true;
+                suratLabel.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                suratInput.disabled = true;
+                suratInput.required = false;
+                suratInput.value = "";
+                suratLabel.classList.add('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        tujuan.addEventListener('change', updateSurat);
+        updateSurat();
+    }
+
+    function openModal() {
+        const modal = document.getElementById('modal-tambah');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+
+        const tglPicker = document.getElementById('tgl-picker');
+        if (tglPicker) {
+            if (!tglPicker.value) {
+                tglPicker.value = formatYYYYMMDD(new Date());
+            }
+            updateAvailableSessions(tglPicker.value);
+        }
+        initSurat();
+    }
+
+    function previewSurat(input) {
+        const lbl = document.getElementById('surat-label-text');
+        if (input.files && input.files[0]) {
+            lbl.textContent = input.files[0].name;
+            lbl.classList.remove('text-gray-400');
+            lbl.classList.add('text-gray-700');
+        }
+    }
+
+    // Autocomplete WBP Search
+    let wbpTimeout = null;
+    const wbpSearchInput = document.getElementById('wbp-search-input');
+    const wbpIdInput = document.getElementById('wbp-id-input');
+    const wbpSuggestions = document.getElementById('wbp-suggestions');
+    const clearWbpBtn = document.getElementById('clear-wbp-btn');
+
+    //hiden kolom
+    function toggleWbpSearch(checked) {
+        const container = document.getElementById('wbp-search-container');
+        if (checked) {
+            container.classList.remove('hidden');
+            wbpSearchInput.required = true;
+        } else {
+            container.classList.add('hidden');
+            wbpSearchInput.required = false;
+            clearWbpSelection();
+        }
+    }
+
+    //menghapus data wargabinaan yang telah dipilih
+    function clearWbpSelection() {
+        wbpSearchInput.value = '';
+        wbpIdInput.value = '';
+        wbpSearchInput.readOnly = false;
+        clearWbpBtn.classList.add('hidden');
+        wbpSuggestions.innerHTML = '';
+        wbpSuggestions.classList.add('hidden');
+    }
+
+    if (wbpSearchInput) {
+        wbpSearchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            clearTimeout(wbpTimeout);
+            
+            if (query.length < 2) {
+                wbpSuggestions.innerHTML = '';
+                wbpSuggestions.classList.add('hidden');
+                return;
+            }
+            
+            wbpTimeout = setTimeout(() => {
+                fetch(`/kunjungan/search-wbp?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        wbpSuggestions.innerHTML = '';
+                        if (data.length === 0) {
+                            wbpSuggestions.innerHTML = '<div class="px-4 py-3 text-sm text-gray-500">Tidak ada warga binaan aktif ditemukan</div>';
+                            wbpSuggestions.classList.remove('hidden');
+                            return;
+                        }
+                        
+                        data.forEach(wbp => {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'w-full text-left px-4 py-2.5 hover:bg-red-50 text-sm text-gray-700 border-b last:border-0 border-gray-100 flex items-center justify-between transition';
+                            btn.innerHTML = `
+                                <span class="font-medium">${wbp.nama}</span>
+                                <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">NIK: ${wbp.nik}</span>
+                            `;
+                            btn.addEventListener('click', () => {
+                                selectWbp(wbp.id, wbp.nama);
+                            });
+                            wbpSuggestions.appendChild(btn);
+                        });
+                        wbpSuggestions.classList.remove('hidden');
+                    });
+            }, 300);
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!wbpSearchInput.contains(e.target) && !wbpSuggestions.contains(e.target)) {
+                wbpSuggestions.classList.add('hidden');
+            }
+        });
+    }
+
+    function selectWbp(id, name) {
+        wbpSearchInput.value = name;
+        wbpIdInput.value = id;
+        wbpSearchInput.readOnly = true;
+        wbpSuggestions.classList.add('hidden');
+        clearWbpBtn.classList.remove('hidden');
+    }
+
+    if (clearWbpBtn) {
+        clearWbpBtn.addEventListener('click', clearWbpSelection);
+    }
+
+    // Initial Render
+    renderCalendar();
 </script>
-@endpush
+    @endpush
 
