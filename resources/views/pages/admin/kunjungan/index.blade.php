@@ -388,10 +388,10 @@
                                     Tanggal Kunjungan
                                 </label>
 
-                                <input type="date"
-                                    name="tgl_kunjungan"
-                                    required
-                                    class="w-full border rounded-lg px-3 py-2">
+                                <input type="date" id="tgl-picker"
+                                name="tgl_kunjungan"
+                                required
+                                class="w-full border rounded-lg px-3 py-2">
                             </div>
 
                             {{-- Jam --}}
@@ -400,18 +400,14 @@
                                     Jam Kunjungan
                                 </label>
 
-                                <select name="jam" required
-                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
-
-                                    <option value="">Pilih jam...</option>
-                                    <option value="09:00">09.00 WIB</option>
-                                    <option value="10:00">10.00 WIB</option>
-                                    <option value="11:00">11.00 WIB</option>
-                                    <option value="13:00">13.00 WIB</option>
-                                    <option value="14:00">14.00 WIB</option>
-                                    <option value="15:00">15.00 WIB</option>
-                                    <option value="16:00">16.00 WIB</option>
-
+                                <select name="jam" id="jam-select" required
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+                                    <option value="">Pilih Sesi...</option>
+                                    <option value="Sesi 1: 08.00-09.30">Sesi 1: 08.00-09.30</option>
+                                    <option value="Sesi 2: 09.30-11.00">Sesi 2: 09.30-11.00</option>
+                                    <option value="Sesi 3: 11.00-12.30">Sesi 3: 11.00-12.30</option>
+                                    <option value="Sesi 4: 13.00-14.30">Sesi 4: 13.00-14.30</option>
+                                    <option value="Sesi 5: 14.30-16.00">Sesi 5: 14.30-16.00</option>
                                 </select>
                             </div>
 
@@ -423,8 +419,7 @@
 
                             <p class="text-sm text-red-700">
                                 <span class="font-semibold">Informasi:</span>
-                                Jam operasional kunjungan adalah
-                                <span class="font-semibold">09:00 – 16:00 WIB</span>.
+                                Jam operasional kunjungan dibagi menjadi 5 sesi per hari mulai dari <span class="font-semibold">08:00 – 16:00 WIB</span> dengan 1 sesi istirahat.
                             </p>
                         </div>
 
@@ -446,6 +441,8 @@
 
 @push('scripts')
 <script>
+    const dbJadwalDisetujui = @json($jadwalDisetujui);
+    console.log(dbJadwalDisetujui);
 function openTolakModal(id) {
     let prefix = "{{ auth()->user()->hasRole('superadmin') ? 'superadmin' : 'admin' }}";
     document.getElementById('form-tolak').action =  '/' + prefix + '/kunjungan/' + id + '/reject';;
@@ -624,5 +621,117 @@ function adminSelectWbp(id, name) {
 if (adminClearWbpBtn) {
     adminClearWbpBtn.addEventListener('click', adminClearWbpSelection);
 }
+
+const jamSelect = document.getElementById('jam-select');
+const tglPicker = document.getElementById('tgl-picker');
+
+function formatYYYYMMDD(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+}
+
+function mapJamToSession(jam){
+    if(!jam) return null;
+
+    if(jam.includes('08:00') || jam.includes('08.00')) return 'Sesi 1';
+    if(jam.includes('09:30') || jam.includes('09.30')) return 'Sesi 2';
+    if(jam.includes('11:00') || jam.includes('11.00')) return 'Sesi 3';
+    if(jam.includes('13:00') || jam.includes('13.00')) return 'Sesi 4';
+    if(jam.includes('14:30') || jam.includes('14.30')) return 'Sesi 5';
+
+    if(jam.includes('Sesi 1')) return 'Sesi 1';
+    if(jam.includes('Sesi 2')) return 'Sesi 2';
+    if(jam.includes('Sesi 3')) return 'Sesi 3';
+    if(jam.includes('Sesi 4')) return 'Sesi 4';
+    if(jam.includes('Sesi 5')) return 'Sesi 5';
+
+    return null;
+}
+
+function updateAvailableSessions(dateStr){
+
+    if(!jamSelect || !dateStr) return;
+
+    // reset semua option
+    [...jamSelect.options].forEach(opt=>{
+
+        if(!opt.value) return;
+
+        opt.disabled = false;
+        opt.textContent = opt.value;
+    });
+
+    const booked = [];
+
+    dbJadwalDisetujui.forEach(item=>{
+          console.log(item.tgl_kunjungan, item.jam);
+
+        let tgl = item.tgl_kunjungan;
+
+        if(tgl.substring)
+            tgl = tgl.substring(0,10);
+
+        if(tgl === dateStr){
+
+            const sesi = mapJamToSession(item.jam);
+
+            if(sesi)
+                booked.push(sesi);
+        }
+    });
+
+    const sessionStart = {
+        'Sesi 1':480,
+        'Sesi 2':570,
+        'Sesi 3':660,
+        'Sesi 4':780,
+        'Sesi 5':870
+    };
+
+    const today = formatYYYYMMDD(new Date());
+
+    const now = new Date();
+    const currentMinute = now.getHours()*60 + now.getMinutes();
+
+    [...jamSelect.options].forEach(opt=>{
+
+        if(!opt.value) return;
+
+        const sesi = mapJamToSession(opt.value);
+
+        let disable = false;
+
+        // jika sesi sudah dibooking
+        if(booked.includes(sesi)){
+            disable = true;
+            opt.textContent = opt.value + ' (Terisi)';
+        }
+
+        // jika hari ini dan sesi sudah lewat
+        if(dateStr === today){
+
+            if(currentMinute >= sessionStart[sesi]){
+
+                disable = true;
+                opt.textContent = opt.value + ' (Terlewat)';
+            }
+        }
+
+        opt.disabled = disable;
+    });
+}
+
+if(tglPicker){
+
+    tglPicker.addEventListener('change',function(){
+
+        updateAvailableSessions(this.value);
+
+    });
+}
+
+
 </script>
 @endpush
