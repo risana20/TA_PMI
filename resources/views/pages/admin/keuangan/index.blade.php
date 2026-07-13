@@ -198,7 +198,7 @@
     </div>
 </div>
 
-{{-- Modal Pemasukan
+{{-- Modal Pemasukan--}}
 <div id="modal-pemasukan" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
         <div class="flex items-center justify-between mb-4">
@@ -239,7 +239,7 @@
 </div>
 
 {{-- Modal Pengeluaran --}}
-{{-- <div id="modal-pengeluaran" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+<div id="modal-pengeluaran" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-lg">Tambah Pengeluaran</h3>
@@ -288,7 +288,7 @@
             </div>
         </form>
     </div>
-</div> --}}
+</div> 
 {{-- modal lihat nota --}}
 <div id="modal-nota" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
 
