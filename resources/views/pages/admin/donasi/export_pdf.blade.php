@@ -44,7 +44,7 @@
     <div class="header">
         <h1>Laporan Data Donasi {{ $tab }}</h1>
         <p>Griya PMI Surakarta</p>
-        <div style="margin-top: 10px; font-size: 11px; color: #333; text-align: center;">
+        <div style="position: fixed; bottom: 15px; left: 15px; font-size: 11px; color: #333; text-align: left; z-index: 10;">
             Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
             Dicetak Oleh: {{ auth()->user()->name }}<br>
             Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
