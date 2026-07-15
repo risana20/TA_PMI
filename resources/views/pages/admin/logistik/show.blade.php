@@ -129,6 +129,7 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-green-700">Tanggal</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-green-700">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-green-700">Pengaju</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-green-700">Keterangan</th>
                     </tr>
                 </thead>
@@ -137,11 +138,12 @@
                     <tr class="hover:bg-green-50">
                         <td class="px-4 py-3 text-gray-800 font-medium">{{ $r->tanggal->format('d/m/Y') }}</td>
                         <td class="px-4 py-3 font-semibold text-green-600">+{{ $r->jumlah }} <span class="font-normal text-gray-500">{{ $logistik->itemLogistik->satuan }}</span></td>
+                        <td class="px-4 py-3 text-gray-600">{{ $r->pengajuUser?->name ?? '-' }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $r->keterangan ?? '-' }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="3" class="px-4 py-12 text-center">
+                        <td colspan="4" class="px-4 py-12 text-center">
                             <i class="fa-solid fa-arrow-down text-4xl text-gray-200 mb-3 block"></i>
                             <p class="text-gray-400 text-sm">Belum ada riwayat pemasukan</p>
                         </td>
@@ -168,6 +170,7 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Tanggal</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Pengaju</th>
                         @if($logistik->itemLogistik->jenisLogistik->nama_jenis_logistik === 'Obat')
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Warga Griya</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-red-700">Aturan Minum</th>
@@ -181,6 +184,7 @@
                     <tr class="hover:bg-red-50">
                         <td class="px-4 py-3 text-gray-800 font-medium">{{ $r->tanggal->format('d/m/Y') }}</td>
                         <td class="px-4 py-3 font-semibold text-red-600">-{{ $r->jumlah }} <span class="font-normal text-gray-500">{{ $logistik->itemLogistik->satuan }}</span></td>
+                        <td class="px-4 py-3 text-gray-600">{{ $r->pengajuUser?->name ?? '-' }}</td>
                         @if($logistik->itemLogistik->jenisLogistik->nama_jenis_logistik === 'Obat')
                         <td class="px-4 py-3 text-gray-600">{{ $r->wargaBinaan?->nama ?? '-' }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $r->aturan_minum ?? '-' }}</td>
@@ -190,7 +194,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="{{ $logistik->itemLogistik->jenisLogistik->nama_jenis_logistik === 'Obat' ? 4 : 3 }}" class="px-4 py-12 text-center">
+                        <td colspan="{{ $logistik->itemLogistik->jenisLogistik->nama_jenis_logistik === 'Obat' ? 5 : 4 }}" class="px-4 py-12 text-center">
                             <i class="fa-solid fa-arrow-up text-4xl text-gray-200 mb-3 block"></i>
                             <p class="text-gray-400 text-sm">Belum ada riwayat pengeluaran</p>
                         </td>

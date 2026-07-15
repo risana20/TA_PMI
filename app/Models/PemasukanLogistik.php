@@ -23,6 +23,7 @@ class PemasukanLogistik extends Model
     protected $fillable = [
         'stok_logistik_id',
         'user_id',
+        'pengaju',
         'donasi_id',
         'nama_barang',
         'jumlah',
@@ -45,6 +46,11 @@ class PemasukanLogistik extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function pengajuUser()
+    {
+        return $this->belongsTo(User::class, 'pengaju');
     }
 
     public function donasi()
