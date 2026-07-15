@@ -69,6 +69,7 @@ class AccReimbursementController extends Controller
                 \App\Models\PemasukanLogistik::create([
                     'stok_logistik_id' => $stok->id,
                     'user_id'          => Auth::id(),
+                    'pengaju'          => $reimbursement->user_id,
                     'jumlah'           => $detail->jumlah,
                     'tanggal'          => now()->toDateString(),
                     'keterangan'       => 'pembelian',

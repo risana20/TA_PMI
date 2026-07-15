@@ -140,8 +140,8 @@ class LogistikController extends Controller
     public function show($id)
     {
         $logistik = StokLogistik::with(['itemLogistik.jenisLogistik'])->findOrFail($id);
-        $riwayatMasuk  = PemasukanLogistik::with(['user', 'donasi'])->where('stok_logistik_id', $id)->latest('tanggal')->get();
-        $riwayatKeluar = PengeluaranLogistik::with(['user', 'wargaBinaan'])->where('stok_logistik_id', $id)->latest('tanggal')->get();
+        $riwayatMasuk  = PemasukanLogistik::with(['user', 'donasi', 'pengajuUser'])->where('stok_logistik_id', $id)->latest('tanggal')->get();
+        $riwayatKeluar = PengeluaranLogistik::with(['user', 'wargaBinaan', 'pengajuUser'])->where('stok_logistik_id', $id)->latest('tanggal')->get();
         $wargaBinaans  = WargaBinaan::where('status', 'Aktif')->orderBy('nama')->get();
 
         return view('pages.admin.logistik.show', compact('logistik', 'riwayatMasuk', 'riwayatKeluar', 'wargaBinaans'));
@@ -196,6 +196,7 @@ class LogistikController extends Controller
         PemasukanLogistik::create([
             'stok_logistik_id' => $logistik->id,
             'user_id'          => Auth::id(),
+            'pengaju'          => Auth::id(),
             'jumlah'           => $data['jumlah'],
             'tanggal'          => $data['tanggal'],
             'keterangan'       => $data['keterangan'] ?? null,
@@ -235,6 +236,7 @@ class LogistikController extends Controller
         PengeluaranLogistik::create([
             'stok_logistik_id' => $logistik->id,
             'user_id'          => Auth::id(),
+            'pengaju'          => Auth::id(),
             'warga_binaan_id'  => $data['warga_binaan_id'] ?? null,
             'jumlah'           => $data['jumlah'],
             'tanggal'          => $data['tanggal'],
