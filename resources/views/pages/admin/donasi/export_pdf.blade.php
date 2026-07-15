@@ -3,9 +3,23 @@
 <head>
     <title>Laporan Data Donasi - {{ $tab }}</title>
     <style>
+        @page {
+            margin-bottom: 20mm;
+        }
         body {
             font-family: 'sans-serif';
             font-size: 10px;
+        }
+        .footer {
+            position: fixed;
+            bottom: -15mm;
+            left: 0;
+            right: 0;
+            height: 40px;
+            font-size: 9px;
+            color: #333333;
+            text-align: left;
+            line-height: 1.4;
         }
         .header {
             text-align: center;
@@ -41,14 +55,14 @@
     </style>
 </head>
 <body>
+    <div class="footer">
+        Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
+        Dicetak Oleh: {{ auth()->user()->name }}<br>
+        Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
+    </div>
     <div class="header">
         <h1>Laporan Data Donasi {{ $tab }}</h1>
         <p>Griya PMI Surakarta</p>
-        <div style="margin-top: 10px; font-size: 11px; color: #333; text-align: center;">
-            Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
-            Dicetak Oleh: {{ auth()->user()->name }}<br>
-            Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
-        </div>
     </div>
     <table>
         <thead>

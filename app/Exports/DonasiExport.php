@@ -63,8 +63,7 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
         }
 
         $data = $query->get();
-
-        return $data->map(function ($donasi, $index) {
+        $mapped = $data->map(function ($donasi, $index) {
             $no = $index + 1;
             $donatur = $donasi->nama_donatur;
             $tanggal = $donasi->created_at->format('d-m-Y');
@@ -122,24 +121,23 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
                 ];
             }
         });
+
+        $user = auth()->user();
+        $role = $user ? ($user->hasRole('superadmin') ? 'Superadmin' : 'Admin') : 'user';
+        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
+
+        $mapped->push([]);
+        $mapped->push(['Tanggal Cetak', $tanggalCetak]);
+        $mapped->push(['Dicetak Oleh', $user ? $user->name : '-']);
+        $mapped->push(['Role', $role]);
+
+        return $mapped;
     }
 
     public function headings(): array
     {
-        $user = auth()->user();
-        $role = $user->hasRole('superadmin') ? 'Superadmin' : 'Admin';
-        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
-
-        $info = [
-            ['Informasi Cetak'],
-            ['Tanggal Cetak', $tanggalCetak],
-            ['Dicetak Oleh', $user->name],
-            ['Role', $role],
-            [], // spacer row
-        ];
-
         if ($this->tab === 'Uang') {
-            $headers = [
+            return [
                 'No',
                 'Donatur',
                 'Nominal (Rp)',
@@ -148,7 +146,7 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
                 'Status'
             ];
         } elseif ($this->tab === 'Barang') {
-            $headers = [
+            return [
                 'No',
                 'Donatur',
                 'Nama Barang',
@@ -160,7 +158,7 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
                 'Status Logistik'
             ];
         } else {
-            $headers = [
+            return [
                 'No',
                 'Donatur',
                 'Nama Makanan',
@@ -172,9 +170,6 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
                 'Status Logistik'
             ];
         }
-
-        $info[] = $headers;
-        return $info;
     }
 
     public function styles(Worksheet $sheet)
@@ -182,11 +177,10 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
         
-        $sheet->mergeCells('A1:B1');
-        
-        $range = 'A6:' . $highestColumn . $highestRow;
+        $tableEndRow = max(1, $highestRow - 4);
+        $range = 'A1:' . $highestColumn . $tableEndRow;
 
-        $sheet->getStyle('A6:' . $highestColumn . '6')->applyFromArray([
+        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFFFF'],
@@ -215,16 +209,18 @@ class DonasiExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
             ],
         ]);
 
-        // Style the print info
-        $sheet->getStyle('A1:A4')->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ]
-        ]);
+        // Style the print info at the bottom-left (last 3 rows, column A & B)
+        if ($highestRow > 3) {
+            $sheet->getStyle('A' . ($highestRow - 2) . ':A' . $highestRow)->applyFromArray([
+                'font' => [
+                    'bold' => true,
+                ]
+            ]);
+        }
 
         // Format column C (Nominal) as currency if tab is Uang
-        if ($this->tab === 'Uang' && $highestRow > 6) {
-            $sheet->getStyle('C7:C' . $highestRow)->getNumberFormat()->setFormatCode('#,##0');
+        if ($this->tab === 'Uang' && $tableEndRow > 1) {
+            $sheet->getStyle('C2:C' . $tableEndRow)->getNumberFormat()->setFormatCode('#,##0');
         }
 
         return [];

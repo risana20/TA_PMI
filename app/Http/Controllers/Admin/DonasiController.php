@@ -126,7 +126,8 @@ class DonasiController extends Controller
         $donasis = $query->get();
 
         $pdf = Pdf::loadView('pages.admin.donasi.export_pdf', compact('donasis', 'tab'));
-        $fileName = 'Laporan Data Donasi - ' . $tab . '.pdf';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Laporan Data Donasi - ' . $tab . '_' . date('Ymd') . '_' . $role . '.pdf';
 
         return $pdf->download($fileName);
     }
@@ -138,7 +139,8 @@ class DonasiController extends Controller
         $statusDonasi = $request->get('status_donasi');
         $statusLogistik = $request->get('status_logistik');
 
-        $fileName = 'Laporan Data Donasi - ' . $tab . '.xlsx';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Laporan Data Donasi - ' . $tab . '_' . date('Ymd') . '_' . $role . '.xlsx';
         return Excel::download(new DonasiExport($tab, $search, $statusDonasi, $statusLogistik), $fileName);
     }
 

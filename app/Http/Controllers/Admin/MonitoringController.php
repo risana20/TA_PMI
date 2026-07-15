@@ -351,7 +351,8 @@ class MonitoringController extends Controller
         $wargaBinaans = $query->latest()->get();
         
         $pdf = Pdf::loadView('pages.admin.monitoring.export_warga_pdf', compact('wargaBinaans', 'tab'));
-        $fileName = 'Laporan Monitoring Kesehatan Warga Binaan - ' . $tab . '.pdf';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Laporan Monitoring Kesehatan Warga Binaan - ' . $tab . '_' . date('Ymd') . '_' . $role . '.pdf';
         
         return $pdf->download($fileName);
     }
@@ -361,7 +362,8 @@ class MonitoringController extends Controller
         $tab = $request->get('tab', 'ODGJ');
         $search = $request->get('search');
         
-        $fileName = 'Laporan Monitoring Kesehatan Warga Binaan - ' . $tab . '.xlsx';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Laporan Monitoring Kesehatan Warga Binaan - ' . $tab . '_' . date('Ymd') . '_' . $role . '.xlsx';
         return Excel::download(new WargaBinaanExport($tab, 'Aktif', $search), $fileName);
     }
 
@@ -370,14 +372,16 @@ class MonitoringController extends Controller
         $riwayat = $wargaBinaan->monitoringKesehatans()->with('riwayatPenyakits')->latest()->get();
         
         $pdf = Pdf::loadView('pages.admin.monitoring.export_pemeriksaan_pdf', compact('wargaBinaan', 'riwayat'));
-        $fileName = 'Laporan Pemeriksaan Kesehatan - ' . $wargaBinaan->nama . '.pdf';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Laporan Pemeriksaan Kesehatan - ' . $wargaBinaan->nama . '_' . date('Ymd') . '_' . $role . '.pdf';
         
         return $pdf->download($fileName);
     }
 
     public function exportPemeriksaanExcel(WargaBinaan $wargaBinaan)
     {
-        $fileName = 'Laporan Pemeriksaan Kesehatan - ' . $wargaBinaan->nama . '.xlsx';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Laporan Pemeriksaan Kesehatan - ' . $wargaBinaan->nama . '_' . date('Ymd') . '_' . $role . '.xlsx';
         return Excel::download(new PemeriksaanKesehatanExport($wargaBinaan), $fileName);
     }
 }
