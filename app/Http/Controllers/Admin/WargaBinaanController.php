@@ -59,7 +59,8 @@ class WargaBinaanController extends Controller
         $wargaBinaans = WargaBinaan::where('kategori', $tab)->latest()->get();
 
         $pdf = Pdf::loadView('pages.admin.warga-binaan.export_pdf', compact('wargaBinaans', 'tab'));
-        $fileName = 'Laporan Data Warga Binaan - ' . $tab . '.pdf';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Laporan Data Warga Binaan - ' . $tab . '_' . date('Ymd') . '_' . $role . '.pdf';
 
         return $pdf->download($fileName);
     }
@@ -68,7 +69,8 @@ class WargaBinaanController extends Controller
     public function exportExcel(Request $request)
     {
         $tab = $request->get('tab', 'ODGJ');
-        $fileName = 'Laporan Data Warga Binaan - ' . $tab . '.xlsx';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Laporan Data Warga Binaan - ' . $tab . '_' . date('Ymd') . '_' . $role . '.xlsx';
         return Excel::download(new WargaBinaanExport($tab), $fileName);
     }
     
