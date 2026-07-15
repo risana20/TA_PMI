@@ -735,10 +735,13 @@ document.getElementById('next-month-btn').addEventListener('click', () => {
     renderCalendar();
 });
 
-// Bind date picker change listener
-document.getElementById('tgl-picker').addEventListener('change', function() {
-    updateAvailableSessions(this.value);
-});
+// Bind date picker change listener (elemen ini hanya ada untuk user yang sudah login)
+const tglPickerEl = document.getElementById('tgl-picker');
+if (tglPickerEl) {
+    tglPickerEl.addEventListener('change', function() {
+        updateAvailableSessions(this.value);
+    });
+}
 
 function initSurat() {
     const tujuan = document.getElementById('tujuan');
