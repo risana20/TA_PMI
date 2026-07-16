@@ -97,7 +97,8 @@ class LogistikController extends Controller
         $logistiks = $query->get();
 
         $pdf = Pdf::loadView('pages.admin.logistik.export_pdf', compact('logistiks', 'kategori', 'status'));
-        $fileName = 'Data_Logistik_Inventaris.pdf';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Data_Logistik_Inventaris_' . date('Ymd') . '_' . $role . '.pdf';
 
         return $pdf->download($fileName);
     }
@@ -108,7 +109,8 @@ class LogistikController extends Controller
         $kategori = $request->get('kategori');
         $status   = $request->get('status');
 
-        $fileName = 'Data_Logistik_Inventaris.xlsx';
+        $role = auth()->user() && auth()->user()->role ? auth()->user()->role->name : 'user';
+        $fileName = 'Data_Logistik_Inventaris_' . date('Ymd') . '_' . $role . '.xlsx';
         return Excel::download(new LogistikExport($search, $kategori, $status), $fileName);
     }
 
@@ -140,8 +142,8 @@ class LogistikController extends Controller
     public function show($id)
     {
         $logistik = StokLogistik::with(['itemLogistik.jenisLogistik'])->findOrFail($id);
-        $riwayatMasuk  = PemasukanLogistik::with(['user', 'donasi'])->where('stok_logistik_id', $id)->latest('tanggal')->get();
-        $riwayatKeluar = PengeluaranLogistik::with(['user', 'wargaBinaan'])->where('stok_logistik_id', $id)->latest('tanggal')->get();
+        $riwayatMasuk  = PemasukanLogistik::with(['user', 'donasi', 'pengajuUser'])->where('stok_logistik_id', $id)->latest('tanggal')->get();
+        $riwayatKeluar = PengeluaranLogistik::with(['user', 'wargaBinaan', 'pengajuUser'])->where('stok_logistik_id', $id)->latest('tanggal')->get();
         $wargaBinaans  = WargaBinaan::where('status', 'Aktif')->orderBy('nama')->get();
 
         return view('pages.admin.logistik.show', compact('logistik', 'riwayatMasuk', 'riwayatKeluar', 'wargaBinaans'));
@@ -196,6 +198,7 @@ class LogistikController extends Controller
         PemasukanLogistik::create([
             'stok_logistik_id' => $logistik->id,
             'user_id'          => Auth::id(),
+            'pengaju'          => Auth::id(),
             'jumlah'           => $data['jumlah'],
             'tanggal'          => $data['tanggal'],
             'keterangan'       => $data['keterangan'] ?? null,
@@ -235,6 +238,7 @@ class LogistikController extends Controller
         PengeluaranLogistik::create([
             'stok_logistik_id' => $logistik->id,
             'user_id'          => Auth::id(),
+            'pengaju'          => Auth::id(),
             'warga_binaan_id'  => $data['warga_binaan_id'] ?? null,
             'jumlah'           => $data['jumlah'],
             'tanggal'          => $data['tanggal'],

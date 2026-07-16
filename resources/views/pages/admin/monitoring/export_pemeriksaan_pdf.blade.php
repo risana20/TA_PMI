@@ -9,7 +9,18 @@
         }
         @page {
             size: A4 landscape;
-            margin: 15mm;
+            margin: 15mm 15mm 25mm 15mm;
+        }
+        .footer {
+            position: fixed;
+            bottom: -15mm;
+            left: 0;
+            right: 0;
+            height: 40px;
+            font-size: 9px;
+            color: #333333;
+            text-align: left;
+            line-height: 1.4;
         }
         .header {
             text-align: center;
@@ -45,14 +56,14 @@
     </style>
 </head>
 <body>
+    <div class="footer">
+        Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
+        Dicetak Oleh: {{ auth()->user()->name }}<br>
+        Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
+    </div>
     <div class="header">
         <h1>Laporan Pemeriksaan Kesehatan Warga Binaan</h1>
         <p>Nama: {{ $wargaBinaan->nama }} ({{ $wargaBinaan->nik }}) | Kategori: {{ $wargaBinaan->kategori }}</p>
-        <div style="margin-top: 10px; font-size: 11px; color: #333; text-align: center;">
-            Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
-            Dicetak Oleh: {{ auth()->user()->name }}<br>
-            Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
-        </div>
     </div>
     <table>
         <thead>
