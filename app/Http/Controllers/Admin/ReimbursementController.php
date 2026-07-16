@@ -113,17 +113,27 @@ class ReimbursementController extends Controller
     }
     public function exportExcel(Request $request)
     {
+        $user = auth()->user();
+        $role = $user && $user->role ? $user->role->name : 'user';
+        $nama = str_replace(' ', '_', $user->name);
+
+        $fileName = 'Laporan_Ajuan_Reimbursement_' .
+                    date('Ymd') . '_' .
+                    $role . '_' .
+                    $nama . '.xlsx';
+
         return Excel::download(
             new ReimbursementExport(),
-            'Laporan_Ajuan_Reimbursement.xlsx'
+            $fileName
         );
     }
-    public function exportPdf(Request $request)
 
+    public function exportPdf(Request $request)
     {
         $reimbursements = Reimbursement::with([
             'detailReimbursements.itemLogistik',
-            'user', 'validator'
+            'user',
+            'validator'
         ])
         ->where('user_id', Auth::id())
         ->latest()
@@ -134,7 +144,16 @@ class ReimbursementController extends Controller
             compact('reimbursements')
         );
 
-        return $pdf->download('Laporan_Ajuan_Reimbursement.pdf');
+        $user = auth()->user();
+        $role = $user && $user->role ? $user->role->name : 'user';
+        $nama = str_replace(' ', '_', $user->name);
+
+        $fileName = 'Laporan_Ajuan_Reimbursement_' .
+                    date('Ymd') . '_' .
+                    $role . '_' .
+                    $nama . '.pdf';
+
+        return $pdf->download($fileName);
     }
 
 }

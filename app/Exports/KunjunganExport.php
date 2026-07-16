@@ -61,7 +61,7 @@ class KunjunganExport extends DefaultValueBinder implements FromCollection, With
 
         $data = $query->orderBy('tgl_kunjungan', 'asc')->get();
 
-        return $data->map(function ($kunjungan) {
+        $mapped = $data->map(function ($kunjungan) {
             return [
                 'nama pengunjung' => $kunjungan->nama_pengunjung,
                 'no hp'           => $kunjungan->no_hp,
@@ -73,20 +73,23 @@ class KunjunganExport extends DefaultValueBinder implements FromCollection, With
                 
             ];
         });
+        $user = auth()->user();
+        $role = $user ? ($user->hasRole('superadmin') ? 'Superadmin' : 'Admin') : 'user';
+        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
+
+        $mapped->push([]);
+        $mapped->push(['Tanggal Cetak', $tanggalCetak]);
+        $mapped->push(['Dicetak Oleh', $user ? $user->name : '-']);
+        $mapped->push(['Role', $role]);
+
+        return $mapped;
+
+
     }
 
     public function headings(): array
     {
-        $user = auth()->user();
-        $role = $user->hasRole('superadmin') ? 'Superadmin' : 'Admin';
-        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
-
         return [
-            ['Informasi Cetak'],
-            ['Tanggal Cetak', $tanggalCetak],
-            ['Dicetak Oleh', $user->name],
-            ['Role', $role],
-            [], // spacer row
             [
                 'nama_pengunjung', 
                 'no_hp',
@@ -104,12 +107,11 @@ class KunjunganExport extends DefaultValueBinder implements FromCollection, With
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        
-        $sheet->mergeCells('A1:B1');
-        
-        $range = 'A6:' . $highestColumn . $highestRow;
 
-        $sheet->getStyle('A6:' . $highestColumn . '6')->applyFromArray([
+        $tableEndRow = max(1, $highestRow - 4);
+        $range = 'A1:' . $highestColumn . $tableEndRow;
+
+        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFFFF'],
@@ -117,7 +119,7 @@ class KunjunganExport extends DefaultValueBinder implements FromCollection, With
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                 'startColor' => [
-                    'argb' => 'FFE4000F', // Brand Red PMI
+                    'argb' => 'FFE4000F',
                 ],
             ],
             'alignment' => [
@@ -138,12 +140,10 @@ class KunjunganExport extends DefaultValueBinder implements FromCollection, With
             ],
         ]);
 
-        // Style the print info
-        $sheet->getStyle('A1:A4')->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ]
-        ]);
+        if ($highestRow > 3) {
+            $sheet->getStyle('A' . ($highestRow - 2) . ':A' . $highestRow)
+                ->getFont()->setBold(true);
+        }
 
         return [];
     }

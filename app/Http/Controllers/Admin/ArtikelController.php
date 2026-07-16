@@ -91,31 +91,51 @@ class ArtikelController extends Controller
         }
 
         if ($request->search) {
-        $query->where(function ($q) use ($request) {
-            $q->where('judul', 'like', "%{$request->search}%")
-              ->orWhere('kategori', 'like', "%{$request->search}%")
-              ->orWhere('status', 'like', "%{$request->search}%")
-              ->orWhere('tgl_terbit', 'like', "%{$request->search}%");
-        });
+            $query->where(function ($q) use ($request) {
+                $q->where('judul', 'like', "%{$request->search}%")
+                ->orWhere('kategori', 'like', "%{$request->search}%")
+                ->orWhere('status', 'like', "%{$request->search}%")
+                ->orWhere('tgl_terbit', 'like', "%{$request->search}%");
+            });
         }
 
         $artikels = $query->latest()->get();
 
-        $pdf = Pdf::loadView('pages.admin.artikel.export_pdf', compact('artikels'));
+        $pdf = Pdf::loadView(
+            'pages.admin.artikel.export_pdf',
+            compact('artikels')
+        );
 
-        return $pdf->download('Laporan artikel.pdf');
+        $user = auth()->user();
+        $role = $user && $user->role ? $user->role->name : 'user';
+        $nama = str_replace(' ', '_', $user->name);
+
+        $fileName = 'Laporan_Artikel_' .
+                    date('Ymd') . '_' .
+                    $role . '_' .
+                    $nama . '.pdf';
+
+        return $pdf->download($fileName);
     }
 
     // Export Excel (download .xlsx)
-
     public function exportExcel(Request $request)
     {
+        $user = auth()->user();
+        $role = $user && $user->role ? $user->role->name : 'user';
+        $nama = str_replace(' ', '_', $user->name);
+
+        $fileName = 'Laporan_Artikel_' .
+                    date('Ymd') . '_' .
+                    $role . '_' .
+                    $nama . '.xlsx';
+
         return Excel::download(
             new ArtikelExport(
                 $request->status,
                 $request->search
             ),
-            'Laporan Artikel.xlsx'
+            $fileName
         );
     }
 }

@@ -162,7 +162,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Satuan</label>
-                    <input type="text" name="satuan" placeholder="kg, pcs, liter, ..." required
+                    <input type="text" name="satuan" id="logistik_satuan" placeholder="kg, pcs, liter, ..." required
+                           pattern="[^0-9]+" title="Satuan tidak boleh mengandung angka"
                         class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
             </div>
@@ -191,4 +192,12 @@
 @endsection
 
 @push('scripts')
+<script>
+const logistikSatuanInput = document.getElementById('logistik_satuan');
+if (logistikSatuanInput) {
+    logistikSatuanInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[0-9]/g, '');
+    });
+}
+</script>
 @endpush

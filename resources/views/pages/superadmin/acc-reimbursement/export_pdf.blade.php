@@ -3,6 +3,9 @@
 <head>
     <title>Laporan Data ACC Reimbursemen</title>
     <style>
+        @page {
+            margin-bottom: 20mm;
+        }
         body {
             font-family: 'sans-serif';
             font-size: 10px;
@@ -38,16 +41,22 @@
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+        .footer {
+            position: fixed;
+            bottom: -15mm;
+            left: 0;
+            right: 0;
+            height: 40px;
+            font-size: 9px;
+            color: #333333;
+            text-align: left;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Laporan Data Acc Reimbursemen</h1>
-        <div style="margin-top: 10px; font-size: 11px; color: #333; text-align: center;">
-            Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
-            Dicetak Oleh: {{ auth()->user()->name }}<br>
-            Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
-        </div>
     </div>
     <table>
         <thead>
@@ -92,5 +101,10 @@
             @endforelse
         </tbody>
     </table>
+     <div class="footer">
+        Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB<br>
+        Dicetak Oleh: {{ auth()->user()->name }}<br>
+        Role: {{ auth()->user()->hasRole('superadmin') ? 'Superadmin' : 'Admin' }}
+    </div>
 </body>
 </html>

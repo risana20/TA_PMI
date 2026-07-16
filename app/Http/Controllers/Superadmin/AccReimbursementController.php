@@ -134,15 +134,34 @@ class AccReimbursementController extends Controller
             compact('reimbursements')
         );
 
-        return $pdf->download('Laporan_ACC_Reimbursement.pdf');
+        $user = auth()->user();
+        $role = $user && $user->role ? $user->role->name : 'user';
+        $nama = str_replace(' ', '_', $user->name);
+
+        $fileName = 'Laporan_ACC_Reimbursement_' .
+                    date('Ymd') . '_' .
+                    $role . '_' .
+                    $nama . '.pdf';
+
+        return $pdf->download($fileName);
     }
-    public function exportExcel(Request $request)
+
+   public function exportExcel(Request $request)
     {
+        $user = auth()->user();
+        $role = $user && $user->role ? $user->role->name : 'user';
+        $nama = str_replace(' ', '_', $user->name);
+
+        $fileName = 'Laporan_ACC_Reimbursement_' .
+                    date('Ymd') . '_' .
+                    $role . '_' .
+                    $nama . '.xlsx';
+
         return Excel::download(
             new ACCReimbursementExport(
                 $request->search
             ),
-            'Laporan_ACC_Reimbursement.xlsx'
+            $fileName
         );
     }
 }

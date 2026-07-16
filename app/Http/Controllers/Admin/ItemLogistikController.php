@@ -11,11 +11,15 @@ class ItemLogistikController extends Controller
 {
     public function store(Request $request)
     {
+        $messages = [
+            'satuan.regex' => 'Satuan logistik tidak boleh mengandung angka.',
+        ];
+
         $request->validate([
             'nama_item' => 'required|string|max:255|unique:item_logistiks,nama_item',
-            'satuan' => 'required|string|max:50',
+            'satuan' => ['required', 'string', 'max:50', 'regex:/^[^0-9]+$/'],
             'jenis_logistik_id' => 'required|exists:jenis_logistiks,id',
-        ]);
+        ], $messages);
 
         $item = ItemLogistik::create([
             'nama_item' => $request->nama_item,

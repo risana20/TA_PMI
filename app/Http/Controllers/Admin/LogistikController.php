@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\LogistikExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 
 class LogistikController extends Controller
 {
@@ -116,13 +117,17 @@ class LogistikController extends Controller
 
     public function store(Request $request)
     {
+        $messages = [
+            'satuan.regex' => 'Satuan logistik tidak boleh mengandung angka.',
+        ];
+
         $request->validate([
             'jenis_logistik_id' => 'required|exists:jenis_logistiks,id',
-            'nama_item'         => 'required|string|max:255',
-            'satuan'            => 'required|string|max:50',
+            'nama_item'         => 'required|string|max:255|unique:item_logistiks,nama_item',
+            'satuan'            => ['required', 'string', 'max:50', 'regex:/^[^0-9]+$/'],
             'jumlah_saat_ini'   => 'required|integer|min:0',
             'jumlah_minimum'    => 'required|integer|min:0',
-        ]);
+        ], $messages);
 
         $item = ItemLogistik::create([
             'jenis_logistik_id' => $request->jenis_logistik_id,
@@ -154,12 +159,17 @@ class LogistikController extends Controller
         $logistik = StokLogistik::findOrFail($id);
         $item = $logistik->itemLogistik;
 
+        $messages = [
+            'satuan.regex' => 'Satuan logistik tidak boleh mengandung angka.',
+        ];
+
         $request->validate([
             'jenis_logistik_id' => 'required|exists:jenis_logistiks,id',
-            'nama_item'         => 'required|string|max:255',
-            'satuan'            => 'required|string|max:50',
+            'nama_item' => ['required|string|max:255',Rule::unique('item_logistiks', 'nama_item')->ignore($item->id),],
+
+            'satuan'            => ['required', 'string', 'max:50', 'regex:/^[^0-9]+$/'],
             'jumlah_minimum'    => 'required|integer|min:0',
-        ]);
+        ], $messages);
 
         $item->update([
             'jenis_logistik_id' => $request->jenis_logistik_id,

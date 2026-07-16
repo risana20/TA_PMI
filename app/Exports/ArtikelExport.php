@@ -56,7 +56,7 @@ class ArtikelExport extends DefaultValueBinder implements FromCollection, WithHe
 
         $data = $query->get();
 
-        return $data->map(function ($artikel) {
+        $mapped = $data->map(function ($artikel) {
             return [
                 'Judul'    => $artikel->judul,
                 'Kategori' => $artikel->kategori,
@@ -66,20 +66,21 @@ class ArtikelExport extends DefaultValueBinder implements FromCollection, WithHe
                 'Pembuat' => optional($artikel->penulis)->name,
             ];
         });
+        $user = auth()->user();
+        $role = $user ? ($user->hasRole('superadmin') ? 'Superadmin' : 'Admin') : 'user';
+        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
+
+        $mapped->push([]);
+        $mapped->push(['Tanggal Cetak', $tanggalCetak]);
+        $mapped->push(['Dicetak Oleh', $user ? $user->name : '-']);
+        $mapped->push(['Role', $role]);
+
+        return $mapped;
     }
 
     public function headings(): array
     {
-        $user = auth()->user();
-        $role = $user->hasRole('superadmin') ? 'Superadmin' : 'Admin';
-        $tanggalCetak = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
-
         return [
-            ['Informasi Cetak'],
-            ['Tanggal Cetak', $tanggalCetak],
-            ['Dicetak Oleh', $user->name],
-            ['Role', $role],
-            [], // spacer row
             [
                 'Judul', 
                 'Kategori',
@@ -96,11 +97,10 @@ class ArtikelExport extends DefaultValueBinder implements FromCollection, WithHe
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
         
-        $sheet->mergeCells('A1:B1');
-        
-        $range = 'A6:' . $highestColumn . $highestRow;
+        $tableEndRow = max(1, $highestRow - 4);
+        $range = 'A1:' . $highestColumn . $tableEndRow;
 
-        $sheet->getStyle('A6:' . $highestColumn . '6')->applyFromArray([
+        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFFFF'],
@@ -129,12 +129,14 @@ class ArtikelExport extends DefaultValueBinder implements FromCollection, WithHe
             ],
         ]);
 
-        // Style the print info
-        $sheet->getStyle('A1:A4')->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ]
-        ]);
+        // Style the print info at the bottom-left (last 3 rows, column A & B)
+        if ($highestRow > 3) {
+            $sheet->getStyle('A' . ($highestRow - 2) . ':A' . $highestRow)->applyFromArray([
+                'font' => [
+                    'bold' => true,
+                ]
+            ]);
+        }
 
         return [];
     }

@@ -319,6 +319,8 @@
                 <input type="text"
                     id="satuan_baru"
                     class="w-full border rounded-lg px-3 py-2"
+                    pattern="[^0-9]+"
+                    title="Satuan tidak boleh mengandung angka"
                     placeholder="Contoh: Kg, Pcs, Box">
             </div>
 
@@ -616,6 +618,11 @@
             return;
         }
 
+        if (/[0-9]/.test(satuan)) {
+            alert('Satuan tidak boleh mengandung angka.');
+            return;
+        }
+
         try {
 
             const response = await fetch("{{ route('admin.item-logistik.store') }}", {
@@ -780,6 +787,16 @@
         document.getElementById('modal-ajukan').classList.remove('hidden');
     });
     @endif
+
+    // Block numbers in satuan_baru
+    document.addEventListener('DOMContentLoaded', function () {
+        const satuanBaru = document.getElementById('satuan_baru');
+        if (satuanBaru) {
+            satuanBaru.addEventListener('input', function () {
+                this.value = this.value.replace(/[0-9]/g, '');
+            });
+        }
+    });
 </script>
 
 @endsection

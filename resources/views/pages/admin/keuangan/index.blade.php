@@ -198,7 +198,7 @@
     </div>
 </div>
 
-{{-- Modal Pemasukan--}}
+{{-- Modal Pemasukan --}}
 <div id="modal-pemasukan" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
         <div class="flex items-center justify-between mb-4">
@@ -288,11 +288,7 @@
             </div>
         </form>
     </div>
-<<<<<<< HEAD
 </div>
-=======
-</div> 
->>>>>>> 13c6c9ef03a53a4ea3de2808bc75823d76889336
 {{-- modal lihat nota --}}
 <div id="modal-nota" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
 

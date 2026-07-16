@@ -23,7 +23,7 @@ class ReimbursementExport implements FromCollection, WithHeadings, WithStyles, S
         ->latest()
         ->get();
 
-        return $data->map(function ($reimbursement) {
+        $mapped = $data->map(function ($reimbursement) {
 
             $barang = [];
             $jumlah = [];
@@ -37,28 +37,33 @@ class ReimbursementExport implements FromCollection, WithHeadings, WithStyles, S
 
             return [
                 'Tanggal Pengajuan' => $reimbursement->tgl_pengajuan,
-                'Pengaju'           => optional($reimbursement->user)->name,
-                'Barang'            => implode(", ", $barang),
-                'Jumlah'            => implode(", ", $jumlah),
-                'Nominal'           => implode(", ", $nominal),
-                'Total'             => 'Rp ' . number_format($reimbursement->total, 0, ',', '.'),
-                'Status'            => $reimbursement->status,
-                'Tanggal Validasi'  => $reimbursement->tgl_validasi ?? '-',
-                'Validator'         => optional($reimbursement->validator)->name ?? '-',
+                'Pengaju' => optional($reimbursement->user)->name,
+                'Barang' => implode(", ", $barang),
+                'Jumlah' => implode(", ", $jumlah),
+                'Nominal' => implode(", ", $nominal),
+                'Total' => 'Rp ' . number_format($reimbursement->total, 0, ',', '.'),
+                'Status' => $reimbursement->status,
+                'Tanggal Validasi' => $reimbursement->tgl_validasi ?? '-',
+                'Validator' => optional($reimbursement->validator)->name ?? '-',
             ];
         });
+
+        $user = auth()->user();
+        $role = $user->hasRole('superadmin') ? 'Superadmin' : 'Admin';
+        $tanggalCetak = now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB';
+
+        $mapped->push([]);
+        $mapped->push(['Tanggal Cetak', $tanggalCetak]);
+        $mapped->push(['Dicetak Oleh', $user->name]);
+        $mapped->push(['Role', $role]);
+
+        return $mapped;
     }
 
     public function headings(): array
     {
-        $user = auth()->user();
 
         return [
-            ['Informasi Cetak'],
-            ['Tanggal Cetak', now()->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB'],
-            ['Dicetak Oleh', $user->name],
-            ['Role', $user->hasRole('superadmin') ? 'Superadmin' : 'Admin'],
-            [],
             [
                 'Tanggal Pengajuan',
                 'Pengaju',
@@ -73,14 +78,17 @@ class ReimbursementExport implements FromCollection, WithHeadings, WithStyles, S
         ];
     }
 
+    
     public function styles(Worksheet $sheet)
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
 
-        $sheet->mergeCells('A1:B1');
+        $tableEndRow = max(1, $highestRow - 4);
 
-        $sheet->getStyle('A6:' . $highestColumn . '6')->applyFromArray([
+        $range = 'A1:' . $highestColumn . $tableEndRow;
+
+        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFFFF'],
@@ -97,17 +105,22 @@ class ReimbursementExport implements FromCollection, WithHeadings, WithStyles, S
             ],
         ]);
 
-        $sheet->getStyle('A6:' . $highestColumn . $highestRow)
-            ->applyFromArray([
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['argb' => 'FF000000'],
-                    ],
+        $sheet->getStyle($range)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
                 ],
-            ]);
+            ],
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+        ]);
 
-        $sheet->getStyle('A1:A4')->getFont()->setBold(true);
+        if ($highestRow > 3) {
+            $sheet->getStyle('A' . ($highestRow - 2) . ':A' . $highestRow)
+                ->getFont()->setBold(true);
+        }
 
         return [];
     }

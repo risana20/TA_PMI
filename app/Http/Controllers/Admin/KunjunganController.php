@@ -187,9 +187,9 @@ class KunjunganController extends Controller
 
         return '00:00';
     }
-    public function exportPdf(Request $request)
+   public function exportPdf(Request $request)
     {
-        $query = Kunjungan::with('wargaBinaan');
+        $query = Kunjungan::query();
 
         if ($request->status) {
             $query->where('status', $request->status);
@@ -197,29 +197,47 @@ class KunjunganController extends Controller
 
         if ($request->search) {
             $query->where(function ($q) use ($request) {
-                $q->where('nama_pengunjung', 'like', "%{$request->search}%")
-                ->orWhere('instansi', 'like', "%{$request->search}%")
-                ->orWhere('tujuan', 'like', "%{$request->search}%");
+                $q->where('nama_pengunjung', 'like', '%' . $request->search . '%')
+                ->orWhere('instansi', 'like', '%' . $request->search . '%')
+                ->orWhere('tujuan', 'like', '%' . $request->search . '%');
             });
         }
 
-        $kunjungans = $query->latest()->get();
+        $kunjungans = $query->orderBy('tgl_kunjungan')->get();
 
-        $pdf = Pdf::loadView('pages.admin.Kunjungan.export_pdf', compact('kunjungans'));
+        $pdf = Pdf::loadView('pages.admin.kunjungan.export_pdf', compact('kunjungans'));
 
-        return $pdf->download('Laporan Kunjungan.pdf');
+        $user = auth()->user();
+        $role = $user && $user->role ? $user->role->name : 'user';
+        $nama = str_replace(' ', '_', $user->name);
+
+        $fileName = 'Laporan_Data_Kunjungan_' .
+                    date('Ymd') . '_' .
+                    $role . '_' .
+                    $nama . '.pdf';
+
+        return $pdf->download($fileName);
     }
 
     // Export Excel (download .xlsx)
 
     public function exportExcel(Request $request)
     {
+        $status = $request->get('status');
+        $search = $request->get('search');
+
+        $user = auth()->user();
+        $role = $user && $user->role ? $user->role->name : 'user';
+        $nama = str_replace(' ', '_', $user->name);
+
+        $fileName = 'Laporan_Data_Kunjungan_' .
+                    date('Ymd') . '_' .
+                    $role . '_' .
+                    $nama . '.xlsx';
+
         return Excel::download(
-            new KunjunganExport(
-                $request->status,
-                $request->search
-            ),
-            'Laporan Kunjungan.xlsx'
+            new KunjunganExport($status, $search),
+            $fileName
         );
     }
 
