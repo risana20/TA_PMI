@@ -271,6 +271,7 @@ class DonasiController extends Controller
                 'tgl_penyerahan'    => $data['tgl_penyerahan'],
                 'jam_penyerahan'    => $data['jam_penyerahan'],
                 'status'            => 'Tunggu Verifikasi',
+                'keterangan'        => 'donasi',
             ]);
         }
 
@@ -340,6 +341,7 @@ class DonasiController extends Controller
                         'metode_penyerahan'=> $donasi->donasiMakanan?->metode_penyerahan ?? null,
                         'status'           => 'Selesai',
                         'bukti_diterima'   => $path ?? null,
+                        'keterangan'       => 'donasi',
                     ]);
 
                     $stok = \App\Models\StokLogistik::find($request->stok_logistik_id);
@@ -361,6 +363,7 @@ class DonasiController extends Controller
                     $updateData['stok_logistik_id'] = $request->stok_logistik_id;
                     $jumlahInt = (int) $request->input('jumlah');
                     $updateData['jumlah'] = $jumlahInt;
+                    $updateData['keterangan'] = 'donasi';
 
                     $stok = \App\Models\StokLogistik::find($request->stok_logistik_id);
                     if ($stok) {

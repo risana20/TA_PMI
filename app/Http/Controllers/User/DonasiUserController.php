@@ -150,6 +150,7 @@ class DonasiUserController extends Controller
                 'tgl_penyerahan'    => $data['tgl_penyerahan'],
                 'jam_penyerahan'    => $data['jam_penyerahan'],
                 'status'            => 'Tunggu Verifikasi',
+                'keterangan'        => 'donasi',
             ]);
         }
 

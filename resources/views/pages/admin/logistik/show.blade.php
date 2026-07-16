@@ -139,7 +139,7 @@
                         <td class="px-4 py-3 text-gray-800 font-medium">{{ $r->tanggal->format('d/m/Y') }}</td>
                         <td class="px-4 py-3 font-semibold text-green-600">+{{ $r->jumlah }} <span class="font-normal text-gray-500">{{ $logistik->itemLogistik->satuan }}</span></td>
                         <td class="px-4 py-3 text-gray-600">{{ $r->pengajuUser?->name ?? '-' }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $r->keterangan ?? '-' }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $r->donasi_id ? 'donasi' : ($r->keterangan ?? '-') }}</td>
                     </tr>
                     @empty
                     <tr>
