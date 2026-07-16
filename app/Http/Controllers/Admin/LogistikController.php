@@ -116,13 +116,17 @@ class LogistikController extends Controller
 
     public function store(Request $request)
     {
+        $messages = [
+            'satuan.regex' => 'Satuan logistik tidak boleh mengandung angka.',
+        ];
+
         $request->validate([
             'jenis_logistik_id' => 'required|exists:jenis_logistiks,id',
             'nama_item'         => 'required|string|max:255',
-            'satuan'            => 'required|string|max:50',
+            'satuan'            => ['required', 'string', 'max:50', 'regex:/^[^0-9]+$/'],
             'jumlah_saat_ini'   => 'required|integer|min:0',
             'jumlah_minimum'    => 'required|integer|min:0',
-        ]);
+        ], $messages);
 
         $item = ItemLogistik::create([
             'jenis_logistik_id' => $request->jenis_logistik_id,
@@ -154,12 +158,16 @@ class LogistikController extends Controller
         $logistik = StokLogistik::findOrFail($id);
         $item = $logistik->itemLogistik;
 
+        $messages = [
+            'satuan.regex' => 'Satuan logistik tidak boleh mengandung angka.',
+        ];
+
         $request->validate([
             'jenis_logistik_id' => 'required|exists:jenis_logistiks,id',
             'nama_item'         => 'required|string|max:255',
-            'satuan'            => 'required|string|max:50',
+            'satuan'            => ['required', 'string', 'max:50', 'regex:/^[^0-9]+$/'],
             'jumlah_minimum'    => 'required|integer|min:0',
-        ]);
+        ], $messages);
 
         $item->update([
             'jenis_logistik_id' => $request->jenis_logistik_id,
