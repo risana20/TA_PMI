@@ -149,7 +149,7 @@
                                 </div>
                                 <div class="w-1/3">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Satuan</label>
-                                    <input type="text" name="satuan" id="satuan_barang" placeholder="Satuan" readonly required
+                                    <input type="text" name="satuan" id="satuan_barang" placeholder="Satuan" readonly required pattern="[^0-9]+" title="Satuan tidak boleh mengandung angka"
                                         class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500 focus:outline-none">
                                 </div>
                             </div>
@@ -238,8 +238,8 @@
                                 <div class="flex gap-2">
                                     <input type="number" min="1" name="jumlah_makanan_value" id="jumlah_makanan_value" placeholder="Contoh: 10" required
                                         class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
-                                    <input type="text" name="jumlah_makanan_satuan" id="jumlah_makanan_satuan" placeholder="Satuan" readonly required
-                                        class="w-28 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500 focus:outline-none">
+                                    <input type="text" name="jumlah_makanan_satuan" id="jumlah_makanan_satuan" placeholder="Satuan" readonly required pattern="[^0-9]+" title="Satuan tidak boleh mengandung angka"
+                                         class="w-28 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500 focus:outline-none">
                                 </div>
                             </div>
                         </div>
@@ -487,6 +487,16 @@ cards.forEach(card => {
         document.querySelector(`.jenis-radio[value="${this.dataset.jenis}"]`).click();
     });
 });
+
+const blockNumbers = (el) => {
+    if (el) {
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/[0-9]/g, '');
+        });
+    }
+};
+blockNumbers(document.getElementById('satuan_barang'));
+blockNumbers(document.getElementById('jumlah_makanan_satuan'));
 
 function previewFile(input) {
     const label = document.getElementById('file-name');

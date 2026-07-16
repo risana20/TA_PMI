@@ -187,7 +187,7 @@ class DonasiController extends Controller
             'Barang' => [
                 'nama_barang'        => 'required|string',
                 'jumlah_barang'      => 'required|integer|min:1',
-                'satuan'             => 'nullable|string',
+                'satuan'             => ['nullable', 'string', 'regex:/^[^0-9]+$/'],
                 'kondisi'            => 'required|in:Baru,Bekas Layak',
                 'metode_penyerahan'  => 'required|in:Antar Sendiri,Dijemput Petugas',
                 'tgl_penyerahan'     => 'required|date',
@@ -196,6 +196,7 @@ class DonasiController extends Controller
             'Makanan' => [
                 'nama_makanan'       => 'required|string',
                 'jenis_makanan'      => $isLainnyaMakanan ? 'required|in:Bahan Mentah,Siap Saji' : 'nullable|in:Bahan Mentah,Siap Saji',
+                'jumlah_makanan_satuan' => ['nullable', 'string', 'regex:/^[^0-9]+$/'],
                 'jumlah_makanan'     => 'required|string',
                 'metode_penyerahan'  => 'nullable|in:Antar Sendiri,Dijemput Petugas',
                 'tgl_penyerahan'     => 'nullable|date',
@@ -208,7 +209,12 @@ class DonasiController extends Controller
             $request->merge(['metode_penyerahan' => 'Dijemput Petugas']);
         }
 
-        $data = $request->validate(array_merge($baseRules, $extraRules));
+        $messages = [
+            'satuan.regex' => 'Satuan barang tidak boleh mengandung angka.',
+            'jumlah_makanan_satuan.regex' => 'Satuan makanan tidak boleh mengandung angka.',
+        ];
+
+        $data = $request->validate(array_merge($baseRules, $extraRules), $messages);
 
         // Create user in the background for this offline donor
         $user = \App\Models\User::create([

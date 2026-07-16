@@ -397,7 +397,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-1">Satuan <span class="text-red-500">*</span></label>
-                        <input type="text" name="satuan" id="add_satuan_barang" placeholder="Satuan" readonly
+                        <input type="text" name="satuan" id="add_satuan_barang" placeholder="Satuan" readonly pattern="[^0-9]+" title="Satuan tidak boleh mengandung angka"
                             class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-gray-50 text-gray-500 focus:outline-none">
                     </div>
                 </div>
@@ -475,7 +475,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-1">Satuan <span class="text-red-500">*</span></label>
-                        <input type="text" name="jumlah_makanan_satuan" id="add_jumlah_makanan_satuan" placeholder="Satuan" readonly
+                        <input type="text" name="jumlah_makanan_satuan" id="add_jumlah_makanan_satuan" placeholder="Satuan" readonly pattern="[^0-9]+" title="Satuan tidak boleh mengandung angka"
                             class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-gray-50 text-gray-500 focus:outline-none">
                     </div>
                 </div>
@@ -740,6 +740,16 @@ addCards.forEach(card => {
         document.querySelector(`.add-jenis-radio[value="${this.dataset.jenis}"]`).click();
     });
 });
+
+const blockNumbers = (el) => {
+    if (el) {
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/[0-9]/g, '');
+        });
+    }
+};
+blockNumbers(document.getElementById('add_satuan_barang'));
+blockNumbers(document.getElementById('add_jumlah_makanan_satuan'));
 </script>
 @endpush
 @endsection
