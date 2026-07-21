@@ -118,7 +118,6 @@ class ArtikelController extends Controller
         return $pdf->download($fileName);
     }
 
-    // Export Excel (download .xlsx)
     public function exportExcel(Request $request)
     {
         $user = auth()->user();

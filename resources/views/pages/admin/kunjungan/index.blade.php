@@ -6,40 +6,73 @@
 
 @include('sections.page-header', ['title' => 'Kunjungan', 'subtitle' => 'Kelola pengajuan kunjungan'])
 
-{{-- Toolbar --}}
-<div class="flex flex-wrap items-center gap-3 mb-4">
-    <form method="GET" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.index') }}" id="filterForm" class="flex items-center gap-3 flex-1">
-        <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-            <input type="text"
-                id="searchInput"
-                name="search"
-                value="{{ request('search') }}"
-                placeholder="Cari nama, no HP, instansi, tujuan..."
-                class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-64 focus:outline-none focus:ring-2 focus:ring-red-500">
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+
+    <form method="GET"
+        action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.index') }}"
+        id="filterForm"
+        class="w-full">
+
+        <div class="flex flex-col sm:flex-row gap-3">
+
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari nama, no HP, instansi..."
+                    class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+            </div>
+
+            <select
+                name="status"
+                id="statusFilter"
+                class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+
+                <option value="">Semua Status</option>
+                <option value="PROSES" {{ request('status') == 'PROSES' ? 'selected' : '' }}>PROSES</option>
+                <option value="DISETUJUI" {{ request('status') == 'DISETUJUI' ? 'selected' : '' }}>DISETUJUI</option>
+                <option value="DITOLAK" {{ request('status') == 'DITOLAK' ? 'selected' : '' }}>DITOLAK</option>
+
+            </select>
+
         </div>
 
-        <select name="status" id="statusFilter"
-            class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
-            <option value="">Semua Status</option>
-            <option value="PROSES" {{ request('status') == 'PROSES' ? 'selected' : '' }}>PROSES</option>
-            <option value="DISETUJUI" {{ request('status') == 'DISETUJUI' ? 'selected' : '' }}>DISETUJUI</option>
-            <option value="DITOLAK" {{ request('status') == 'DITOLAK' ? 'selected' : '' }}>DITOLAK</option>
-        </select>
-        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.export.pdf', request()->query()) }}"
-            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
-            <i class="fa-solid fa-download"></i> Ekspor PDF
-        </a>
-        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.export.excel', request()->query())  }}"
-            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
-            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
-        </a>
-    </form> 
-    <button onclick="openModal()"
-                class="inline-flex items-center bg-red-600 text-white rounded-full px-5 py-2 font-semibold text-sm  gap-2 transition ">
-            <i class="fa-solid fa-plus"></i> Tambah Kunjungan
-    </button>
+    </form>
+
     
+    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.export.pdf', request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
+
+            <i class="fa-solid fa-download"></i>
+            Ekspor PDF
+
+        </a>
+
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'kunjungan.export.excel', request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
+
+            <i class="fa-solid fa-file-excel"></i>
+            Ekspor Excel
+
+        </a>
+
+        <button
+            onclick="openModal()"
+            class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-5 py-2 text-sm font-semibold flex items-center justify-center gap-2">
+
+            <i class="fa-solid fa-plus"></i>
+            Tambah Kunjungan
+
+        </button>
+
+    </div>
+
 </div>
 
 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
@@ -47,15 +80,16 @@
         <thead class="bg-gray-50">
             <tr>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Nama</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">No. HP</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tujuan</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Instansi</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">No. HP</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tujuan</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Instansi</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tgl Kunjungan</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Jam</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Surat Pengajuan</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Jam</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Surat Pengajuan</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Aksi</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Aksi</th>
+                <th class="md:hidden  text-left text-xs font-semibold uppercase text-gray-400"> Detail</th>
             </tr>
         </thead>
 
@@ -67,11 +101,11 @@
                     {{ $kunjungan->nama_pengunjung }}
                 </td>
 
-                <td class="px-4 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600">
                     {{ $kunjungan->no_hp }}
                 </td>
 
-                <td class="px-4 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600">
                     <div>{{ $kunjungan->tujuan }}</div>
                     @if($kunjungan->wargaBinaan)
                         <span class="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1 rounded text-xs font-semibold bg-red-50 text-red-700">
@@ -81,7 +115,7 @@
                     @endif
                 </td>
 
-                <td class="px-4 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600">
                     {{ $kunjungan->instansi ?? '-' }}
                 </td>
 
@@ -89,12 +123,12 @@
                     {{ $kunjungan->tgl_kunjungan->format('d M Y') }}
                 </td>
 
-                <td class="px-4 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600">
                     {{ $kunjungan->jam }}
                 </td>
 
                 {{-- SURAT PENGAJUAN --}}
-                <td class="px-4 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600">
 
                     @if($kunjungan->surat_pengajuan)
 
@@ -116,8 +150,7 @@
                     @include('components.badge-status', ['status' => $kunjungan->status])
                 </td>
 
-            {{-- keterangan --}}
-                <td class="px-5 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-5 py-4 text-gray-600">
                     @if($kunjungan->status == 'DITOLAK')
                         {{ $kunjungan->alasan_tolak ?? '-' }}
                     @else
@@ -125,8 +158,7 @@
                     @endif
                 </td>
 
-                {{-- AKSI --}}
-                <td class="px-4 py-4">
+                <td class="hidden md:table-cell px-4 py-4">
 
                     @if($kunjungan->status === 'PROSES')
 
@@ -147,6 +179,27 @@
 
                     @endif
 
+                </td>
+                <td class="md:hidden px-4 py-4">
+                    <button
+                        onclick='openPreview(
+                            @json($kunjungan->id),
+                            @json($kunjungan->nama_pengunjung),
+                            @json($kunjungan->no_hp),
+                            @json($kunjungan->tujuan),
+                            @json($kunjungan->instansi ?? "-"),
+                            @json($kunjungan->tgl_kunjungan->format("d M Y")),
+                            @json($kunjungan->jam),
+                            @json($kunjungan->surat_pengajuan ? asset("storage/".$kunjungan->surat_pengajuan) : ""),
+                            @json($kunjungan->status),
+                            @json($kunjungan->alasan_tolak ?? "-"),
+                            @json($kunjungan->wargaBinaan->nama ?? "-")
+                        )'
+                        class="text-blue-600 hover:text-blue-800">
+
+                        <i class="fa-solid fa-eye"></i>
+
+                    </button>
                 </td>
                 
             </tr>
@@ -189,7 +242,7 @@
     </div>
 </div>
 
-<div id="modal-surat" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+<div id="modal-surat" class="hidden fixed inset-0 bg-black/40 z-[60] flex items-center justify-center">
 
     <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl p-6">
 
@@ -204,7 +257,7 @@
         </div>
 
         <iframe
-            id="preview-surat"
+             id="surat-frame"
             src=""
             class="w-full h-[500px] border rounded-lg">
         </iframe>
@@ -436,6 +489,81 @@
                 </form>
             </div>
         </div>
+<div id="modal-preview" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+
+        <div class="flex justify-between items-center mb-5">
+            <h3 class="text-xl font-bold text-gray-800">
+                Detail Kunjungan
+            </h3>
+
+            <button onclick="closePreview()"
+                class="text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+
+            <div>
+                <p class="text-gray-500">Nama Pengunjung</p>
+                <p id="preview-nama" class="font-medium"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500">No. HP</p>
+                <p id="preview-nohp" class="font-medium"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500">Tujuan</p>
+                <p id="preview-tujuan" class="font-medium"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500">Warga Binaan</p>
+                <p id="preview-wbp" class="font-medium"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500">Instansi</p>
+                <p id="preview-instansi" class="font-medium"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500">Tanggal</p>
+                <p id="preview-tanggal" class="font-medium"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500">Jam</p>
+                <p id="preview-jam" class="font-medium"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500">Status</p>
+                <div id="preview-status"></div>
+            </div>
+
+        </div>
+
+        <div class="mt-5">
+            <p class="text-gray-500 text-sm mb-1">Surat Pengajuan</p>
+
+            <div id="preview-surat"></div>
+        </div>
+
+        <div class="mt-5">
+            <p class="text-gray-500 text-sm mb-1">Keterangan</p>
+
+            <div id="preview-keterangan"
+                class="bg-gray-50 rounded-lg p-3 text-sm">
+            </div>
+        </div>
+        <div id="preview-actions" class="mt-6 hidden"> </div>
+
+    </div>
+</div>
 
 @endsection
 
@@ -450,9 +578,7 @@ function openTolakModal(id) {
 }
 function openSuratModal(url){
 
-    document.getElementById('preview-surat').src = url;
-
-    document.getElementById('download-surat').href = url;
+    document.getElementById('surat-frame').src = url;
 
     document.getElementById('modal-surat').classList.remove('hidden');
 
@@ -730,6 +856,90 @@ if(tglPicker){
         updateAvailableSessions(this.value);
 
     });
+}
+function openPreview(
+    id,
+    nama,
+    nohp,
+    tujuan,
+    instansi,
+    tanggal,
+    jam,
+    surat,
+    status,
+    alasan,
+    wbp
+) {
+
+    document.getElementById('preview-nama').innerText = nama;
+    document.getElementById('preview-nohp').innerText = nohp;
+    document.getElementById('preview-tujuan').innerText = tujuan;
+    document.getElementById('preview-wbp').innerText = wbp;
+    document.getElementById('preview-instansi').innerText = instansi;
+    document.getElementById('preview-tanggal').innerText = tanggal;
+    document.getElementById('preview-jam').innerText = jam;
+
+    document.getElementById('preview-keterangan').innerText =
+        status === 'DITOLAK' ? alasan : '-';
+
+    document.getElementById('preview-status').innerHTML =
+        `<span class="px-2 py-1 rounded text-xs">${status}</span>`;
+
+    if (surat) {
+        document.getElementById('preview-surat').innerHTML =
+            `<button onclick="openSuratModal('${surat}')"
+                class="text-blue-600 hover:underline">
+                Lihat Surat
+            </button>`;
+    } else {
+        document.getElementById('preview-surat').innerHTML = '-';
+    }
+
+    const actionContainer = document.getElementById('preview-actions');
+
+    if (status === 'PROSES') {
+
+        actionContainer.classList.remove('hidden');
+
+        actionContainer.innerHTML = `
+            <div class="flex gap-3">
+
+                <form method="POST"
+                    action="/{{ auth()->user()->hasRole('superadmin') ? 'superadmin' : 'admin' }}/kunjungan/${id}/approve"
+                    class="flex-1">
+
+                    @csrf
+
+                    <button type="submit"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg">
+                        Setujui
+                    </button>
+
+                </form>
+
+                <button
+                    onclick="closePreview(); openTolakModal(${id})"
+                    class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg">
+
+                    Tolak
+
+                </button>
+
+            </div>
+        `;
+
+    } else {
+
+        actionContainer.classList.add('hidden');
+        actionContainer.innerHTML = '';
+
+    }
+
+    document.getElementById('modal-preview').classList.remove('hidden');
+}
+
+function closePreview(){
+    document.getElementById('modal-preview').classList.add('hidden');
 }
 
 

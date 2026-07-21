@@ -7,77 +7,113 @@
 @include('sections.page-header', ['title' => 'Data Warga Binaan', 'subtitle' => 'Kelola data ODGJ dan Lansia'])
 
 {{-- Toolbar --}}
-<div class="flex flex-wrap items-center gap-3 mb-4">
-    <form method="GET" class="flex items-center gap-3 flex-1 flex-wrap" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index') }}" id="filterForm">
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+
+    {{-- Filter --}}
+    <form
+        method="GET"
+        action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index') }}"
+        id="filterForm"
+        class="w-full">
+
         <input type="hidden" name="tab" value="{{ $tab }}">
 
-        {{-- Search --}}
-        <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-            <input 
-                type="text"
-                name="search"
-                id="searchInput"
-                value="{{ request('search') }}"
-                placeholder="Cari Nama..."
-                class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-56 focus:outline-none focus:ring-2 focus:ring-red-500">
+        <div class="flex flex-col sm:flex-row gap-3">
+
+            {{-- Search --}}
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    id="searchInput"
+                    value="{{ request('search') }}"
+                    placeholder="Cari Nama..."
+                    class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+            </div>
+
+            {{-- Filter Status --}}
+            <div class="relative sm:w-48">
+                <select
+                    name="status_filter"
+                    id="statusFilter"
+                    class="w-full border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-red-500 bg-white text-gray-600">
+
+                    <option value="">Semua</option>
+                    <option value="Aktif" {{ request('status_filter') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="Meninggal" {{ request('status_filter') == 'Meninggal' ? 'selected' : '' }}>Meninggal</option>
+                    <option value="Kabur" {{ request('status_filter') == 'Kabur' ? 'selected' : '' }}>Kabur</option>
+                    <option value="Selesai Pembinaan" {{ request('status_filter') == 'Selesai Pembinaan' ? 'selected' : '' }}>
+                        Selesai Pembinaan
+                    </option>
+
+                </select>
+
+                <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </span>
+            </div>
+
         </div>
 
-        {{-- Filter Status --}}
-        <div class="relative">
-            <select 
-                name="status_filter"
-                id="statusFilter"
-                class="border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-red-500 bg-white text-gray-600">
-
-                <option value="">Semua</option>
-                <option value="Aktif" {{ request('status_filter') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                <option value="Meninggal" {{ request('status_filter') == 'Meninggal' ? 'selected' : '' }}>Meninggal</option>
-                <option value="Kabur" {{ request('status_filter') == 'Kabur' ? 'selected' : '' }}>Kabur</option>
-                <option value="Selesai Pembinaan" {{ request('status_filter') == 'Selesai Pembinaan' ? 'selected' : '' }}>Selesai Pembinaan</option>
-
-            </select>
-
-            <span class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-gray-400">
-                <i class="fa-solid fa-chevron-down text-xs"></i>
-            </span>
-        </div>
-
-        {{-- Ekspor --}}
-        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->query(), ['export' => 'pdf'])) }}"
-            class="border border-red-600 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm flex items-center gap-2 transition">
-            <i class="fa-solid fa-file-pdf"></i> Ekspor PDF
-        </a>
-        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->query(), ['export' => 'excel'])) }}"
-            class="border border-red-600 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm flex items-center gap-2 transition">
-            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
-        </a>
     </form>
 
-    {{-- Tambah --}}
-    <button onclick="document.getElementById('modal-tambah').classList.remove('hidden')"
-        class="bg-red-600 text-white rounded-full px-5 py-2 font-semibold text-sm hover:bg-red-700 flex items-center gap-2 transition">
-        <i class="fa-solid fa-plus"></i> Tambah Warga
-    </button>
+    {{-- Tombol --}}
+    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->query(), ['export' => 'pdf'])) }}"
+            class="border border-red-600 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm flex items-center justify-center gap-2 transition">
+
+            <i class="fa-solid fa-file-pdf"></i>
+            Ekspor PDF
+
+        </a>
+
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->query(), ['export' => 'excel'])) }}"
+            class="border border-red-600 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm flex items-center justify-center gap-2 transition">
+
+            <i class="fa-solid fa-file-excel"></i>
+            Ekspor Excel
+
+        </a>
+
+        <button
+            onclick="document.getElementById('modal-tambah').classList.remove('hidden')"
+            class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-5 py-2 text-sm font-semibold flex items-center justify-center gap-2 transition">
+
+            <i class="fa-solid fa-plus"></i>
+            Tambah Warga
+
+        </button>
+
+    </div>
+
 </div>
 
 {{-- Tab Pill --}}
-<div class="bg-gray-100 p-1 rounded-xl inline-flex gap-1 mb-4 flex-wrap">
-    <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->except('tab', 'page'), ['tab' => 'ODGJ'])) }}"
-        class="px-5 py-2 rounded-lg text-sm font-medium transition
-               {{ $tab === 'ODGJ' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
-        Griya PMI Peduli (ODGJ)
-    </a>
-    <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->except('tab', 'page'), ['tab' => 'Lansia'])) }}"
-        class="px-5 py-2 rounded-lg text-sm font-medium transition
-               {{ $tab === 'Lansia' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
-        Griya PMI Bahagia (Lansia)
-    </a>
-    <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->except('tab', 'page'), ['tab' => 'Lansia ODGJ'])) }}"
-        class="px-5 py-2 rounded-lg text-sm font-medium transition
-               {{ $tab === 'Lansia ODGJ' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
-        Lansia ODGJ
-    </a>
+<div class="overflow-x-auto mb-4">
+    <div class="bg-gray-100 p-1 rounded-xl inline-flex gap-1 whitespace-nowrap min-w-max">
+
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->except('tab', 'page'), ['tab' => 'ODGJ'])) }}"
+            class="px-5 py-2 rounded-lg text-sm font-medium transition
+            {{ $tab === 'ODGJ' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
+            Griya PMI Peduli (ODGJ)
+        </a>
+
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->except('tab', 'page'), ['tab' => 'Lansia'])) }}"
+            class="px-5 py-2 rounded-lg text-sm font-medium transition
+            {{ $tab === 'Lansia' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
+            Griya PMI Bahagia (Lansia)
+        </a>
+
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'warga-binaan.index', array_merge(request()->except('tab', 'page'), ['tab' => 'Lansia ODGJ'])) }}"
+            class="px-5 py-2 rounded-lg text-sm font-medium transition
+            {{ $tab === 'Lansia ODGJ' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
+            Lansia ODGJ
+        </a>
+
+    </div>
 </div>
 
 {{-- Tabel --}}
@@ -87,10 +123,10 @@
             <tr>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Foto</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Nama</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">TTL</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Umur</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Status</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Tgl Masuk</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">TTL</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Umur</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Status</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Tgl Masuk</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Aksi</th>
             </tr>
         </thead>
@@ -113,21 +149,21 @@
                     <p class="text-xs text-gray-400 mt-0.5">{{ $warga->nik }}</p>
                 </td>
                 {{-- TTL --}}
-                <td class="px-4 py-4 text-gray-600 text-sm">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600 text-sm">
                     {{ $warga->tempat_lahir }},<br>
                     <span class="text-xs">{{ $warga->tgl_lahir->format('d/m/Y') }}</span>
                 </td>
                 {{-- Umur --}}
-                <td class="px-4 py-4 text-gray-900">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-900">
                     <span class="font-semibold">{{ $warga->umur }}</span>
                     <span class="text-xs text-gray-400"> thn</span>
                 </td>
                 {{-- Status --}}
-                <td class="px-4 py-4">
+                <td class="hidden md:table-cell px-4 py-4">
                     @include('components.badge-status', ['status' => $warga->status])
                 </td>
                 {{-- Tgl Masuk --}}
-                <td class="px-4 py-4 text-gray-600 text-sm">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600 text-sm">
                     {{ $warga->tgl_masuk->format('d/m/Y') }}
                 </td>
                 {{-- Aksi --}}

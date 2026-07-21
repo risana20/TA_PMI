@@ -6,33 +6,52 @@
 
 @include('sections.page-header', ['title' => 'Artikel Kegiatan', 'subtitle' => 'Kelola artikel dan publikasi kegiatan'])
 
-<div class="flex flex-wrap items-center gap-3 mb-4">
-    <form method="GET" action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.index') }}" id="filterForm" class="flex items-center gap-3 flex-1">
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
 
-        <div class="relative">
+    {{-- Pencarian --}}
+    <form
+        method="GET"
+        action="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.index') }}"
+        id="filterForm"
+        class="w-full lg:w-auto">
+
+        <div class="relative w-full lg:w-72">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-            <input type="text"
+
+            <input
+                type="text"
                 id="searchInput"
                 name="search"
                 value="{{ request('search') }}"
                 placeholder="Cari judul artikel..."
-                class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-64 focus:outline-none focus:ring-2 focus:ring-red-500">
+                class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
         </div>
     </form>
-    <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 mt-4">
+
+    {{-- Tombol --}}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto">
+
         <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.export.pdf', request()->query()) }}"
-            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
-            <i class="fa-solid fa-download"></i> Ekspor PDF
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i>
+            <span>Ekspor PDF</span>
         </a>
-        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.export.excel', request()->query())  }}"
-            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
-            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
+
+        <a href="{{ route((auth()->user()->hasRole('superadmin') ? 'superadmin.' : 'admin.') . 'artikel.export.excel', request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Ekspor Excel</span>
         </a>
-    <button onclick="document.getElementById('modal-buat').classList.remove('hidden')"
-        class="bg-red-600 text-white rounded-full px-5 py-2 font-semibold text-sm hover:bg-red-700 flex items-center gap-2">
-        <i class="fa-solid fa-plus"></i> Buat Artikel
-    </button>
-    
+
+        <button
+            onclick="document.getElementById('modal-buat').classList.remove('hidden')"
+            class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus"></i>
+            <span>Buat Artikel</span>
+        </button>
+
+    </div>
+
 </div>
 
 <div class="bg-white rounded-xl shadow overflow-hidden border border-gray-90 w-full">
@@ -41,10 +60,10 @@
             <tr>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Gambar</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Judul</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Kategori</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Penulis</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tanggal</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
+                <th class=" hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Kategori</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Penulis</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tanggal</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Aksi</th>
             </tr>
         </thead>
@@ -61,17 +80,20 @@
                     @endif
                 </td>
                 <td class="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">{{ $artikel->judul }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ $artikel->kategori ?? '-' }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ $artikel->penulis?->name }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ $artikel->tgl_terbit?->format('d M Y') ?? '-' }}</td>
-                <td class="px-4 py-3">@include('components.badge-status', ['status' => $artikel->status])</td>
+                <td class="hidden md:table-cell px-4 py-3 text-gray-600">{{ $artikel->kategori ?? '-' }}</td>
+                <td class="hidden md:table-cell px-4 py-3 text-gray-600">{{ $artikel->penulis?->name }}</td>
+                <td class="hidden md:table-cell px-4 py-3 text-gray-600">{{ $artikel->tgl_terbit?->format('d M Y') ?? '-' }}</td>
+                <td class="hidden md:table-cell px-4 py-3">@include('components.badge-status', ['status' => $artikel->status])</td>
                 <td class="px-4 py-3">
                     {{-- Preview --}}
                     <button 
                         onclick='openPreview(
                             @json($artikel->judul),
                             @json($artikel->konten),
-                            @json($artikel->gambar ? Storage::url($artikel->gambar) : "")
+                            @json($artikel->gambar ? Storage::url($artikel->gambar) : ""),
+                            @json($artikel->penulis?->name ?? "-"),
+                            @json($artikel->tgl_terbit?->format("d F Y") ?? "-"),
+                            @json($artikel->kategori ?? "-")
                         )'
                         class="text-gray-400 hover:text-blue-500 mr-2">
                         <i class="fa-solid fa-eye"></i>
@@ -220,20 +242,40 @@
 <div id="modal-preview" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6 max-h-screen overflow-y-auto">
 
-        <div class="flex items-center justify-between mb-4">
-            <h3 id="preview-judul" class="font-bold text-lg"></h3>
+        <div class="flex justify-between items-start mb-4">
+
+            <div>
+                <h3 id="preview-judul" class="font-bold text-2xl text-gray-900"></h3>
+            </div>
 
             <button onclick="closePreview()" class="text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-xmark text-lg"></i>
+                <i class="fa-solid fa-xmark text-xl"></i>
             </button>
+
         </div>
 
         {{-- Gambar --}}
-        <img id="preview-gambar" 
+        <img id="preview-gambar"
              class="w-full h-60 object-cover rounded-lg mb-4 hidden">
 
-        <hr class="mb-4">
+        <div class="mt-2 text-sm text-gray-500 flex flex-wrap gap-4">
+            <span>
+                <i class="fa-solid fa-user mr-1"></i>
+                <span id="preview-penulis"></span>
+            </span>
 
+            <span>
+                <i class="fa-solid fa-calendar-days mr-1"></i>
+                <span id="preview-tanggal"></span>
+            </span>
+
+            <span>
+                <i class="fa-solid fa-tag mr-1"></i>
+                <span id="preview-kategori"></span>
+                </span>
+        <div>
+        <hr class="mb-4">
+        
         {{-- Konten --}}
         <div id="preview-konten" class="prose max-w-none text-gray-700"></div>
 
@@ -263,9 +305,12 @@ function openEditArtikel(id, judul, kategori, status, konten, updateUrl) {
     document.getElementById('form-edit').action = updateUrl;
     document.getElementById('modal-edit').classList.remove('hidden');
 }
-function openPreview(judul, konten, gambar) {
+function openPreview(judul, konten, gambar, penulis, tanggal, kategori) {
 
     document.getElementById('preview-judul').innerText = judul;
+    document.getElementById('preview-penulis').textContent = penulis;
+    document.getElementById('preview-tanggal').textContent = tanggal;
+    document.getElementById('preview-kategori').textContent = kategori;
     document.getElementById('preview-konten').innerHTML = konten;
 
     const img = document.getElementById('preview-gambar');
