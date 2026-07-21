@@ -430,6 +430,7 @@ MONTHS_ID[11] = 'Desember';
 
 const DAYS_ID   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 
+//mendetaksi tanggal dan tahun ini
 let viewDate = new Date();
 let selectedDateStr = "";
 
@@ -483,13 +484,19 @@ function renderCalendar() {
     if (!grid || !label) return;
 
     grid.innerHTML = "";
+    //mengambil tahun
     const year = viewDate.getFullYear();
+    //mengambil bulan
     const month = viewDate.getMonth();
 
+    //menampilkan nama bulan dan tahun
     label.textContent = `${MONTHS_ID[month]} ${year}`;
 
+    //Ambil hari pertama pada bulan tersebut.
     const firstDayIndex = new Date(year, month, 1).getDay();
+    //Cari jumlah hari pada bulan tersebut.
     const lastDay = new Date(year, month + 1, 0).getDate();
+    //jumlah hari pada bulan sebelumnya
     const prevLastDay = new Date(year, month, 0).getDate();
 
     const today = new Date();
@@ -724,12 +731,13 @@ function updateAvailableSessions(dateStr) {
     });
 }
 
-// Bind navigation buttons
+// ke bulan sebelumnya
 document.getElementById('prev-month-btn').addEventListener('click', () => {
     viewDate.setMonth(viewDate.getMonth() - 1);
     renderCalendar();
 });
 
+// ke bulan setelahnya
 document.getElementById('next-month-btn').addEventListener('click', () => {
     viewDate.setMonth(viewDate.getMonth() + 1);
     renderCalendar();

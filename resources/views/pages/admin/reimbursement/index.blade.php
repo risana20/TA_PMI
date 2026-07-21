@@ -46,10 +46,11 @@
             <tr>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tanggal</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Total</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Detail</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Nota</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Detail</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Nota</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
+                <th class="md:hidden px-4 py-3">Aksi</th>
             </tr>
         </thead>
 
@@ -65,7 +66,7 @@
                     Rp {{ number_format($r->total, 0, ',', '.') }}
                 </td>
 
-                <td class="px-4 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600">
                    @foreach($r->detailReimbursements as $d)
                         <div class="text-sm">
                             • {{ $d->itemLogistik->nama_item ?? '-' }}
@@ -74,7 +75,7 @@
                         </div>
                     @endforeach
                 </td>
-                <td class="px-4 py-4">
+                <td class="hidden md:table-cell">
                     @if($r->bukti_nota)
                         <a href="{{ asset('storage/' . $r->bukti_nota) }}"
                         target="_blank"
@@ -89,12 +90,24 @@
                 <td class="px-4 py-4">
                     @include('components.badge-status', ['status' => $r->status])
                 </td>
-                <td class="px-5 py-4 text-gray-600">
+                <td class="hidden md:table-cell">
                     @if($r->status == 'Ditolak')
                         {{ $r->alasan_tolak ?? '-' }}
                     @else
                         <span class="text-gray-400 text-xs">—</span>
                     @endif
+                </td>
+                <td class="md:hidden px-4 py-4">
+                    <button
+                        onclick='openPreview(
+                            @json($r->detailReimbursements),
+                            @json($r->bukti_nota ? asset("storage/".$r->bukti_nota) : ""),
+                            @json($r->status == "Ditolak" ? ($r->alasan_tolak ?? "-") : "-")
+                        )'
+                        class="text-blue-600 hover:text-blue-800">
+
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
                 </td>
 
             </tr>
@@ -319,8 +332,6 @@
                 <input type="text"
                     id="satuan_baru"
                     class="w-full border rounded-lg px-3 py-2"
-                    pattern="[^0-9]+"
-                    title="Satuan tidak boleh mengandung angka"
                     placeholder="Contoh: Kg, Pcs, Box">
             </div>
 
@@ -404,6 +415,56 @@
 
     </div>
 </div>
+
+{{-- preview --}}
+<div id="modal-preview" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800">
+                Detail Reimbursement
+            </h3>
+
+            <button onclick="closePreview()"
+                class="text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        {{-- Detail --}}
+        <div class="mb-5">
+            <h4 class="font-semibold text-gray-700 mb-2">
+                Detail Barang
+            </h4>
+
+            <div id="preview-detail"
+                class="bg-gray-50 rounded-lg p-3 text-sm space-y-2">
+            </div>
+        </div>
+
+        {{-- Nota --}}
+        <div class="mb-5">
+            <h4 class="font-semibold text-gray-700 mb-2">
+                Bukti Nota
+            </h4>
+
+            <div id="preview-nota"></div>
+        </div>
+
+        {{-- Keterangan --}}
+        <div>
+            <h4 class="font-semibold text-gray-700 mb-2">
+                Keterangan
+            </h4>
+
+            <div id="preview-keterangan"
+                class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
+            </div>
+        </div>
+
+    </div>
+</div>
+
 
 <script>
 
@@ -618,11 +679,6 @@
             return;
         }
 
-        if (/[0-9]/.test(satuan)) {
-            alert('Satuan tidak boleh mengandung angka.');
-            return;
-        }
-
         try {
 
             const response = await fetch("{{ route('admin.item-logistik.store') }}", {
@@ -672,19 +728,16 @@
 
     function tambahItemKeDropdown(item){
 
-        // 1. Add to itemData
         itemData[item.id] = {
             satuan: item.satuan
         };
 
-        // 2. Append to optionItems for future added items
         optionItems += `
             <option value="${item.id}" data-satuan="${item.satuan}">
                 ${item.nama_item}
             </option>
         `;
 
-        // 3. Add to all existing TomSelect dropdown options
         tomSelectInstances.forEach(ts => {
             ts.addOption({
                 value: item.id,
@@ -694,7 +747,6 @@
             ts.refreshOptions(false);
         });
 
-        // 4. Set the value of the active TomSelect dropdown
         if (activeTomSelect) {
             activeTomSelect.setValue(item.id);
         }
@@ -704,7 +756,6 @@
     function showKonfirmasiModal() {
         const form = document.querySelector('#modal-ajukan form');
 
-        // Kumpulkan semua item
         const items = document.querySelectorAll('#items > .item');
         let total = 0;
         let itemsHTML = '';
@@ -716,9 +767,7 @@
             const jumlahEl = item.querySelector('.input-jumlah') || item.querySelector('input[name*="[jumlah]"]');
             const nominalEl = item.querySelector('.input-nominal') || item.querySelector('input[name*="[nominal]"]');
 
-            // Ambil nama item — baca value dari native select (selalu di-sync TomSelect),
-            // lalu cari teks label-nya
-            let namaItem = '';
+            
             const selectedVal = selectEl ? selectEl.value : '';
 
             if (selectEl) {
@@ -759,11 +808,11 @@
             return;
         }
 
-        // Isi konten modal konfirmasi
+        
         document.getElementById('konfirmasi-items').innerHTML = itemsHTML;
         document.getElementById('konfirmasi-total').textContent = 'Rp ' + total.toLocaleString('id-ID');
 
-        // Cek bukti nota
+        
         const notaInput = form.querySelector('input[name="bukti_nota"]');
         const notaWrapper = document.getElementById('konfirmasi-nota-wrapper');
         const notaText = document.getElementById('konfirmasi-nota');
@@ -788,15 +837,53 @@
     });
     @endif
 
-    // Block numbers in satuan_baru
-    document.addEventListener('DOMContentLoaded', function () {
-        const satuanBaru = document.getElementById('satuan_baru');
-        if (satuanBaru) {
-            satuanBaru.addEventListener('input', function () {
-                this.value = this.value.replace(/[0-9]/g, '');
-            });
+    function openPreview(detail, nota, keterangan) {
+
+        let html = '';
+
+        detail.forEach(function(item){
+
+            html += `
+                <div class="flex justify-between border-b pb-2">
+                    <div>
+                        <div class="font-medium">${item.item_logistik?.nama_item ?? '-'}</div>
+                        <div class="text-gray-500">
+                            ${item.jumlah} ${item.item_logistik?.satuan ?? ''}
+                        </div>
+                    </div>
+
+                    <div class="font-semibold">
+                        Rp ${Number(item.nominal).toLocaleString('id-ID')}
+                    </div>
+                </div>
+            `;
+
+        });
+
+        document.getElementById('preview-detail').innerHTML = html;
+
+        if(nota){
+            document.getElementById('preview-nota').innerHTML = `
+                <a href="${nota}"
+                    target="_blank"
+                    class="text-blue-600 hover:underline">
+                    Lihat Bukti Nota
+                </a>
+            `;
+        }else{
+            document.getElementById('preview-nota').innerHTML = `
+                <span class="text-gray-400">Tidak ada nota</span>
+            `;
         }
-    });
+
+        document.getElementById('preview-keterangan').textContent = keterangan;
+
+        document.getElementById('modal-preview').classList.remove('hidden');
+    }
+
+    function closePreview(){
+        document.getElementById('modal-preview').classList.add('hidden');
+    }
 </script>
 
 @endsection

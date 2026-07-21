@@ -15,6 +15,8 @@ class BerandaController extends Controller
         $artikelTerbaru    = Artikel::published()->latest()->limit(3)->get();
         $kebutuhanMendesak = StokLogistik::with('itemLogistik')->mendesak()->limit(4)->get();
         $totalWarga        = WargaBinaan::where('status', 'Aktif')->count();
+        $totalODGJ = WargaBinaan::whereIn('kategori', ['ODGJ','Lansia ODGJ'])->count();
+        $totalLansia = WargaBinaan::whereIn('kategori', ['Lansia','Lansia ODGJ'])->count();
 
         // Fetch verified donors (status: Selesai)
         $donaturTerverifikasi = Donasi::with('user')
@@ -28,6 +30,6 @@ class BerandaController extends Controller
             $donaturTerverifikasi = $donaturTerverifikasi->concat($donaturTerverifikasi)->concat($donaturTerverifikasi);
         }
 
-        return view('pages.public.beranda', compact('artikelTerbaru', 'kebutuhanMendesak', 'totalWarga', 'donaturTerverifikasi'));
+        return view('pages.public.beranda', compact('artikelTerbaru', 'kebutuhanMendesak', 'totalWarga', 'donaturTerverifikasi', 'totalODGJ', 'totalLansia'));
     }
 }

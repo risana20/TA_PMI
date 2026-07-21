@@ -5,34 +5,54 @@
 @section('content')
 
 @include('sections.page-header', ['title' => 'ACC Reimbursement', 'subtitle' => 'Validasi ajuan reimbursement dari admin'])
-<div class="flex flex-wrap items-center gap-3 mb-4">
-    <form method="GET" class="flex items-center gap-3 flex-1 flex-wrap" action="{{ route('superadmin.acc-reimbursement.index') }}" id="filterForm">
-        <input type="hidden">
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
 
-        {{-- Search --}}
-        <div class="relative">
+    {{-- Pencarian --}}
+    <form method="GET"
+        action="{{ route('superadmin.acc-reimbursement.index') }}"
+        id="filterForm"
+        class="w-full lg:w-auto">
+
+        <div class="relative w-full lg:w-72">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-            <input 
+
+            <input
                 type="text"
                 name="search"
                 id="searchInput"
                 value="{{ request('search') }}"
                 placeholder="Cari Nama..."
-                class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm w-56 focus:outline-none focus:ring-2 focus:ring-red-500">
+                class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
         </div>
-        <a href="{{  route('superadmin.acc-reimbursement.export.pdf', request()->query())  }}"
-            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
-            <i class="fa-solid fa-download"></i> Ekspor PDF
-        </a>
-        <a href="{{  route('superadmin.acc-reimbursement.export.excel', request()->query()) }}"
-            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
-            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
-        </a>
+
     </form>
-        <button onclick="document.getElementById('modal-ajukan').classList.remove('hidden')"
-            class="bg-red-600 text-white rounded-full px-5 py-2 font-semibold text-sm hover:bg-red-700 flex items-center gap-2 transition">
-            <i class="fa-solid fa-plus"></i> Ajukan Reimbursement
+
+    {{-- Tombol --}}
+    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+
+        <a href="{{ route('superadmin.acc-reimbursement.export.pdf', request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-download"></i>
+            <span>Ekspor PDF</span>
+        </a>
+
+        <a href="{{ route('superadmin.acc-reimbursement.export.excel', request()->query()) }}"
+            class="border border-red-500 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Ekspor Excel</span>
+        </a>
+
+        <button
+            onclick="document.getElementById('modal-ajukan').classList.remove('hidden')"
+            class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-5 py-2 text-sm font-semibold flex items-center justify-center gap-2 transition">
+
+            <i class="fa-solid fa-plus"></i>
+            <span>Ajukan Reimbursement</span>
+
         </button>
+
+    </div>
+
 </div>
 <div class="mb-4 flex justify-between items-center">
     <div class="bg-gray-100 border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2">
@@ -45,22 +65,23 @@
     <table class="w-full text-sm">
         <thead class="bg-gray-50">
             <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tanggal</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Tanggal</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Admin</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Detail Pengeluaran</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Detail Pengeluaran</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">total</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Nota</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Nota</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Status</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Aksi</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Keterangan</th>
+                <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Aksi</th>
+                <th class="md:hidden px-4 py-3 text-left text-xs font-semibold uppercase text-gray-400">Detail</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
             @forelse($reimbursements as $r)
             <tr class="hover:bg-gray-50">
-                <td class="px-4 py-4 text-gray-600">{{ $r->tgl_pengajuan->format('d M Y') }}</td>
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600">{{ $r->tgl_pengajuan->format('d M Y') }}</td>
                 <td class="px-4 py-4 font-medium text-gray-900">{{ $r->user->name }}</td>
-                <td class="px-4 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-4 py-4 text-gray-600">
                     @foreach($r->detailReimbursements as $detail)
                         <div class="mb-2 text-sm border-b pb-1">
                             <div>
@@ -85,7 +106,7 @@
                     @endforeach
                 </td>
                 <td class="px-4 py-4 font-semibold">Rp {{ number_format($r->total, 0, ',', '.') }}</td>
-                <td class="px-4 py-4">
+                <td class="hidden md:table-cell px-4 py-4">
                     @if($r->bukti_nota)
                         <a href="{{ Storage::url($r->bukti_nota) }}"
                         target="_blank"
@@ -98,43 +119,61 @@
                 </td>
                 <td class="px-4 py-4">@include('components.badge-status', ['status' => $r->status])</td>
 
-                <td class="px-5 py-4 text-gray-600">
+                <td class="hidden md:table-cell px-5 py-4 text-gray-600">
                     @if($r->status == 'Ditolak')
                         {{ $r->alasan_tolak ?? '-' }}
                     @else
                         <span class="text-gray-400 text-xs">—</span>
                     @endif
                 </td>
-                <td class="px-4 py-4">
-                @if($r->status === 'Tunggu Verifikasi')
+                <td class="hidden md:table-cell px-4 py-4">
+                    @if($r->status === 'Tunggu Verifikasi')
 
-                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2">
 
-                        <form action="{{ route('superadmin.acc-reimbursement.validasi', $r->id) }}"
-                            method="POST"
-                            class="inline"
-                            onsubmit="return confirmApprove(event, {{ $r->total }}, {{ $saldo }})">
+                            <form action="{{ route('superadmin.acc-reimbursement.validasi', $r->id) }}"
+                                method="POST"
+                                class="inline"
+                                onsubmit="return confirmApprove(event, {{ $r->total }}, {{ $saldo }})">
 
-                            @csrf
+                                @csrf
 
-                            <button
-                                type="submit"
-                                class="text-green-600 hover:text-green-800 text-xs font-medium">
-                                Setujui
+                                <button
+                                    type="submit"
+                                    class="text-green-600 hover:text-green-800 text-xs font-medium">
+                                    Setujui
+                                </button>
+
+                            </form>
+
+                            <button type="button"
+                                onclick="openTolakModal({{ $r->id }})"
+                                class="text-red-600 hover:text-red-800 text-xs font-medium">
+                                Tolak
                             </button>
 
-                        </form>
+                        </div>
 
-                        <button type="button"
-                            onclick="openTolakModal({{ $r->id }})"
-                            class="text-red-600 hover:text-red-800 text-xs font-medium">
-                            Tolak
-                        </button>
+                    @endif
+                </td>
+                <td class="md:hidden px-4 py-4">
+                    <button
+                        onclick='openPreview(
+                            @json($r->tgl_pengajuan->format("d M Y")),
+                            @json($r->user->name),
+                            @json($r->detailReimbursements->load("itemLogistik.jenisLogistik")),
+                            @json($r->total),
+                            @json($r->bukti_nota ? Storage::url($r->bukti_nota) : ""),
+                            @json($r->status),
+                            @json($r->alasan_tolak ?? "-"),
+                            {{ $r->id }},
+                            {{ $saldo }}
+                        )'
+                        class="text-blue-600 hover:text-blue-800">
 
-                    </div>
-
-                @endif
-            </td>
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </td>
             
             </tr>
             @empty
@@ -236,6 +275,86 @@
         </div>
     </div>
 </div>
+<div id="modal-preview"
+    class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h3 class="text-xl font-bold">
+                Detail Reimbursement
+            </h3>
+
+            <button onclick="closePreview()">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-5">
+
+            <div>
+                <p class="text-gray-500 text-sm">Tanggal</p>
+                <p id="preview-tanggal"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500 text-sm">Admin</p>
+                <p id="preview-admin"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500 text-sm">Total</p>
+                <p id="preview-total"></p>
+            </div>
+
+            <div>
+                <p class="text-gray-500 text-sm">Status</p>
+                <div id="preview-status"></div>
+            </div>
+
+        </div>
+
+        <div class="mb-5">
+
+            <h4 class="font-semibold mb-2">
+                Detail Pengeluaran
+            </h4>
+
+            <div id="preview-detail"></div>
+
+        </div>
+
+        <div class="mb-5">
+
+            <h4 class="font-semibold mb-2">
+                Bukti Nota
+            </h4>
+
+            <div id="preview-nota"></div>
+
+        </div>
+
+        <div class="mb-5">
+
+            <h4 class="font-semibold mb-2">
+                Keterangan
+            </h4>
+
+            <div id="preview-keterangan"
+                class="bg-gray-50 rounded-lg p-3">
+            </div>
+
+        </div>
+
+        <div id="preview-action"
+            class="flex justify-end gap-2">
+        </div>
+
+    </div>
+
+</div>
 
 
 <script>
@@ -273,6 +392,107 @@
             _pendingApproveForm.submit();
             _pendingApproveForm = null;
         }
+    }
+
+    function openPreview(tanggal,admin,detail,total,nota,status,keterangan,id,saldo){
+
+        document.getElementById('preview-tanggal').textContent=tanggal;
+        document.getElementById('preview-admin').textContent=admin;
+        document.getElementById('preview-total').textContent=
+            "Rp "+Number(total).toLocaleString('id-ID');
+
+        document.getElementById('preview-status').innerHTML=status;
+
+        let html='';
+
+        detail.forEach(function(item){
+
+            html+=`
+                <div class="border rounded-lg p-3 mb-2">
+
+                    <div><strong>${item.item_logistik?.nama_item ?? '-'}</strong></div>
+
+                    <div>
+                        Jenis :
+                        ${item.item_logistik?.jenis_logistik?.nama_jenis_logistik ?? '-'}
+                    </div>
+
+                    <div>
+                        Jumlah :
+                        ${item.jumlah}
+                        ${item.item_logistik?.satuan ?? ''}
+                    </div>
+
+                    <div>
+                        Rp ${Number(item.nominal).toLocaleString('id-ID')}
+                    </div>
+
+                </div>
+            `;
+
+        });
+
+        document.getElementById('preview-detail').innerHTML=html;
+
+        if(nota){
+
+            document.getElementById('preview-nota').innerHTML=
+            `<a href="${nota}" target="_blank"
+                class="text-blue-600 hover:underline">
+                Lihat Nota
+            </a>`;
+
+        }else{
+
+            document.getElementById('preview-nota').innerHTML=
+            `<span class="text-gray-400">Tidak ada</span>`;
+
+        }
+
+        document.getElementById('preview-keterangan').textContent=
+            keterangan ?? '-';
+
+        let aksi='';
+
+        if(status==='Tunggu Verifikasi'){
+
+            aksi=`
+                <form
+                    method="POST"
+                    action="/superadmin/acc-reimbursement/${id}/validasi">
+
+                    @csrf
+
+                    <button
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg">
+
+                        Setujui
+
+                    </button>
+
+                </form>
+
+                <button
+                    onclick="openTolakModal(${id})"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg">
+
+                    Tolak
+
+                </button>
+            `;
+
+        }
+
+        document.getElementById('preview-action').innerHTML=aksi;
+
+        document.getElementById('modal-preview').classList.remove('hidden');
+
+    }
+
+    function closePreview(){
+
+        document.getElementById('modal-preview').classList.add('hidden');
+
     }
 </script>
 @endsection

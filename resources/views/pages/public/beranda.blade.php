@@ -164,7 +164,7 @@
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Warga Ditampung</p>
                             </div>
                             <div class="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 text-center relative overflow-hidden group hover:shadow-md transition">
-                                <p class="text-3xl sm:text-4xl font-extrabold text-green-600 mb-1">120</p>
+                                <p class="text-3xl sm:text-4xl font-extrabold text-green-600 mb-1">{{ $totalODGJ }}</p>
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Warga Saat Ini</p>
                             </div>
                         </div>
@@ -216,7 +216,7 @@
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Lansia Ditampung</p>
                             </div>
                             <div class="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 text-center relative overflow-hidden group hover:shadow-md transition">
-                                <p class="text-3xl sm:text-4xl font-extrabold text-amber-600 mb-1">24</p>
+                                <p class="text-3xl sm:text-4xl font-extrabold text-amber-600 mb-1">{{ $totalLansia }}</p>
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Lansia Saat Ini</p>
                             </div>
                         </div>

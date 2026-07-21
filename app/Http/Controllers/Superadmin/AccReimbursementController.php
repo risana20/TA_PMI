@@ -44,7 +44,6 @@ class AccReimbursementController extends Controller
 
         return view('pages.superadmin.acc-reimbursement.index', compact('reimbursements', 'search', 'saldo'));
     }
-
     public function validasi(Reimbursement $reimbursement)
     {
         if ($reimbursement->status !== 'Tunggu Verifikasi') {
@@ -93,9 +92,6 @@ class AccReimbursementController extends Controller
 
         return back()->with('success', 'Reimbursement berhasil disetujui.');
     }
-
-    
-
     public function batalkan(Request $request,Reimbursement $reimbursement)
     {   
         // dd($request->all());
