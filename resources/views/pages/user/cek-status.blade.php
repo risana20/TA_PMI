@@ -49,35 +49,35 @@
         <div id="panel-donasi">
 
             {{-- Sub-tab: Uang | Barang | Makanan --}}
-            <div class="flex gap-2 mb-4 bg-gray-100 p-1 rounded-xl w-fit">
+            <div class="grid grid-cols-3 sm:flex gap-1 sm:gap-2 mb-4 bg-gray-100 p-1 rounded-xl w-full sm:w-fit">
                 <button id="sub-uang" onclick="switchSub('uang')"
-                    class="tab-sub active px-5 py-2 rounded-lg text-sm transition">
-                    Donasi Uang
+                    class="tab-sub active py-2 sm:px-5 rounded-lg text-xs sm:text-sm transition text-center">
+                    <span class="hidden sm:inline">Donasi </span>Uang
                 </button>
                 <button id="sub-barang" onclick="switchSub('barang')"
-                    class="tab-sub inactive px-5 py-2 rounded-lg text-sm transition">
-                    Donasi Barang
+                    class="tab-sub inactive py-2 sm:px-5 rounded-lg text-xs sm:text-sm transition text-center">
+                    <span class="hidden sm:inline">Donasi </span>Barang
                 </button>
                 <button id="sub-makanan" onclick="switchSub('makanan')"
-                    class="tab-sub inactive px-5 py-2 rounded-lg text-sm transition">
-                    Donasi Makanan
+                    class="tab-sub inactive py-2 sm:px-5 rounded-lg text-xs sm:text-sm transition text-center">
+                    <span class="hidden sm:inline">Donasi </span>Makanan
                 </button>
             </div>
 
             {{-- Tabel Donasi Uang --}}
             <div id="panel-uang" class="bg-white rounded-2xl shadow-lg overflow-hidden">
-                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-4 border-b border-gray-100">
                     <div>
                         <h2 class="font-bold text-gray-900">Riwayat Donasi Uang</h2>
                         <p class="text-xs text-gray-400 mt-0.5">Status pengajuan donasi uang Anda</p>
                     </div>
                     <a href="{{ route('donasi.index') }}"
-                        class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center gap-2 transition">
+                        class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto">
                         <i class="fa-solid fa-plus"></i> Ajukan Donasi
                     </a>
                 </div>
                 @if($donasiUang->count())
-                <div class="overflow-x-auto">
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wide">
                             <tr>
@@ -119,6 +119,48 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="block sm:hidden divide-y divide-gray-100">
+                    @foreach($donasiUang as $i => $d)
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400 font-medium">#{{ $i + 1 }}</span>
+                            @include('components.badge-donasi', ['status' => $d->status])
+                        </div>
+                        <div class="flex justify-between items-start gap-4">
+                            <div>
+                                <p class="text-xs text-gray-400">Jumlah Donasi</p>
+                                <p class="font-semibold text-gray-900 text-sm">
+                                    Rp {{ number_format($d->donasiUang->nominal ?? 0, 0, ',', '.') }}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400">Bank Tujuan</p>
+                                <p class="text-gray-600 text-xs font-medium">{{ $d->donasiUang->bank_tujuan ?? '-' }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <div class="text-xs text-gray-400">
+                                <i class="fa-regular fa-calendar mr-1"></i> {{ $d->created_at->format('d/m/Y') }}
+                            </div>
+                            <div>
+                                @if($d->donasiUang && $d->donasiUang->bukti_transfer)
+                                <a href="{{ asset('storage/' . $d->donasiUang->bukti_transfer) }}" target="_blank"
+                                    class="text-blue-600 hover:text-blue-700 text-xs font-semibold flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-lg">
+                                    <i class="fa-solid fa-file-image text-xs"></i> Bukti Transfer
+                                </a>
+                                @else
+                                <span class="text-gray-400 text-xs italic">Belum upload</span>
+                                @endif
+                            </div>
+                        </div>
+                        @if($d->status === 'Donasi Ditolak' && $d->alasan_penolakan)
+                        <div class="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100 mt-2">
+                            <span class="font-semibold">Alasan Penolakan:</span> {{ $d->alasan_penolakan }}
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
                 @else
                 <div class="flex flex-col items-center justify-center py-14 text-gray-400">
                     <i class="fa-solid fa-heart text-4xl mb-3 text-gray-200"></i>
@@ -129,18 +171,18 @@
 
             {{-- Tabel Donasi Barang --}}
             <div id="panel-barang" class="hidden bg-white rounded-2xl shadow-lg overflow-hidden">
-                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-4 border-b border-gray-100">
                     <div>
                         <h2 class="font-bold text-gray-900">Riwayat Donasi Barang</h2>
                         <p class="text-xs text-gray-400 mt-0.5">Status pengajuan donasi barang Anda</p>
                     </div>
-                    <button onclick="openModal()"
-                        class="inline-flex items-center bg-white text-red-600 rounded-full px-5 py-2 font-semibold text-sm hover:bg-red-400 hover:text-white gap-2 transition ">
-                        <i class="fa-solid fa-arrow-right"></i> Ajukan Kunjungan
-                    </button>
+                    <a href="{{ route('donasi.index') }}"
+                        class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto">
+                        <i class="fa-solid fa-plus"></i> Ajukan Donasi
+                    </a>
                 </div>
                 @if($donasiBarang->count())
-                <div class="overflow-x-auto">
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wide">
                             <tr>
@@ -197,6 +239,67 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="block sm:hidden divide-y divide-gray-100">
+                    @foreach($donasiBarang as $i => $d)
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400 font-medium">#{{ $i + 1 }}</span>
+                            @include('components.badge-donasi', ['status' => $d->status])
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">Nama Barang</p>
+                            <p class="font-semibold text-gray-900 text-sm">
+                                {{ $d->pemasukanLogistik->nama_barang ?? ($d->pemasukanLogistik->stokLogistik->itemLogistik->nama_item ?? '-') }}
+                            </p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <p class="text-gray-400">Jumlah</p>
+                                <p class="text-gray-800 font-medium">{{ $d->pemasukanLogistik->jumlah ?? 0 }} {{ $d->pemasukanLogistik->satuan ?? '' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Kondisi</p>
+                                <span class="inline-flex items-center text-xs font-medium text-gray-600 mt-0.5">
+                                    {{ $d->pemasukanLogistik->kondisi ?? '-' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <p class="text-gray-400">Metode Penyerahan</p>
+                                <p class="text-gray-800 font-medium mt-0.5">{{ $d->pemasukanLogistik->metode_penyerahan ?? '-' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Waktu Penyerahan</p>
+                                <p class="text-gray-800 font-medium mt-0.5 leading-tight">
+                                    {{ $d->pemasukanLogistik && $d->pemasukanLogistik->tgl_penyerahan ? \Carbon\Carbon::parse($d->pemasukanLogistik->tgl_penyerahan)->format('d/m/Y') : '-' }} 
+                                    ({{ $d->pemasukanLogistik && $d->pemasukanLogistik->jam_penyerahan ? \Carbon\Carbon::parse($d->pemasukanLogistik->jam_penyerahan)->format('H:i') : '-' }})
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between pt-1 border-t border-gray-50">
+                            <div class="text-xs text-gray-400">
+                                <i class="fa-regular fa-calendar mr-1"></i> {{ $d->created_at->format('d/m/Y') }}
+                            </div>
+                            <div>
+                                @if($d->pemasukanLogistik && $d->pemasukanLogistik->bukti_diterima)
+                                <a href="{{ asset('storage/' . $d->pemasukanLogistik->bukti_diterima) }}" target="_blank"
+                                    class="text-blue-600 hover:text-blue-700 text-xs font-semibold flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-lg">
+                                    <i class="fa-solid fa-file-image text-xs"></i> Bukti Diterima
+                                </a>
+                                @else
+                                <span class="text-gray-400 text-xs italic">Belum ada bukti</span>
+                                @endif
+                            </div>
+                        </div>
+                        @if($d->status === 'Donasi Ditolak' && $d->alasan_penolakan)
+                        <div class="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100 mt-2">
+                            <span class="font-semibold">Alasan Penolakan:</span> {{ $d->alasan_penolakan }}
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
                 @else
                 <div class="flex flex-col items-center justify-center py-14 text-gray-400">
                     <i class="fa-solid fa-box text-4xl mb-3 text-gray-200"></i>
@@ -207,18 +310,18 @@
 
             {{-- Tabel Donasi Makanan --}}
             <div id="panel-makanan" class="hidden bg-white rounded-2xl shadow-lg overflow-hidden">
-                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-4 border-b border-gray-100">
                     <div>
                         <h2 class="font-bold text-gray-900">Riwayat Donasi Makanan</h2>
                         <p class="text-xs text-gray-400 mt-0.5">Status pengajuan donasi makanan Anda</p>
                     </div>
                     <a href="{{ route('donasi.index') }}"
-                        class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center gap-2 transition">
+                        class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto">
                         <i class="fa-solid fa-plus"></i> Ajukan Donasi
                     </a>
                 </div>
                 @if($donasiMakanan->count())
-                <div class="overflow-x-auto">
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wide">
                             <tr>
@@ -274,6 +377,67 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+                <div class="block sm:hidden divide-y divide-gray-100">
+                    @foreach($donasiMakanan as $i => $d)
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400 font-medium">#{{ $i + 1 }}</span>
+                            @include('components.badge-donasi', ['status' => $d->status])
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">Nama Makanan</p>
+                            <p class="font-semibold text-gray-900 text-sm">
+                                {{ $d->donasiMakanan->nama_makanan ?? '-' }}
+                            </p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <p class="text-gray-400">Jumlah</p>
+                                <p class="text-gray-800 font-medium">{{ $d->donasiMakanan->jumlah_makanan ?? '-' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Jenis</p>
+                                <span class="inline-flex items-center text-xs font-medium text-orange-600 mt-0.5">
+                                    {{ $d->donasiMakanan->jenis_makanan ?? '-' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <p class="text-gray-400">Metode Penyerahan</p>
+                                <p class="text-gray-800 font-medium mt-0.5">{{ $d->donasiMakanan->metode_penyerahan ?? '-' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Waktu Penyerahan</p>
+                                <p class="text-gray-800 font-medium mt-0.5 leading-tight">
+                                    {{ $d->donasiMakanan && $d->donasiMakanan->tgl_penyerahan ? \Carbon\Carbon::parse($d->donasiMakanan->tgl_penyerahan)->format('d/m/Y') : '-' }} 
+                                    ({{ $d->donasiMakanan && $d->donasiMakanan->jam_penyerahan ? \Carbon\Carbon::parse($d->donasiMakanan->jam_penyerahan)->format('H:i') : '-' }})
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between pt-1 border-t border-gray-50">
+                            <div class="text-xs text-gray-400">
+                                <i class="fa-regular fa-calendar mr-1"></i> {{ $d->created_at->format('d/m/Y') }}
+                            </div>
+                            <div>
+                                @if($d->donasiMakanan && $d->donasiMakanan->bukti_diterima)
+                                <a href="{{ asset('storage/' . $d->donasiMakanan->bukti_diterima) }}" target="_blank"
+                                    class="text-blue-600 hover:text-blue-700 text-xs font-semibold flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-lg">
+                                    <i class="fa-solid fa-file-image text-xs"></i> Bukti Diterima
+                                </a>
+                                @else
+                                <span class="text-gray-400 text-xs italic">Belum ada bukti</span>
+                                @endif
+                            </div>
+                        </div>
+                        @if($d->status === 'Donasi Ditolak' && $d->alasan_penolakan)
+                        <div class="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100 mt-2">
+                            <span class="font-semibold">Alasan Penolakan:</span> {{ $d->alasan_penolakan }}
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
                 </div>
                 @else
                 <div class="flex flex-col items-center justify-center py-14 text-gray-400">

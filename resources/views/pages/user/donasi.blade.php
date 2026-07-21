@@ -5,7 +5,7 @@
 @section('content')
 
 {{-- Hero --}}
-<section class="bg-gradient-to-br from-red-600 to-red-700 text-white pt-12 pb-24">
+<section class="bg-gradient-to-br from-red-600 to-red-700 text-white pt-10 pb-20 sm:pt-12 sm:pb-24">
     <div class="max-w-4xl mx-auto px-4 text-center">
 
         <div class="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-5 uppercase tracking-widest">
@@ -13,8 +13,8 @@
             Berbagi Kebaikan
         </div>
 
-        <h1 class="text-4xl font-bold mb-4">Form Donasi</h1>
-        <p class="text-red-100 text-base max-w-lg mx-auto leading-relaxed">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-4">Form Donasi</h1>
+        <p class="text-red-100 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
             Bantuan Anda sangat berarti bagi warga binaan Griya PMI. Pilih jenis donasi yang ingin Anda salurkan.
         </p>
     </div>
@@ -25,7 +25,7 @@
     <div class="max-w-2xl mx-auto px-4 -mt-12 relative z-10">
 
         {{-- Form Card --}}
-        <div class="bg-white rounded-2xl shadow-lg p-8">
+        <div class="bg-white rounded-2xl shadow-lg p-5 sm:p-8">
 
             @if($errors->any())
             <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-6">
@@ -43,7 +43,7 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-1">Pilih Jenis Donasi</h2>
                 <p class="text-sm text-gray-400 mb-5">Silakan pilih jenis donasi dan lengkapi data yang diperlukan</p>
 
-                <div class="grid grid-cols-3 gap-3 mb-8 items-stretch">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 items-stretch">
                     @foreach([
                         'Uang'    => ['fa-credit-card', 'Transfer ke rekening PMI'],
                         'Barang'  => ['fa-box',         'Pakaian, alat rumah tangga, dll'],
@@ -52,18 +52,20 @@
                     <label class="cursor-pointer flex flex-col">
                         <input type="radio" name="jenis" value="{{ $jenis }}"
                                class="sr-only jenis-radio" {{ $jenis === 'Uang' ? 'checked' : '' }}>
-                        <div class="jenis-card flex-1 flex flex-col border-2 rounded-xl p-4 transition
+                        <div class="jenis-card flex-1 flex flex-row sm:flex-col items-center sm:items-start border-2 rounded-xl p-4 transition
                                 {{ $jenis === 'Uang' ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white' }}"
                              data-jenis="{{ $jenis }}">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-3
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-0 sm:mb-3 mr-4 sm:mr-0 shrink-0
                                     {{ $jenis === 'Uang' ? 'bg-red-600' : 'bg-gray-100' }}">
                                 <i class="fa-solid {{ $info[0] }} text-sm
                                         {{ $jenis === 'Uang' ? 'text-white' : 'text-gray-400' }}"></i>
                             </div>
-                            <p class="font-semibold text-sm text-gray-900">
-                                {{ $jenis === 'Makanan' ? 'Bahan Makanan' : $jenis }}
-                            </p>
-                            <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">{{ $info[1] }}</p>
+                            <div class="text-left">
+                                <p class="font-semibold text-sm text-gray-900">
+                                    {{ $jenis === 'Makanan' ? 'Bahan Makanan' : $jenis }}
+                                </p>
+                                <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">{{ $info[1] }}</p>
+                            </div>
                         </div>
                     </label>
                     @endforeach
@@ -85,7 +87,7 @@
                         </ul>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mb-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Donasi (Rp)</label>
                             <input type="number" name="nominal" min="1" placeholder="100000"
@@ -104,7 +106,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti Transfer</label>
                         <label id="upload-area"
-                               class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-10 cursor-pointer hover:border-red-300 transition bg-white">
+                               class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-6 sm:py-10 cursor-pointer hover:border-red-300 transition bg-white">
                             <i class="fa-solid fa-upload text-gray-300 text-2xl mb-3"></i>
                             <p class="text-sm text-gray-500">Klik untuk upload atau drag & drop</p>
                             <p class="text-xs text-gray-400 mt-1 uppercase tracking-wide">PNG, JPG hingga 5MB</p>
@@ -118,7 +120,7 @@
                 {{-- Detail Barang --}}
                 <div id="detail-Barang" class="detail-donasi hidden">
                     <h2 class="text-lg font-bold text-gray-900 mb-5">Detail Donasi</h2>
-                    <div class="grid grid-cols-2 gap-x-6 gap-y-4 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-4">
                         {{-- Kiri: Nama Barang + Jumlah --}}
                         <div class="space-y-4">
                             <div>
@@ -180,7 +182,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Penyerahan</label>
                             <div class="relative">
@@ -209,7 +211,7 @@
                     <h2 class="text-lg font-bold text-gray-900 mb-5">Detail Donasi</h2>
 
                     {{-- 2 kolom: kiri input, kanan radio --}}
-                    <div class="grid grid-cols-2 gap-x-6 gap-y-4 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-4">
 
                         {{-- Kiri: Nama Makanan + Jumlah --}}
                         <div class="space-y-4">
@@ -275,7 +277,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Penyerahan</label>
                             <div class="relative">
@@ -314,7 +316,7 @@
             <h2 class="text-lg font-bold text-gray-900 mb-4">Riwayat Donasi Saya</h2>
             <div class="space-y-3">
                 @foreach($riwayat as $d)
-                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center justify-between">
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center justify-between gap-4">
                     <div>
                         <p class="font-semibold text-sm text-gray-800">
                             {{ $d->jenis === 'Makanan' ? 'Bahan Makanan' : $d->jenis }}
