@@ -97,14 +97,21 @@ Sebelum menginstal proyek ini, pastikan perangkat Anda memenuhi persyaratan beri
 
 ---
 
-##  Panduan Instalasi
+## 🚀 Panduan Instalasi
 
 Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek di lingkungan lokal Anda:
 
-### 1. Masuk ke Direktori Proyek
-Buka terminal / PowerShell dan arahkan ke direktori proyek:
+### 1. Pull Repository dari Branch Staging
+Clone repositori atau dapatkan pembaruan kode terbaru dari branch `staging`:
+
 ```bash
+# Jika baru pertama kali mengklon repositori:
+git clone -b staging <repository-url>
 cd TA_PMI
+
+# Atau jika repositori sudah ada lokal, masuk ke direktori, switch ke staging dan lakukan pull:
+git checkout staging
+git pull origin staging
 ```
 
 ### 2. Install Dependensi PHP (Composer)
