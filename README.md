@@ -1,59 +1,266 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏥 Sistem Informasi Manajemen Griya PMI
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-^8.2-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-5.7+-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-v7.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 
-## About Laravel
+Sistem Informasi Manajemen **Griya PMI** (Palang Merah Indonesia) adalah platform berbasis web yang dirancang untuk mengelola operasional panti/griya pelayanan sosial PMI secara digital, transparan, dan terintegrasi. Platform ini mencakup pengelolaan warga binaan, logistik barang, permohonan kunjungan, penerimaan donasi, monitoring kesehatan, pencatatan keuangan, hingga pengajuan reimbursement.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Daftar Isi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. [Penjelasan Proyek](#-penjelasan-proyek)
+2. [Fitur Utama](#-fitur-utama)
+   - [Akses Publik & User (Donatur)](#1-akses-publik--user-donatur)
+   - [Panel Admin Griya](#2-panel-admin-griya)
+   - [Panel Superadmin](#3-panel-superadmin)
+3. [Teknologi & Dependensi](#-teknologi--dependensi)
+4. [Persyaratan Sistem](#-persyaratan-sistem)
+5. [Panduan Instalasi](#-panduan-instalasi)
+6. [Konfigurasi Environment (.env)](#-konfigurasi-environment-env)
+7. [Akun Default / Akun Uji Coba](#-akun-default--akun-uji-coba)
+8. [Panduan Penggunaan](#-panduan-penggunaan)
+   - [Menjalankan Aplikasi](#menjalankan-aplikasi)
+   - [Ekspor Laporan (PDF & Excel)](#ekspor-laporan-pdf--excel)
+9. [Struktur Direktori Proyek](#-struktur-direktori-proyek)
+10. [Lisensi](#-lisensi)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+##  Penjelasan Proyek
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Platform ini dibangun menggunakan framework **Laravel 12** dan **Tailwind CSS v4** untuk memberikan solusi pengelolaan data terpadu pada Palang Merah Indonesia (PMI), khususnya dalam memfasilitasi operasional Griya PMI.
 
-## Laravel Sponsors
+Tujuan utama dari sistem ini adalah:
+- **Transparansi Donasi & Logistik**: Memungkinkan donatur dan masyarakat melihat kebutuhan mendesak serta menyalurkan bantuan secara tepat.
+- **Digitalisasi Rekam Medis & Monitoring**: Memudahkan pengelola memantau riwayat kesehatan warga binaan, kontrol obat, rujukan medis/RSJ, dan rekam pemeriksaan rutin.
+- **Efisiensi Akuntabilitas Keuangan**: Sistem pencatatan keuangan internal dan alur persetujuan *reimbursement* bertingkat antara Admin dan Superadmin.
+- **Kemudahan Pelayanan Publik**: Memudahkan keluarga atau instansi melakukan pendaftaran kunjungan warga binaan secara online.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+##  Fitur Utama
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 1. Akses Publik & User (Donatur)
+- **Beranda & Profil Griya**: Informasi seputar kegiatan Griya PMI, kebutuhan barang mendesak, serta artikel berita terbaru.
+- **Permohonan Kunjungan**: Publik dapat mengajukan jadwal kunjungan warga binaan secara mandiri.
+- **Donasi Online**: Pendaftaran donasi berupa barang atau uang tunai, lengkap dengan bukti transfer dan pelacakan status verifikasi.
+- **Cek Status**: Pengecekan status real-time untuk permohonan kunjungan maupun donasi yang diajukan.
+- **Manajemen Profil**: Pengaturan akun user, verifikasi email, dan pembaruan kata sandi.
 
-## Contributing
+### 2. Panel Admin Griya
+- **Dashboard Operasional**: Ringkasan statistik warga binaan, stok logistik, status kunjungan, dan donasi masuk.
+- **Manajemen Warga Binaan**: Pendataan identitas warga binaan (WBP) beserta pencetakan/ekspor data ke format PDF & Excel.
+- **Manajemen Logistik**: Pengelolaan barang masuk, pengeluaran logistik, penyesuaian stok, serta publikasi kebutuhan barang ke halaman publik.
+- **Persetujuan Kunjungan**: Verifikasi, persetujuan (*Approve*), atau penolakan (*Reject*) pengajuan kunjungan dari masyarakat.
+- **Verifikasi Donasi**: Proses validasi transaksi donasi masuk hingga status selesai (*Completed*).
+- **Monitoring Kesehatan**:
+  - Catatan pemeriksaan fisik rutin & riwayat penyakit.
+  - Pengelolaan stok & distribusi obat warga binaan.
+  - Catatan rujukan medis dan rujukan Rumah Sakit Jiwa (RSJ).
+- **Keuangan & Reimbursement**: Pencatatan arus kas (pemasukan/pengeluaran) serta pengajuan klaim biaya (*reimbursement*) kepada Superadmin.
+- **Manajemen Artikel**: Pembuatan dan publikasi berita/kegiatan Griya PMI.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Panel Superadmin
+- **Semua Fitur Admin**: Akses penuh ke seluruh fitur operasional Admin.
+- **ACC & Validasi Reimbursement**: Persetujuan/penolakan akhir klaim *reimbursement* yang diajukan oleh staf Admin, dilengkapi ekspor laporan PDF/Excel.
+- **Manajemen Akun Griya**: Pembuatan, pembaruan, dan penonaktifan akun pengelola (Admin & Superadmin).
+- **Manajemen Akun Publik**: Pengelolaan dan pemblokiran/aktifasi akun pengguna publik.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Teknologi & Dependensi
 
-## Security Vulnerabilities
+| Kategori | Teknologi / Paket | Deskripsi |
+| :--- | :--- | :--- |
+| **Backend Framework** | Laravel 12.x | PHP Web Framework modern |
+| **Language** | PHP ^8.2 | Versi PHP minimal yang disyaratkan |
+| **Database** | MySQL / MariaDB | Database Relasional |
+| **Frontend Styling** | Tailwind CSS v4 & Vite | Utility-first CSS framework & bundler |
+| **Role & Authorization** | `spatie/laravel-permission` | Manajemen Role (Superadmin, Admin, User) |
+| **PDF Export** | `barryvdh/laravel-dompdf` | Generator laporan berbentuk PDF |
+| **Excel Export** | `maatwebsite/excel` | Generator ekspor spreadsheet Excel |
+| **Utilities** | `laravel/tinker`, `laravel/pail` | Interactive shell & real-time log tailing |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+##  Persyaratan Sistem
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Sebelum menginstal proyek ini, pastikan perangkat Anda memenuhi persyaratan berikut:
+- **PHP** versi `>= 8.2` (ekstensi aktif: `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `gd`)
+- **Composer** versi `>= 2.x`
+- **Node.js** versi `>= 18.x` dan **npm** versi `>= 9.x`
+- **Database Server**: MySQL `>= 5.7` / MariaDB `>= 10.3` (misal via Laragon atau XAMPP)
+
+---
+
+##  Panduan Instalasi
+
+Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek di lingkungan lokal Anda:
+
+### 1. Masuk ke Direktori Proyek
+Buka terminal / PowerShell dan arahkan ke direktori proyek:
+```bash
+cd TA_PMI
+```
+
+### 2. Install Dependensi PHP (Composer)
+Jalankan Composer untuk mengunduh seluruh pustaka PHP:
+```bash
+composer install
+```
+
+### 3. Install Dependensi Frontend (npm)
+Install paket Node.js untuk kompilasi Tailwind CSS & Vite:
+```bash
+npm install
+```
+
+### 4. Salin File Konfigurasi Environment
+Buat file `.env` dari contoh `.env.example`:
+```bash
+copy .env.example .env
+```
+
+### 5. Generate Application Key
+Buat kunci enkripsi aplikasi Laravel:
+```bash
+php artisan key:generate
+```
+
+### 6. Konfigurasi Database & Migrasi
+1. Buat database baru di MySQL dengan nama **`TA_PMI`** (atau sesuaikan pada file `.env`).
+2. Jalankan perintah migrasi tabel beserta *seeder* data awal:
+```bash
+php artisan migrate:fresh --seed
+```
+
+### 7. Buat Symbolic Link Storage
+Agar file upload (seperti bukti donasi, gambar artikel, file medis) dapat diakses publik:
+```bash
+php artisan storage:link
+```
+
+### 8. Build Aset Frontend
+Jalankan kompilasi aset dengan Vite:
+```bash
+npm run build
+```
+
+---
+
+##  Konfigurasi Environment (.env)
+
+Pastikan variabel-variabel kunci berikut telah disesuaikan pada file `.env`:
+
+```ini
+APP_NAME="Griya PMI"
+APP_ENV=local
+APP_KEY=base64:...
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+# Database Configuration
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=TA_PMI
+DB_USERNAME=root
+DB_PASSWORD=
+
+# Session & Cache
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+
+# Mail Settings (Opsional - untuk verifikasi email)
+MAIL_MAILER=log
+MAIL_FROM_ADDRESS="no-reply@griyapmi.id"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+---
+
+##  Akun Default / Akun Uji Coba
+
+Setelah menjalankan perintah `php artisan migrate:fresh --seed`, tersedia 3 akun bawaan untuk keperluan pengujian:
+
+| Role | Email | Password | Hak Akses Utama |
+| :--- | :--- | :--- | :--- |
+| **Superadmin** | `superadmin@griyapmi.id` | `password` | Full Control, ACC Reimbursement, Kelola Akun Staf |
+| **Admin** | `admin@griyapmi.id` | `password` | Kelola Warga Binaan, Logistik, Donasi, Kunjungan, Monitoring Medis |
+| **User / Donatur** | `user@griyapmi.id` | `password` | Pengajuan Donasi, Permohonan Kunjungan, Cek Status |
+
+---
+
+##  Panduan Penggunaan
+
+### Menjalankan Aplikasi
+
+Anda dapat menjalankan server lokal Laravel dan Vite secara bersamaan:
+
+#### Opsi 1: Menjalankan Sekaligus (Melalui Script Composer)
+```bash
+composer run dev
+```
+
+#### Opsi 2: Menjalankan Secara Terpisah
+1. **Server Laravel (PHP Backend):**
+   ```bash
+   php artisan serve
+   ```
+   Aplikasi dapat diakses melalui browser di: **`http://localhost:8000`**
+
+2. **Vite Development Server (Frontend Asset Hot-Reload):**
+   ```bash
+   npm run dev
+   ```
+
+### Ekspor Laporan (PDF & Excel)
+
+Staf Admin dan Superadmin dapat mengunduh laporan pada modul-modul berikut melalui tombol **Export PDF** atau **Export Excel**:
+- **Data Warga Binaan**: `/admin/warga-binaan/export/pdf` dan `/excel`
+- **Data Kunjungan**: `/admin/kunjungan/export/pdf` dan `/excel`
+- **Data Monitoring Kesehatan**: `/admin/monitoring/{id}/pemeriksaan/export/pdf` dan `/excel`
+- **Data Reimbursement**: `/admin/reimbursement/export/pdf` dan `/excel`
+- **Laporan ACC Reimbursement**: `/superadmin/acc-reimbursement/export/pdf` dan `/excel`
+
+---
+
+##  Struktur Direktori Proyek
+
+```text
+TA_PMI/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Admin/          # Controller Admin (Logistik, Warga Binaan, Donasi, Medis, Keuangan, dll)
+│   │   │   ├── Public/         # Controller Publik (Beranda, Artikel, Kebutuhan Mendesak)
+│   │   │   ├── Superadmin/     # Controller Superadmin (ACC Reimbursement, Akun Griya)
+│   │   │   └── User/           # Controller User/Donatur (Donasi, Kunjungan, Profil)
+│   │   └── Middleware/         # Custom Middleware Role & Auth
+│   └── Models/                 # Eloquent ORM Models
+├── config/                     # Konfigurasi aplikasi
+├── database/
+│   ├── migrations/             # Skema tabel database
+│   └── seeders/                # Data seeder (UserSeeder, RoleSeeder, LogistikSeeder, WargaBinaanSeeder)
+├── public/                     # Public assets & index.php
+├── resources/
+│   ├── css/                    # Tailwind CSS styles
+│   ├── js/                     # Script JavaScript entry points
+│   └── views/                  # Blade Views (Layouts, Admin, User, Public pages)
+├── routes/
+│   ├── web.php                 # Web routes aplikasi
+│   └── console.php             # Command routes
+├── storage/                    # Storage upload, log, & cache
+└── vite.config.js              # Konfigurasi Vite bundler
+```
+
+---
+
+##  Lisensi
+
+Platform ini dikembangkan untuk **Griya PMI (Palang Merah Indonesia)**. Hak cipta dilindungi undang-undang. Framework Laravel dilisensikan di bawah [MIT License](https://opensource.org/licenses/MIT).
