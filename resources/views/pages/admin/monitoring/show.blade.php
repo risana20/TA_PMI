@@ -1051,12 +1051,11 @@
             const opt = select.options[select.selectedIndex];
             if (opt.dataset.nama) inputNama.value = opt.dataset.nama;
             if (opt.dataset.bentuk) {
-                // Set nilai pada select (dipakai saat submit) dan tampilkan di field readonly
                 inputBentuk.value = opt.dataset.bentuk;
                 if (displaySatuan) displaySatuan.value = opt.dataset.bentuk;
             }
         } else {
-            inputNama.value = 'dummy';
+            inputNama.value = '';
             if (displaySatuan) displaySatuan.value = '';
         }
     }
@@ -1082,7 +1081,7 @@
             containerGriya.classList.add('hidden');
             inputNama.removeAttribute('readonly');
             inputNama.setAttribute('required', 'required');
-            if (inputNama.value === 'dummy' || selectLogistik.selectedIndex > 0) {
+            if (selectLogistik.selectedIndex > 0) {
                 inputNama.value = '';
             }
             selectLogistik.removeAttribute('required');

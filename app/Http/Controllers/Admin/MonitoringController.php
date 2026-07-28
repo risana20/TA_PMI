@@ -224,17 +224,17 @@ class MonitoringController extends Controller
     public function storeObat(Request $request, WargaBinaan $wargaBinaan)
     {
         $data = $request->validate([
-            'logistik_id'  => 'nullable|exists:stok_logistiks,id',
-            'nama_obat'    => 'required|string|max:255',
+            'logistik_id'  => 'required_if:asal_obat,OBAT_GRIYA|nullable|exists:stok_logistiks,id',
+            'nama_obat'    => 'required_if:asal_obat,OBAT_PERIKSA|nullable|string|max:255',
             'aturan_minum' => 'required|string',
-            'bentuk_obat'  => 'required|string|max:50',
+            'bentuk_obat'  => 'required_if:asal_obat,OBAT_PERIKSA|nullable|string|max:50',
             'jumlah_awal'  => 'required|integer|min:1',
             'tgl_mulai'    => 'required|date',
             'asal_obat'    => 'required|in:OBAT_PERIKSA,OBAT_GRIYA',
             'keterangan'   => 'nullable|string',
         ]);
 
-        if ($data['asal_obat'] === 'OBAT_GRIYA' && isset($data['logistik_id'])) {
+        if ($data['asal_obat'] === 'OBAT_GRIYA' && !empty($data['logistik_id'])) {
             $logistik = StokLogistik::with('itemLogistik')->find($data['logistik_id']);
             if ($logistik) {
                 // Kurangi stok logistik
@@ -253,7 +253,7 @@ class MonitoringController extends Controller
 
                 // Pastikan nama dan bentuk obat selaras dengan data logistik
                 $data['nama_obat'] = $logistik->itemLogistik->nama_item;
-                $data['bentuk_obat'] = $logistik->itemLogistik->satuan ?? $data['bentuk_obat'];
+                $data['bentuk_obat'] = $logistik->itemLogistik->satuan ?? ($data['bentuk_obat'] ?? 'Tablet');
             }
         }
 

@@ -160,11 +160,11 @@
                         <!-- Stats Grid -->
                         <div class="grid grid-cols-2 gap-4">
                             <div class="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 text-center relative overflow-hidden group hover:shadow-md transition">
-                                <p class="text-3xl sm:text-4xl font-extrabold text-green-600 mb-1">843+</p>
+                                <p class="text-3xl sm:text-4xl font-extrabold text-green-600 mb-1">{{ $totalPeduliDitampung }}</p>
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Warga Ditampung</p>
                             </div>
                             <div class="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 text-center relative overflow-hidden group hover:shadow-md transition">
-                                <p class="text-3xl sm:text-4xl font-extrabold text-green-600 mb-1">{{ $totalODGJ }}</p>
+                                <p class="text-3xl sm:text-4xl font-extrabold text-green-600 mb-1">{{ $totalPeduliSaatIni }}</p>
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Warga Saat Ini</p>
                             </div>
                         </div>
@@ -212,18 +212,18 @@
                         <!-- Stats Grid -->
                         <div class="grid grid-cols-2 gap-4">
                             <div class="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 text-center relative overflow-hidden group hover:shadow-md transition">
-                                <p class="text-3xl sm:text-4xl font-extrabold text-amber-600 mb-1">180+</p>
+                                <p class="text-3xl sm:text-4xl font-extrabold text-amber-600 mb-1">{{ $totalBahagiaDitampung }}</p>
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Lansia Ditampung</p>
                             </div>
                             <div class="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 text-center relative overflow-hidden group hover:shadow-md transition">
-                                <p class="text-3xl sm:text-4xl font-extrabold text-amber-600 mb-1">{{ $totalLansia }}</p>
+                                <p class="text-3xl sm:text-4xl font-extrabold text-amber-600 mb-1">{{ $totalBahagiaSaatIni }}</p>
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Lansia Saat Ini</p>
                             </div>
                         </div>
 
                         <div class="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-2xl">
                             <p class="text-sm text-amber-800 leading-relaxed italic">
-                                "Sampai saat ini, Griya PMI Bahagia telah mengayomi lebih dari 180 orang lansia telantar, memberikan hunian yang layak dan bahagia."
+                                "Sampai saat ini, Griya PMI Bahagia telah mengayomi {{ $totalBahagiaDitampung }} orang lansia telantar, memberikan hunian yang layak dan bahagia."
                             </p>
                         </div>
                     </div>
